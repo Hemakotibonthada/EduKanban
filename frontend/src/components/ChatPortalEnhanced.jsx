@@ -1565,30 +1565,47 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                 )}
               </div>
               <div className="flex items-center gap-1 md:gap-2">
-                <button 
-                  onClick={() => setShowPinnedMessages(!showPinnedMessages)}
-                  className={`p-2 hover:bg-gray-100 rounded-lg ${pinnedMessages.length > 0 ? 'text-blue-600' : 'text-gray-500'}`}
-                  title={`${pinnedMessages.length} pinned messages`}
-                >
-                  <Pin className="w-5 h-5" />
-                  {pinnedMessages.length > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                      {pinnedMessages.length}
-                    </span>
-                  )}
-                </button>
-                <button className="p-2 hover:bg-gray-100 rounded-lg hidden md:block">
-                  <Phone className="w-5 h-5 text-gray-500" />
-                </button>
-                <button className="p-2 hover:bg-gray-100 rounded-lg hidden md:block">
-                  <VideoIcon className="w-5 h-5 text-gray-500" />
-                </button>
-                <button 
-                  onClick={() => setShowSearch(!showSearch)}
-                  className="p-2 hover:bg-gray-100 rounded-lg hidden sm:block"
-                >
-                  <Search className="w-5 h-5 text-gray-500" />
-                </button>
+                {selectedChatType === 'ai' && aiMessages.length > 0 && (
+                  <button 
+                    onClick={() => {
+                      if (window.confirm('Clear all AI chat messages?')) {
+                        clearAIMessages();
+                      }
+                    }}
+                    className="p-2 hover:bg-gray-100 rounded-lg text-gray-500"
+                    title="Clear chat history"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                )}
+                {selectedChatType !== 'ai' && (
+                  <>
+                    <button 
+                      onClick={() => setShowPinnedMessages(!showPinnedMessages)}
+                      className={`p-2 hover:bg-gray-100 rounded-lg ${pinnedMessages.length > 0 ? 'text-blue-600' : 'text-gray-500'}`}
+                      title={`${pinnedMessages.length} pinned messages`}
+                    >
+                      <Pin className="w-5 h-5" />
+                      {pinnedMessages.length > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                          {pinnedMessages.length}
+                        </span>
+                      )}
+                    </button>
+                    <button className="p-2 hover:bg-gray-100 rounded-lg hidden md:block">
+                      <Phone className="w-5 h-5 text-gray-500" />
+                    </button>
+                    <button className="p-2 hover:bg-gray-100 rounded-lg hidden md:block">
+                      <VideoIcon className="w-5 h-5 text-gray-500" />
+                    </button>
+                    <button 
+                      onClick={() => setShowSearch(!showSearch)}
+                      className="p-2 hover:bg-gray-100 rounded-lg hidden sm:block"
+                    >
+                      <Search className="w-5 h-5 text-gray-500" />
+                    </button>
+                  </>
+                )}
                 <button className="p-2 hover:bg-gray-100 rounded-lg">
                   <MoreVertical className="w-5 h-5 text-gray-500" />
                 </button>
