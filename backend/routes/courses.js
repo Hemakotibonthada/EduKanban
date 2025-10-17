@@ -7,6 +7,101 @@ const Progress = require('../models/Progress');
 
 const router = express.Router();
 
+// Helper function to auto-generate tasks for a course
+async function autoGenerateTasksForCourse(courseId, userId) {
+  try {
+    const course = await Course.findById(courseId);
+    if (!course || !course.modules || course.modules.length === 0) {
+      return { success: false, message: 'Course or modules not found' };
+    }
+
+    const tasks = [];
+    let taskOrder = 0;
+
+    // Generate tasks for each module
+    for (let i = 0; i < course.modules.length; i++) {
+      const module = course.modules[i];
+      const moduleNumber = i + 1;
+
+      // Task 1: Study/Read the module
+      tasks.push({
+        title: `📚 Study: ${module.title}`,
+        description: `Complete the reading and understanding of module ${moduleNumber}: ${module.title}`,
+        courseId: courseId,
+        userId: userId,
+        status: 'todo',
+        priority: i === 0 ? 'high' : 'medium', // First module is high priority
+        dueDate: new Date(Date.now() + (i + 1) * 7 * 24 * 60 * 60 * 1000), // Week by week
+        estimatedTime: 120, // 2 hours
+        order: taskOrder++,
+        type: 'reading'
+      });
+
+      // Task 2: Complete exercises/practice
+      if (module.lessons && module.lessons.length > 0) {
+        tasks.push({
+          title: `✏️ Practice: ${module.title}`,
+          description: `Complete practice exercises for ${module.title}. ${module.lessons.length} lessons to practice.`,
+          courseId: courseId,
+          userId: userId,
+          status: 'todo',
+          priority: 'medium',
+          dueDate: new Date(Date.now() + (i + 1) * 7 * 24 * 60 * 60 * 1000 + 3 * 24 * 60 * 60 * 1000), // +3 days after study
+          estimatedTime: 90, // 1.5 hours
+          order: taskOrder++,
+          type: 'practice'
+        });
+      }
+
+      // Task 3: Quiz/Assessment
+      tasks.push({
+        title: `🎯 Quiz: ${module.title}`,
+        description: `Take the assessment quiz for module ${moduleNumber} to test your understanding`,
+        courseId: courseId,
+        userId: userId,
+        status: 'todo',
+        priority: 'high',
+        dueDate: new Date(Date.now() + (i + 1) * 7 * 24 * 60 * 60 * 1000 + 6 * 24 * 60 * 60 * 1000), // End of week
+        estimatedTime: 30, // 30 minutes
+        order: taskOrder++,
+        type: 'quiz'
+      });
+    }
+
+    // Final project/review task
+    tasks.push({
+      title: `🚀 Final Project: ${course.title}`,
+      description: `Complete the final project to demonstrate your mastery of ${course.title}`,
+      courseId: courseId,
+      userId: userId,
+      status: 'todo',
+      priority: 'urgent',
+      dueDate: new Date(Date.now() + (course.modules.length + 1) * 7 * 24 * 60 * 60 * 1000),
+      estimatedTime: 240, // 4 hours
+      order: taskOrder++,
+      type: 'project'
+    });
+
+    // Create all tasks
+    const createdTasks = await Task.insertMany(tasks);
+
+    console.log(`✅ Auto-generated ${createdTasks.length} tasks for course: ${course.title}`);
+
+    return {
+      success: true,
+      tasksCreated: createdTasks.length,
+      tasks: createdTasks
+    };
+
+  } catch (error) {
+    console.error('Error auto-generating tasks:', error);
+    return { success: false, message: error.message };
+  }
+}
+
+// Export for use in other routes
+router.autoGenerateTasksForCourse = autoGenerateTasksForCourse;
+
 // GET /api/courses - Get user's courses
 router.get('/', async (req, res) => {
   try {

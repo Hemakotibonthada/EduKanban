@@ -21,6 +21,8 @@ const ProfilePage = ({ user, token }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState(null);
+  const [profilePicture, setProfilePicture] = useState(user.profilePicture || null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [formData, setFormData] = useState({
     firstName: user.firstName || '',
     lastName: user.lastName || '',
@@ -93,6 +95,65 @@ const ProfilePage = ({ user, token }) => {
         learningGoals: goals
       }
     }));
+  };
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB');
+      return;
+    }
+
+    setUploadingPhoto(true);
+    
+    try {
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePicture(reader.result);
+      };
+      reader.readAsDataURL(file);
+
+      // Upload to server
+      const formData = new FormData();
+      formData.append('profilePicture', file);
+
+      const response = await fetch('http://localhost:5001/api/users/profile-picture', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        toast.success('Profile picture updated successfully!');
+        setProfilePicture(data.data.profilePicture);
+        
+        // Update localStorage
+        const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const updatedUser = { ...savedUser, profilePicture: data.data.profilePicture };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      } else {
+        toast.error(data.message || 'Failed to upload photo');
+      }
+    } catch (error) {
+      console.error('Photo upload error:', error);
+      toast.error('Failed to upload photo. Please try again.');
+    } finally {
+      setUploadingPhoto(false);
+    }
   };
 
   const handleSave = async () => {
@@ -173,14 +234,36 @@ const ProfilePage = ({ user, token }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-6">
             <div className="relative">
-              <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                <span className="text-2xl font-bold">
-                  {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
-                </span>
+              <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center overflow-hidden">
+                {profilePicture ? (
+                  <img 
+                    src={profilePicture} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-2xl font-bold">
+                    {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+                  </span>
+                )}
               </div>
-              <button className="absolute -bottom-2 -right-2 w-8 h-8 bg-white text-blue-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
-                <Camera className="w-4 h-4" />
-              </button>
+              <input
+                type="file"
+                id="profilePictureInput"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                className="hidden"
+              />
+              <label
+                htmlFor="profilePictureInput"
+                className="absolute -bottom-2 -right-2 w-8 h-8 bg-white text-blue-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+              >
+                {uploadingPhoto ? (
+                  <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Camera className="w-4 h-4" />
+                )}
+              </label>
             </div>
             
             <div>

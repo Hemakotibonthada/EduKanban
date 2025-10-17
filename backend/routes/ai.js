@@ -645,4 +645,77 @@ Here are some practical examples that demonstrate the concepts in action:
   }
 });
 
+// POST /api/ai/chat - AI Chat Assistant
+router.post('/chat', [
+  body('message').notEmpty().trim().withMessage('Message is required')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
+    const { message } = req.body;
+    const userId = req.userId;
+
+    console.log(`💬 AI Chat request from user ${userId}: "${message}"`);
+
+    // Try to use OpenAI if available
+    let aiResponse;
+    try {
+      if (OpenAIService && typeof OpenAIService.generateCourseContent === 'function') {
+        // Use OpenAI if available (would need to add a chat method to OpenAIService)
+        throw new Error('OpenAI chat not yet implemented');
+      } else {
+        throw new Error('OpenAI not configured');
+      }
+    } catch (openaiError) {
+      console.warn('OpenAI not available, using fallback responses:', openaiError.message);
+      
+      // Fallback AI responses based on keywords
+      const lowerMessage = message.toLowerCase();
+      
+      if (lowerMessage.includes('help') || lowerMessage.includes('how to')) {
+        aiResponse = "I'm here to help! I can assist you with:\n\n📚 **Understanding Topics** - Ask me to explain any concept you're learning\n💡 **Study Tips** - I can share effective learning strategies\n🎓 **Course Guidance** - Get advice on how to approach your courses\n🗺️ **Learning Paths** - I'll help you plan your educational journey\n\nWhat would you like to know more about?";
+      } else if (lowerMessage.includes('study') || lowerMessage.includes('learn')) {
+        aiResponse = "Great question about learning! Here are some proven study techniques:\n\n1. **Active Recall** - Test yourself regularly instead of just re-reading\n2. **Spaced Repetition** - Review material at increasing intervals\n3. **Pomodoro Technique** - Study in 25-minute focused sessions\n4. **Teach Others** - Explaining concepts solidifies your understanding\n5. **Take Breaks** - Your brain needs rest to consolidate information\n\nWould you like me to elaborate on any of these techniques?";
+      } else if (lowerMessage.includes('course') || lowerMessage.includes('topic')) {
+        aiResponse = "I'd be happy to help you with your course! To provide the best guidance, could you tell me:\n\n- What subject or topic are you studying?\n- What's your current level (beginner, intermediate, advanced)?\n- What specific aspect are you finding challenging?\n- What are your learning goals?\n\nThis will help me give you personalized advice!";
+      } else if (lowerMessage.includes('career') || lowerMessage.includes('job')) {
+        aiResponse = "Career planning is exciting! Here's my advice:\n\n**For Tech Careers:**\n- Build a strong foundation in programming fundamentals\n- Create a portfolio of projects showcasing your skills\n- Contribute to open-source projects\n- Network with professionals in your field\n- Stay updated with industry trends\n\n**General Career Tips:**\n- Focus on continuous learning\n- Develop both technical and soft skills\n- Seek mentorship and guidance\n- Don't be afraid to start small and grow\n\nWhat specific career path interests you?";
+      } else if (lowerMessage.includes('explain') || lowerMessage.includes('what is')) {
+        aiResponse = "I'd love to explain that concept to you! However, I need a bit more detail about what you'd like me to explain.\n\nYou can ask me about:\n- Programming concepts (variables, functions, OOP, etc.)\n- Web development (HTML, CSS, JavaScript, frameworks)\n- Data structures and algorithms\n- Machine learning basics\n- Software engineering principles\n- And much more!\n\nWhat specific topic would you like me to break down for you?";
+      } else if (lowerMessage.includes('thank') || lowerMessage.includes('thanks')) {
+        aiResponse = "You're very welcome! 😊 I'm always here to help you learn and grow.\n\nRemember:\n- Keep practicing consistently\n- Don't be afraid to ask questions\n- Learn from mistakes - they're part of the journey\n- Celebrate small wins along the way\n\nFeel free to ask me anything else whenever you need assistance. Happy learning! 🎓";
+      } else {
+        aiResponse = `That's an interesting question! Let me help you with that.\n\n${message.includes('?') ? 'To provide a thorough answer' : 'To best assist you'}, I'd recommend:\n\n1. **Break it down** - Start with the fundamentals\n2. **Practice actively** - Apply what you learn through exercises\n3. **Use multiple resources** - Different perspectives enhance understanding\n4. **Ask specific questions** - The more specific, the better I can help\n\nWould you like me to dive deeper into any particular aspect? I'm here to guide your learning journey! 🚀`;
+      }
+    }
+
+    // Optionally log the chat interaction (simplified - no validation issues)
+    console.log(`✅ AI Chat completed for user ${userId} - Message length: ${message.length}, Response length: ${aiResponse.length}`);
+
+    res.json({
+      success: true,
+      message: 'AI response generated',
+      data: {
+        response: aiResponse,
+        timestamp: new Date()
+      }
+    });
+
+  } catch (error) {
+    console.error('AI chat error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'AI Guide is temporarily unavailable. Please try again shortly.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 module.exports = router;

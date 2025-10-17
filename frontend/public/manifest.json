@@ -8,101 +8,10 @@
   "theme_color": "#8b5cf6",
   "orientation": "portrait-primary",
   "scope": "/",
-  "icons": [
-    {
-      "src": "/icons/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "My Courses",
-      "short_name": "Courses",
-      "description": "View all your courses",
-      "url": "/?view=courses",
-      "icons": [{ "src": "/icons/courses-96x96.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "Task Board",
-      "short_name": "Tasks",
-      "description": "Manage your tasks",
-      "url": "/?view=kanban",
-      "icons": [{ "src": "/icons/tasks-96x96.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "Create Course",
-      "short_name": "Create",
-      "description": "Generate new AI course",
-      "url": "/?view=create",
-      "icons": [{ "src": "/icons/create-96x96.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "Chat Portal",
-      "short_name": "Chat",
-      "description": "Connect with peers",
-      "url": "/?view=chat",
-      "icons": [{ "src": "/icons/chat-96x96.png", "sizes": "96x96" }]
-    }
-  ],
+  "icons": [],
+  "shortcuts": [],
   "categories": ["education", "productivity", "learning"],
-  "screenshots": [
-    {
-      "src": "/screenshots/dashboard.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "label": "Dashboard with course overview"
-    },
-    {
-      "src": "/screenshots/course-generation.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "label": "AI-powered course generation"
-    }
-  ],
+  "screenshots": [],
   "prefer_related_applications": false,
   "related_applications": [],
   "share_target": {

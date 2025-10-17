@@ -301,6 +301,7 @@ class CourseTemplateService {
     }
     
     const userIdToUse = userId || course.userId;
+    const createdTasks = [];
     
     // Map template task types to Task model types
     const typeMapping = {
@@ -310,25 +311,127 @@ class CourseTemplateService {
       'project': 'PROJECT',
       'assignment': 'PROJECT'
     };
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     
-    for (const module of modules) {
+    for (let moduleIndex = 0; moduleIndex < modules.length; moduleIndex++) {
+      const module = modules[moduleIndex];
+      const moduleNumber = module.moduleNumber || (moduleIndex + 1);
+      
+      // Calculate base date for this module (weekly progression)
+      const moduleStartDate = new Date(today);
+      moduleStartDate.setDate(moduleStartDate.getDate() + (moduleIndex * 7));
+      
+      // Check if module has predefined tasks
       if (module.tasks && module.tasks.length > 0) {
+        // Use predefined tasks from template
         for (let i = 0; i < module.tasks.length; i++) {
           const taskData = module.tasks[i];
-          await Task.create({
+          const taskDueDate = new Date(moduleStartDate);
+          taskDueDate.setDate(taskDueDate.getDate() + i);
+          
+          const task = await Task.create({
             title: taskData.title,
             description: taskData.description,
             courseId,
-            moduleId: module._id || module.moduleNumber,
+            moduleId: module._id || moduleNumber,
             userId: userIdToUse,
             type: typeMapping[taskData.type] || 'LEARN',
             estimatedDuration: taskData.estimatedTime || taskData.estimatedDuration || 30,
             order: taskData.order || (i + 1),
-            status: 'To Do'
+            status: 'todo',
+            priority: taskData.priority || (moduleIndex === 0 ? 'high' : 'medium'),
+            dueDate: taskDueDate
           });
+          createdTasks.push(task);
         }
+      } else {
+        // Auto-generate tasks for modules without predefined tasks
+        const moduleTasks = [];
+        
+        // 1. Study/Reading Task (📚)
+        const studyDueDate = new Date(moduleStartDate);
+        const studyTask = await Task.create({
+          title: `📚 Study Module ${moduleNumber}: ${module.title}`,
+          description: `Read and understand the content of ${module.title}. Review key concepts and take notes.`,
+          courseId,
+          moduleId: module._id || moduleNumber,
+          userId: userIdToUse,
+          type: 'LEARN',
+          estimatedDuration: 120, // 2 hours
+          order: 1,
+          status: 'todo',
+          priority: moduleIndex === 0 ? 'high' : 'medium',
+          dueDate: studyDueDate
+        });
+        moduleTasks.push(studyTask);
+        
+        // 2. Practice/Exercise Task (✏️) - if module has lessons
+        if (module.lessons && module.lessons.length > 0) {
+          const practiceDueDate = new Date(moduleStartDate);
+          practiceDueDate.setDate(practiceDueDate.getDate() + 3);
+          
+          const practiceTask = await Task.create({
+            title: `✏️ Practice Module ${moduleNumber}: Exercises`,
+            description: `Complete practice exercises and hands-on activities for ${module.title}. Apply what you've learned.`,
+            courseId,
+            moduleId: module._id || moduleNumber,
+            userId: userIdToUse,
+            type: 'PRACTICE',
+            estimatedDuration: 90, // 1.5 hours
+            order: 2,
+            status: 'todo',
+            priority: 'medium',
+            dueDate: practiceDueDate
+          });
+          moduleTasks.push(practiceTask);
+        }
+        
+        // 3. Quiz/Assessment Task (🎯)
+        const quizDueDate = new Date(moduleStartDate);
+        quizDueDate.setDate(quizDueDate.getDate() + 6);
+        
+        const quizTask = await Task.create({
+          title: `🎯 Quiz: Module ${moduleNumber} Assessment`,
+          description: `Test your understanding of ${module.title}. Complete the quiz to verify your knowledge.`,
+          courseId,
+          moduleId: module._id || moduleNumber,
+          userId: userIdToUse,
+          type: 'TEST',
+          estimatedDuration: 30, // 30 minutes
+          order: 3,
+          status: 'todo',
+          priority: 'high',
+          dueDate: quizDueDate
+        });
+        moduleTasks.push(quizTask);
+        
+        createdTasks.push(...moduleTasks);
       }
     }
+    
+    // Add final project task for the entire course
+    const finalProjectDate = new Date(today);
+    finalProjectDate.setDate(finalProjectDate.getDate() + (modules.length * 7) + 7);
+    
+    const finalProject = await Task.create({
+      title: `🚀 Final Project: ${course.title}`,
+      description: `Complete the comprehensive final project for ${course.title}. Apply all concepts learned throughout the course.`,
+      courseId,
+      moduleId: null, // Course-level task
+      userId: userIdToUse,
+      type: 'PROJECT',
+      estimatedDuration: 240, // 4 hours
+      order: 999,
+      status: 'todo',
+      priority: 'urgent',
+      dueDate: finalProjectDate
+    });
+    createdTasks.push(finalProject);
+    
+    console.log(`✅ Created ${createdTasks.length} tasks for course: ${course.title}`);
+    return createdTasks;
   }
   
   static hasSignificantChanges(oldTemplate, newContent) {

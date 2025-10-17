@@ -26,7 +26,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { API_BASE_URL } from '../config/api';
-import KanbanBoard from './KanbanBoard';
+import EnhancedKanbanBoard from './EnhancedKanbanBoard';
 import ProfilePage from './ProfilePage';
 import CourseGenerationPage from './CourseGenerationPage';
 import CoursesListPage from './CoursesListPage';
@@ -514,7 +514,7 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
         )}
 
         {activeView === 'kanban' && (
-          <KanbanBoard user={user} token={token} />
+          <EnhancedKanbanBoard user={user} token={token} />
         )}
 
         {activeView === 'calendar' && (

@@ -13,6 +13,7 @@ import { useDropzone } from 'react-dropzone';
 import toast from 'react-hot-toast';
 import { getBackendURL, getSocketURL } from '../config/api';
 import { CreateCommunityModal, CreateGroupModal, UserSearchModal } from './ChatModals';
+import { useAIChat } from '../hooks/useAIChat';
 
 const API_URL = getBackendURL();
 const SOCKET_URL = getSocketURL();
@@ -36,6 +37,15 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
   const [groups, setGroups] = useState([]);
   const [messages, setMessages] = useState([]);
   const [friendRequests, setFriendRequests] = useState({ sent: [], received: [] });
+  
+  // AI Chat hook
+  const {
+    messages: aiMessages,
+    isLoading: aiIsTyping,
+    error: aiError,
+    sendMessage: sendAIMessage,
+    clearMessages: clearAIMessages
+  } = useAIChat(token);
   
   // UI state
   const [newMessage, setNewMessage] = useState('');
@@ -352,8 +362,23 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
     }
   };
 
+  const sendMessageToAI = async () => {
+    if (!newMessage.trim()) return;
+    
+    const messageContent = newMessage.trim();
+    setNewMessage('');
+    
+    await sendAIMessage(messageContent, user);
+  };
+
   const sendMessage = async () => {
     if (!newMessage.trim() && uploadingFiles.length === 0) return;
+
+    // Handle AI chat separately
+    if (selectedChatType === 'ai' && selectedChat === 'ai-guide') {
+      await sendMessageToAI();
+      return;
+    }
 
     // Check if we're editing a message
     if (editingMessage) {
@@ -1116,8 +1141,9 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
         `}>
         {/* Tabs */}
         <div className="p-2 md:p-4 border-b bg-gradient-to-r from-blue-600 to-purple-600">
-          <div className="flex gap-1 md:gap-2">
+          <div className="grid grid-cols-5 gap-1 md:gap-2">
             {[
+              { id: 'ai-guide', label: 'AI Guide', icon: Globe },
               { id: 'friends', label: 'Friends', icon: UserPlus },
               { id: 'dms', label: 'DMs', icon: MessageCircle },
               { id: 'communities', label: 'Communities', icon: Users },
@@ -1125,8 +1151,14 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
             ].map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 px-2 md:px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition-all ${
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  if (tab.id === 'ai-guide') {
+                    setSelectedChat('ai-guide');
+                    setSelectedChatType('ai');
+                  }
+                }}
+                className={`px-2 md:px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition-all ${
                   activeTab === tab.id
                     ? 'bg-white text-blue-600 shadow-lg'
                     : 'bg-blue-500/20 text-white hover:bg-white/20'
@@ -1248,6 +1280,124 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
             </div>
           )}
 
+          {activeTab === 'ai-guide' && (
+            <div className="p-4 space-y-4">
+              {/* AI Guide Header */}
+              <div className="bg-gradient-to-r from-purple-100 to-blue-100 p-4 rounded-lg border border-purple-200">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                    <Globe className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900">AI Learning Guide</h3>
+                    <div className="flex items-center gap-1 text-xs text-green-600">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <span>Always Available</span>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-700">
+                  Your personal AI assistant for learning support, course guidance, and instant answers to your questions.
+                </p>
+              </div>
+
+              {/* Quick Actions */}
+              <div>
+                <h4 className="text-xs font-semibold text-gray-500 uppercase mb-2">Quick Actions</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => {
+                      setSelectedChat('ai-guide');
+                      setSelectedChatType('ai');
+                      setNewMessage("Help me understand a topic");
+                    }}
+                    className="p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm transition-all text-left"
+                  >
+                    <div className="text-2xl mb-1">📚</div>
+                    <div className="text-xs font-medium text-gray-900">Explain Topic</div>
+                    <div className="text-xs text-gray-500">Get explanations</div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedChat('ai-guide');
+                      setSelectedChatType('ai');
+                      setNewMessage("I need help with my course");
+                    }}
+                    className="p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm transition-all text-left"
+                  >
+                    <div className="text-2xl mb-1">🎓</div>
+                    <div className="text-xs font-medium text-gray-900">Course Help</div>
+                    <div className="text-xs text-gray-500">Course guidance</div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedChat('ai-guide');
+                      setSelectedChatType('ai');
+                      setNewMessage("Give me study tips");
+                    }}
+                    className="p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm transition-all text-left"
+                  >
+                    <div className="text-2xl mb-1">💡</div>
+                    <div className="text-xs font-medium text-gray-900">Study Tips</div>
+                    <div className="text-xs text-gray-500">Learning strategies</div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedChat('ai-guide');
+                      setSelectedChatType('ai');
+                      setNewMessage("Suggest a learning path");
+                    }}
+                    className="p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm transition-all text-left"
+                  >
+                    <div className="text-2xl mb-1">🗺️</div>
+                    <div className="text-xs font-medium text-gray-900">Learning Path</div>
+                    <div className="text-xs text-gray-500">Personalized plan</div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Example Questions */}
+              <div>
+                <h4 className="text-xs font-semibold text-gray-500 uppercase mb-2">Example Questions</h4>
+                <div className="space-y-2">
+                  {[
+                    "What's the best way to learn programming?",
+                    "Explain the concept of machine learning",
+                    "How can I improve my study habits?",
+                    "What career paths are available in tech?"
+                  ].map((question, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setSelectedChat('ai-guide');
+                        setSelectedChatType('ai');
+                        setNewMessage(question);
+                      }}
+                      className="w-full text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-purple-300 hover:shadow-sm transition-all"
+                    >
+                      <div className="flex items-start gap-2">
+                        <MessageCircle className="w-4 h-4 text-purple-500 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm text-gray-700">{question}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Chat with AI Button */}
+              <button
+                onClick={() => {
+                  setSelectedChat('ai-guide');
+                  setSelectedChatType('ai');
+                }}
+                className="w-full flex items-center justify-center gap-2 p-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all"
+              >
+                <MessageCircle className="w-5 h-5" />
+                <span className="font-medium">Start Chatting with AI</span>
+              </button>
+            </div>
+          )}
+
           {activeTab === 'communities' && (
             <div className="p-3 space-y-2">
               <button
@@ -1356,7 +1506,9 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
         {selectedChat ? (
           <>
             {/* Chat header */}
-            <div className="px-3 md:px-6 py-3 md:py-4 border-b bg-white flex items-center justify-between shadow-sm">
+            <div className={`px-3 md:px-6 py-3 md:py-4 border-b flex items-center justify-between shadow-sm ${
+              selectedChatType === 'ai' ? 'bg-gradient-to-r from-purple-50 to-blue-50' : 'bg-white'
+            }`}>
               {/* Back button for mobile */}
               <button
                 onClick={() => setSelectedChat(null)}
@@ -1365,22 +1517,52 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                 <ChevronDown className="w-5 h-5 text-gray-600 transform rotate-90" />
               </button>
               <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
-                <Hash className="w-5 h-5 text-gray-500 hidden md:block" />
-                <div className="min-w-0 flex-1">
-                  <h2 className="font-semibold text-gray-900 truncate text-sm md:text-base">Chat</h2>
-                  <p className="text-xs text-gray-500 truncate">
-                    {typingUsers.size > 0 ? (
-                      <span className="flex items-center gap-1">
-                        <span className="inline-flex gap-0.5">
-                          <span className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                          <span className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                          <span className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
-                        </span>
-                        {Array.from(typingUsers.values()).map(u => u.name).join(', ')} {typingUsers.size === 1 ? 'is' : 'are'} typing...
-                      </span>
-                    ) : 'Active now'}
-                  </p>
-                </div>
+                {selectedChatType === 'ai' ? (
+                  <>
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                      <Globe className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h2 className="font-semibold text-gray-900 truncate text-sm md:text-base">AI Learning Guide</h2>
+                      <p className="text-xs text-purple-600 truncate flex items-center gap-1">
+                        {aiIsTyping ? (
+                          <>
+                            <span className="inline-flex gap-0.5">
+                              <span className="w-1 h-1 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                              <span className="w-1 h-1 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                              <span className="w-1 h-1 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                            </span>
+                            <span>AI is typing...</span>
+                          </>
+                        ) : (
+                          <>
+                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                            <span>Always available to help</span>
+                          </>
+                        )}
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Hash className="w-5 h-5 text-gray-500 hidden md:block" />
+                    <div className="min-w-0 flex-1">
+                      <h2 className="font-semibold text-gray-900 truncate text-sm md:text-base">Chat</h2>
+                      <p className="text-xs text-gray-500 truncate">
+                        {typingUsers.size > 0 ? (
+                          <span className="flex items-center gap-1">
+                            <span className="inline-flex gap-0.5">
+                              <span className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                              <span className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                              <span className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                            </span>
+                            {Array.from(typingUsers.values()).map(u => u.name).join(', ')} {typingUsers.size === 1 ? 'is' : 'are'} typing...
+                          </span>
+                        ) : 'Active now'}
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
               <div className="flex items-center gap-1 md:gap-2">
                 <button 
@@ -1518,6 +1700,104 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                     <p className="text-gray-500">Loading messages...</p>
                   </div>
                 </div>
+              ) : selectedChatType === 'ai' && selectedChat === 'ai-guide' ? (
+                <>
+                  {/* AI Chat Welcome Message */}
+                  {aiMessages.length === 0 && (
+                    <div className="flex flex-col items-center justify-center h-full p-8">
+                      <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                        <Globe className="w-10 h-10 text-white" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">Welcome to AI Learning Guide!</h3>
+                      <p className="text-gray-600 text-center max-w-md mb-6">
+                        I'm your personal AI assistant. Ask me anything about your courses, get study tips, or explore new topics!
+                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
+                        {[
+                          { icon: "🎓", text: "Explain a concept", question: "Can you explain machine learning?" },
+                          { icon: "💡", text: "Get study tips", question: "What are effective study techniques?" },
+                          { icon: "📚", text: "Course guidance", question: "How should I approach learning programming?" },
+                          { icon: "🚀", text: "Career advice", question: "What skills do I need for a tech career?" }
+                        ].map((item, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setNewMessage(item.question)}
+                            className="p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-purple-300 hover:shadow-md transition-all text-left group"
+                          >
+                            <div className="text-2xl mb-2">{item.icon}</div>
+                            <div className="text-sm font-medium text-gray-700 group-hover:text-purple-600">
+                              {item.text}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* AI Chat Messages */}
+                  {aiMessages.map(message => (
+                    <div
+                      key={message._id}
+                      className={`flex items-start gap-2 md:gap-3 mb-4 ${
+                        message.sender.type === 'user' ? 'flex-row-reverse' : 'flex-row'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        message.sender.type === 'user'
+                          ? 'bg-gradient-to-br from-blue-500 to-purple-500'
+                          : 'bg-gradient-to-br from-purple-500 to-blue-500'
+                      }`}>
+                        {message.sender.type === 'user' ? (
+                          <span className="text-white text-xs md:text-sm font-semibold">
+                            {user.firstName?.[0]}{user.lastName?.[0]}
+                          </span>
+                        ) : (
+                          <Globe className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                        )}
+                      </div>
+                      
+                      <div className={`flex flex-col max-w-[75%] md:max-w-[60%] ${
+                        message.sender.type === 'user' ? 'items-end' : 'items-start'
+                      }`}>
+                        <div className={`px-4 py-2 md:py-3 rounded-2xl ${
+                          message.sender.type === 'user'
+                            ? 'bg-blue-600 text-white'
+                            : message.isError
+                            ? 'bg-red-50 text-red-800 border border-red-200'
+                            : 'bg-gradient-to-r from-purple-50 to-blue-50 text-gray-800 border border-purple-100'
+                        }`}>
+                          <div className="text-sm md:text-base whitespace-pre-wrap break-words">
+                            {message.content}
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1 px-2">
+                          {new Date(message.timestamp || message.createdAt).toLocaleTimeString('en-US', { 
+                            hour: 'numeric', 
+                            minute: '2-digit' 
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* AI Typing Indicator */}
+                  {aiIsTyping && (
+                    <div className="flex items-start gap-3 mb-4">
+                      <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                        <Globe className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="px-4 py-3 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-100 rounded-2xl">
+                        <div className="flex gap-1">
+                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div ref={messagesEndRef} />
+                </>
               ) : (
                 <>
                   {messages.map(message => (
@@ -1556,6 +1836,21 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                 </div>
                 <button onClick={() => { setEditingMessage(null); setNewMessage(''); }} className="text-amber-600 hover:text-amber-800">
                   <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
+            {/* AI Error Banner */}
+            {selectedChatType === 'ai' && aiError && (
+              <div className="px-4 py-2 bg-red-50 border-t border-red-200 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-red-600" />
+                  <span className="text-sm text-red-800">
+                    Connection error: {aiError}
+                  </span>
+                </div>
+                <button onClick={() => sendMessageToAI()} className="text-red-600 hover:text-red-800 text-sm font-medium">
+                  Retry
                 </button>
               </div>
             )}
