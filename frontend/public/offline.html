@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduKanban - Offline</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #581c87 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .container {
+      text-align: center;
+      padding: 2rem;
+      max-width: 600px;
+    }
+
+    .icon {
+      font-size: 120px;
+      margin-bottom: 2rem;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    p {
+      font-size: 1.2rem;
+      color: #cbd5e1;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .features {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 1rem;
+      padding: 2rem;
+      margin: 2rem 0;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .features h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: #a78bfa;
+    }
+
+    .features ul {
+      list-style: none;
+      text-align: left;
+    }
+
+    .features li {
+      padding: 0.5rem 0;
+      color: #e2e8f0;
+    }
+
+    .features li:before {
+      content: "✓ ";
+      color: #10b981;
+      font-weight: bold;
+      margin-right: 0.5rem;
+    }
+
+    .retry-btn {
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      font-weight: 600;
+    }
+
+    .retry-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+    }
+
+    .retry-btn:active {
+      transform: translateY(0);
+    }
+
+    .note {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">📵</div>
+    <h1>You're Offline</h1>
+    <p>
+      Don't worry! EduKanban works offline too. You can continue viewing your cached
+      courses and tasks. Changes will sync automatically when you're back online.
+    </p>
+
+    <div class="features">
+      <h2>Available Offline:</h2>
+      <ul>
+        <li>View previously loaded courses</li>
+        <li>Access cached course content</li>
+        <li>Review your task board</li>
+        <li>Check your progress statistics</li>
+        <li>Browse cached achievements</li>
+      </ul>
+    </div>
+
+    <button class="retry-btn" onclick="window.location.reload()">
+      Try Again
+    </button>
+
+    <p class="note">
+      Your learning journey continues even without internet!
+    </p>
+  </div>
+
+  <script>
+    // Auto-retry connection every 30 seconds
+    let retryCount = 0;
+    const maxRetries = 5;
+
+    function checkConnection() {
+      if (navigator.onLine) {
+        window.location.reload();
+      } else if (retryCount < maxRetries) {
+        retryCount++;
+        setTimeout(checkConnection, 30000);
+      }
+    }
+
+    window.addEventListener('online', () => {
+      window.location.reload();
+    });
+
+    // Start checking after 30 seconds
+    setTimeout(checkConnection, 30000);
+  </script>
+</body>
+</html>

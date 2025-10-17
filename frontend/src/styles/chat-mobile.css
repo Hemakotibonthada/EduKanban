@@ -1,0 +1,288 @@
+/* Mobile-Friendly Chat Styles */
+
+/* Ensure proper viewport height on mobile */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari specific fix for viewport height */
+  .fixed.inset-0 {
+    height: -webkit-fill-available;
+  }
+}
+
+/* Touch-friendly minimum sizes */
+@media (max-width: 768px) {
+  /* Minimum touch target size of 44x44px (Apple HIG) */
+  button, 
+  a, 
+  input[type="button"], 
+  input[type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Prevent text selection on double-tap */
+  .message-bubble,
+  .chat-sidebar {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Allow text selection in message content */
+  .message-content {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  /* Smooth scrolling for mobile */
+  .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Prevent zoom on input focus */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Tablet styles */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .chat-sidebar {
+    width: 280px;
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 1024px) {
+  .chat-sidebar {
+    width: 384px; /* lg:w-96 */
+  }
+}
+
+/* Prevent pull-to-refresh on mobile */
+.chat-container {
+  overscroll-behavior-y: contain;
+}
+
+/* Smooth transitions */
+.chat-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Accessibility: Focus visible for keyboard navigation */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Custom scrollbar for desktop */
+@media (min-width: 1024px) {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+}
+
+/* Loading skeleton animation */
+@keyframes skeleton {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 0px, #f8f8f8 40px, #f0f0f0 80px);
+  background-size: 200px 100%;
+  animation: skeleton 1.5s infinite;
+}
+
+/* Emoji picker responsive */
+@media (max-width: 640px) {
+  .emoji-picker {
+    transform: scale(0.85);
+    transform-origin: bottom right;
+  }
+}
+
+/* Safe area insets for iPhone notch */
+@supports (padding: max(0px)) {
+  .safe-top {
+    padding-top: max(env(safe-area-inset-top), 12px);
+  }
+
+  .safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 12px);
+  }
+}
+
+/* Haptic feedback simulation (visual) */
+.haptic-feedback:active {
+  transform: scale(0.95);
+  transition: transform 0.1s;
+}
+
+/* Message bubble animations */
+.message-enter {
+  animation: messageSlideIn 0.3s ease-out;
+}
+
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Typing indicator dots animation */
+.typing-dot {
+  animation: typingDot 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typingDot {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Online status pulse */
+.status-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Drag and drop overlay */
+.drag-overlay {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* File upload progress */
+.upload-progress {
+  position: relative;
+  overflow: hidden;
+}
+
+.upload-progress::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: var(--progress, 0%);
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  transition: width 0.3s ease;
+}
+
+/* Chat bubble tail */
+.message-bubble-tail {
+  position: relative;
+}
+
+.message-bubble-tail::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+}
+
+.message-bubble-tail.sent::after {
+  right: -8px;
+  border-left-color: #3b82f6;
+  border-right: 0;
+}
+
+.message-bubble-tail.received::after {
+  left: -8px;
+  border-right-color: white;
+  border-left: 0;
+}
+
+/* Glassmorphism effect for modals */
+.glass-modal {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+  .glass-modal {
+    background: rgba(31, 41, 55, 0.95);
+  }
+}
+
+/* Prevent text selection on UI elements */
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Responsive grid for file attachments */
+.file-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+@media (min-width: 768px) {
+  .file-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+}
