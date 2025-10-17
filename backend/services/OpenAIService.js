@@ -155,7 +155,7 @@ class OpenAIService {
       const prompt = this.buildCoursePrompt(courseTopic, knowledgeLevel, timeCommitment);
 
       const completion = await this.client.chat.completions.create({
-        model: 'gpt-4-turbo-preview',
+        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
@@ -180,7 +180,11 @@ class OpenAIService {
       console.error('❌ OpenAI generation error:', error.message);
       
       // If OpenAI fails, return a fallback course structure
-      if (error.message.includes('OpenAI service is not available') || error.message.includes('API key')) {
+      if (error.message.includes('OpenAI service is not available') || 
+          error.message.includes('API key') || 
+          error.message.includes('quota') || 
+          error.message.includes('429') ||
+          error.message.includes('rate limit')) {
         console.log('🔄 Falling back to template course generation...');
         return this.generateFallbackCourse(courseTopic, knowledgeLevel, timeCommitment);
       }
@@ -295,7 +299,7 @@ Make the content practical, engaging, and appropriate for ${level} level learner
       }
 
       const completion = await this.client.chat.completions.create({
-        model: 'gpt-4-turbo-preview',
+        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
         messages: [
           {
             role: 'system',

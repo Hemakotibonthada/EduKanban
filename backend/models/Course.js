@@ -185,5 +185,9 @@ courseSchema.index({ userId: 1 });
 courseSchema.index({ status: 1 });
 courseSchema.index({ topic: 'text', title: 'text' });
 courseSchema.index({ createdAt: -1 });
+courseSchema.index({ difficulty: 1 });
+courseSchema.index({ userId: 1, status: 1 });
+courseSchema.index({ templateKey: 1 });
+courseSchema.index({ isTemplate: 1 });
 
 module.exports = mongoose.model('Course', courseSchema);

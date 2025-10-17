@@ -19,7 +19,14 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    minlength: 6
+    minlength: 8,
+    validate: {
+      validator: function(v) {
+        // Password must contain at least 8 characters, 1 uppercase, 1 lowercase, 1 number
+        return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(v);
+      },
+      message: 'Password must be at least 8 characters and contain uppercase, lowercase, and number'
+    }
   },
   firstName: {
     type: String,
@@ -206,6 +213,14 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  resetPasswordToken: {
+    type: String,
+    default: null
+  },
+  resetPasswordExpires: {
+    type: Date,
+    default: null
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -226,5 +241,9 @@ userSchema.pre('save', function(next) {
 userSchema.index({ email: 1 });
 userSchema.index({ username: 1 });
 userSchema.index({ createdAt: -1 });
+userSchema.index({ 'friends': 1 });
+userSchema.index({ 'following': 1 });
+userSchema.index({ 'stats.lastActiveDate': -1 });
+userSchema.index({ 'onlineStatus.isOnline': 1 });
 
 module.exports = mongoose.model('User', userSchema);

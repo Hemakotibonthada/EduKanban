@@ -278,6 +278,59 @@ Continue to the practical exercises to reinforce your learning, then take the as
   return content;
 };
 
+/**
+ * @swagger
+ * /ai/generate-course:
+ *   post:
+ *     summary: Generate a personalized course using AI
+ *     description: Create a full course with modules and tasks based on user input. Uses template caching for efficiency.
+ *     tags: [AI]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - courseTopic
+ *               - timeCommitment
+ *               - knowledgeLevel
+ *             properties:
+ *               courseTopic:
+ *                 type: string
+ *                 example: "Machine Learning Fundamentals"
+ *               timeCommitment:
+ *                 type: string
+ *                 example: "2 hours per week"
+ *               knowledgeLevel:
+ *                 type: string
+ *                 enum: [Beginner, Intermediate, Advanced, Expert]
+ *                 example: "Beginner"
+ *     responses:
+ *       200:
+ *         description: Course generated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 fromCache:
+ *                   type: boolean
+ *                 course:
+ *                   $ref: '#/components/schemas/Course'
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
 // POST /api/ai/generate-course
 router.post('/generate-course', courseGenerationValidation, async (req, res) => {
   try {

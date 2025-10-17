@@ -1,11 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Toaster } from 'react-hot-toast';
-import LandingPage from './src/pages/LandingPage';
-import AuthPage from './src/components/AuthPage';
-import Dashboard from './src/components/Dashboard';
 import Celebration, { useCelebration } from './src/components/Celebration';
 import PWAInstallPrompt from './src/components/PWAInstallPrompt';
+import ErrorBoundary from './src/components/ErrorBoundary';
 import './index.css';
+
+// Lazy load heavy components for better initial load time
+const LandingPage = lazy(() => import('./src/pages/LandingPage'));
+const AuthPage = lazy(() => import('./src/components/AuthPage'));
+const ForgotPasswordPage = lazy(() => import('./src/components/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./src/components/ResetPasswordPage'));
+const Dashboard = lazy(() => import('./src/components/Dashboard'));
+
+// Loading fallback component
+const LoadingFallback = ({ message = 'Loading...' }) => (
+  <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+    <div className="flex flex-col items-center space-y-4">
+      <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      <p className="text-gray-600 font-medium">{message}</p>
+    </div>
+  </div>
+);
 
 const App = () => {
   const [currentView, setCurrentView] = useState('landing');
@@ -19,6 +34,16 @@ const App = () => {
 
   // Check for existing authentication on app load
   useEffect(() => {
+    // Check if this is a password reset page
+    const urlParams = new URLSearchParams(window.location.search);
+    const resetToken = urlParams.get('token');
+    
+    if (resetToken) {
+      setCurrentView('reset-password');
+      setIsLoading(false);
+      return;
+    }
+
     const savedToken = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
     
@@ -40,7 +65,11 @@ const App = () => {
 
   const handleAuthMode = (mode) => {
     setAuthMode(mode);
-    setCurrentView('auth');
+    if (mode === 'forgot-password') {
+      setCurrentView('forgot-password');
+    } else {
+      setCurrentView('auth');
+    }
   };
 
   const handleAuthSuccess = (userData, userToken) => {
@@ -79,72 +108,82 @@ const App = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-600 font-medium">Loading EduKanban...</p>
-        </div>
-      </div>
-    );
+    return <LoadingFallback message="Loading EduKanban..." />;
   }
 
   return (
-    <div className="min-h-screen">
-      <Toaster 
-        position="top-right"
-        toastOptions={{
-          duration: 4000,
-          style: {
-            background: '#363636',
-            color: '#fff',
-          },
-          success: {
-            duration: 3000,
-            theme: {
-              primary: '#10B981',
-            },
-          },
-          error: {
+    <ErrorBoundary>
+      <div className="min-h-screen">
+        <Toaster 
+          position="top-right"
+          toastOptions={{
             duration: 4000,
-            theme: {
-              primary: '#EF4444',
+            style: {
+              background: '#363636',
+              color: '#fff',
             },
-          },
-        }}
-      />
-      
-      {currentView === 'landing' && (
-        <LandingPage onAuthMode={handleAuthMode} />
-      )}
-      
-      {currentView === 'auth' && (
-        <AuthPage
-          mode={authMode}
-          onAuthSuccess={handleAuthSuccess}
-          onModeChange={setAuthMode}
-          onBack={handleBackToLanding}
+            success: {
+              duration: 3000,
+              theme: {
+                primary: '#10B981',
+              },
+            },
+            error: {
+              duration: 4000,
+              theme: {
+                primary: '#EF4444',
+              },
+            },
+          }}
         />
-      )}
-      
-      {currentView === 'dashboard' && user && (
-        <Dashboard
-          user={user}
-          token={token}
-          onLogout={handleLogout}
-          onCelebrate={celebrate}
+        
+        <Suspense fallback={<LoadingFallback message="Loading page..." />}>
+          {currentView === 'landing' && (
+            <LandingPage onAuthMode={handleAuthMode} />
+          )}
+          
+          {currentView === 'auth' && (
+            <AuthPage
+              mode={authMode}
+              onAuthSuccess={handleAuthSuccess}
+              onModeChange={handleAuthMode}
+              onBack={handleBackToLanding}
+            />
+          )}
+          
+          {currentView === 'forgot-password' && (
+            <ForgotPasswordPage
+              onBack={() => {
+                setAuthMode('login');
+                setCurrentView('auth');
+              }}
+            />
+          )}
+          
+          {currentView === 'reset-password' && (
+            <ResetPasswordPage />
+          )}
+          
+          {currentView === 'dashboard' && user && (
+            <Dashboard
+              user={user}
+              token={token}
+              onLogout={handleLogout}
+              onCelebrate={celebrate}
+            />
+          )}
+        </Suspense>
+        
+        {/* Global Celebration System */}
+        <Celebration
+          celebration={celebration}
+          onClose={closeCelebration}
         />
-      )}
-      
-      {/* Global Celebration System */}
-      <Celebration
-        celebration={celebration}
-        onClose={closeCelebration}
-      />
 
-      {/* PWA Install Prompt */}
-      <PWAInstallPrompt />
-    </div>
+        {/* PWA Install Prompt */}
+        <PWAInstallPrompt />
+      </div>
+    </ErrorBoundary>
   );
 };
 

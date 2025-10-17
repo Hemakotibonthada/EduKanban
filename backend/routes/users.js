@@ -41,6 +41,37 @@ const upload = multer({
   }
 });
 
+/**
+ * @swagger
+ * /users/profile:
+ *   get:
+ *     summary: Get user profile
+ *     description: Retrieve the authenticated user's profile information
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Profile retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/User'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
 // GET /api/users/profile
 router.get('/profile', async (req, res) => {
   try {
@@ -67,6 +98,54 @@ router.get('/profile', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /users/profile:
+ *   put:
+ *     summary: Update user profile
+ *     description: Update the authenticated user's profile fields
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *               lastName:
+ *                 type: string
+ *               username:
+ *                 type: string
+ *                 minLength: 3
+ *                 maxLength: 30
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/User'
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
 // PUT /api/users/profile
 router.put('/profile', [
   body('firstName').optional().trim().notEmpty(),
@@ -132,10 +211,60 @@ router.put('/profile', [
   }
 });
 
+/**
+ * @swagger
+ * /users/search:
+ *   get:
+ *     summary: Search for users
+ *     description: Search users by username, name, or email
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         schema:
+ *           type: string
+ *           minLength: 2
+ *         description: Search query (min 2 characters)
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *         description: Filter by user type
+ *       - $ref: '#/components/parameters/limitParam'
+ *       - $ref: '#/components/parameters/offsetParam'
+ *     responses:
+ *       200:
+ *         description: Search results retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     users:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/User'
+ *                 pagination:
+ *                   $ref: '#/components/schemas/Pagination'
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
 // GET /api/users/search
 router.get('/search', async (req, res) => {
   try {
-    const { q, type } = req.query;
+    const { q, type, limit = 20, offset = 0 } = req.query;
     
     if (!q || q.length < 2) {
       return res.status(400).json({
@@ -144,14 +273,25 @@ router.get('/search', async (req, res) => {
       });
     }
 
+    const parsedLimit = Math.min(parseInt(limit), 100);
+    const parsedOffset = parseInt(offset);
+
     let users = [];
+    let total = 0;
 
     if (type === 'username' || !type) {
-      users = await User.find({
+      const filter = {
         username: { $regex: q, $options: 'i' },
         _id: { $ne: req.userId },
         isActive: true
-      }).select('_id username firstName lastName').limit(10);
+      };
+
+      users = await User.find(filter)
+        .select('_id username firstName lastName avatar')
+        .limit(parsedLimit)
+        .skip(parsedOffset);
+
+      total = await User.countDocuments(filter);
     }
 
     // Log user search
@@ -169,7 +309,13 @@ router.get('/search', async (req, res) => {
 
     res.json({
       success: true,
-      data: { users }
+      data: { users },
+      pagination: {
+        total,
+        limit: parsedLimit,
+        offset: parsedOffset,
+        hasMore: parsedOffset + parsedLimit < total
+      }
     });
 
   } catch (error) {

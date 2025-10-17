@@ -11,6 +11,39 @@ const { generatePremiumCertificate } = require('../utils/certificateTemplate');
 // Certificate model for tracking issued certificates
 const Certificate = require('../models/Certificate');
 
+/**
+ * @swagger
+ * /certificates/generate/{courseId}:
+ *   post:
+ *     summary: Generate course completion certificate
+ *     description: Generate a PDF certificate for a completed course with QR code verification
+ *     tags: [Certificates]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: courseId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Course ID
+ *     responses:
+ *       200:
+ *         description: Certificate generated successfully
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       400:
+ *         description: Course not completed
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         description: Course or progress not found
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
 // Generate certificate for completed course
 router.post('/generate/:courseId', async (req, res) => {
   try {

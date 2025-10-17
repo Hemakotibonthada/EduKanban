@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-// Import utilities for startup
+// Import utilities for startup 
 const { validateEnvironment } = require('./utils/environmentValidator');
 const { logger } = require('./middleware/logger');
 
@@ -41,6 +41,7 @@ async function startServer() {
     const exportRoutes = require('./routes/export');
     const certificateRoutes = require('./routes/certificates');
     const socialRoutes = require('./routes/social');
+    const quizRoutes = require('./routes/quizzes');
 
     // Import middleware
     const authMiddleware = require('./middleware/auth');
@@ -90,22 +91,47 @@ async function startServer() {
       }
     }));
 
-    // Rate limiting with environment configuration
-    const limiter = rateLimit({
-      windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-      max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
-      message: 'Too many requests from this IP, please try again later.'
-    });
-    app.use('/api/', limiter);
+    // Enhanced rate limiting with per-endpoint limits
+    const {
+      authLimiter,
+      apiLimiter,
+      writeLimiter,
+      readLimiter,
+      uploadLimiter,
+      searchLimiter,
+      aiLimiter,
+      exportLimiter,
+      addRateLimitHeaders
+    } = require('./middleware/rateLimiter');
 
-    // More strict rate limiting for auth endpoints
-    const authLimiter = rateLimit({
-      windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-      max: parseInt(process.env.AUTH_RATE_LIMIT_MAX) || 5,
-      message: 'Too many authentication attempts, please try again later.'
-    });
+    // Add rate limit headers to all responses
+    app.use(addRateLimitHeaders);
+
+    // General API rate limiting
+    app.use('/api/', apiLimiter);
+
+    // Strict auth endpoint rate limiting
     app.use('/api/auth/login', authLimiter);
     app.use('/api/auth/register', authLimiter);
+    app.use('/api/auth/forgot-password', authLimiter);
+    app.use('/api/auth/reset-password', authLimiter);
+
+    // AI generation endpoints
+    app.use('/api/ai/generate-course', aiLimiter);
+    app.use('/api/ai/analyze-code', aiLimiter);
+    app.use('/api/ai/get-hint', aiLimiter);
+
+    // Upload endpoints
+    app.use('/api/users/profile-picture', uploadLimiter);
+    app.use('/api/chat/upload', uploadLimiter);
+
+    // Search endpoints
+    app.use('/api/users/search', searchLimiter);
+    app.use('/api/search/', searchLimiter);
+
+    // Export endpoints
+    app.use('/api/analytics/export', exportLimiter);
+    app.use('/api/export/', exportLimiter);
 
     // CORS configuration
     app.use(cors({
@@ -146,18 +172,34 @@ async function startServer() {
     app.use(express.urlencoded({ extended: true, limit: process.env.MAX_FILE_SIZE || '10mb' }));
     app.use(requestLogger);
 
-    // Step 8: Configure health check endpoints
-    logger.info('Step 8: Setting up health check endpoints...');
+    // Step 8: Configure enhanced monitoring and health check endpoints
+    logger.info('Step 8: Setting up enhanced monitoring and health check endpoints...');
     
-    // Basic health check
-    app.get('/api/health', (req, res) => {
-      res.status(200).json({
-        status: 'healthy',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        version: process.env.npm_package_version || '1.0.0'
-      });
-    });
+    const {
+      requestTracker,
+      performanceMonitor,
+      errorTracker,
+      updateMetrics,
+      healthCheck,
+      readinessCheck,
+      livenessCheck,
+      getMetrics
+    } = require('./middleware/monitoring');
+
+    // Apply monitoring middleware
+    app.use(requestTracker);
+    app.use(performanceMonitor);
+    app.use(updateMetrics);
+
+    // Health check endpoints
+    app.get('/health', healthCheck);
+    app.get('/api/health', healthCheck);
+    app.get('/ready', readinessCheck);
+    app.get('/api/ready', readinessCheck);
+    app.get('/alive', livenessCheck);
+    app.get('/api/alive', livenessCheck);
+    app.get('/metrics', getMetrics);
+    app.get('/api/metrics', getMetrics);
 
     // Detailed system status
     app.get('/api/status', async (req, res) => {
@@ -195,8 +237,22 @@ async function startServer() {
       }
     });
 
-    // Step 9: Configure API routes
-    logger.info('Step 9: Configuring API routes...');
+    // Step 9: Configure API Documentation (Swagger)
+    logger.info('Step 9a: Setting up API documentation...');
+    const { swaggerSpec, swaggerUi, swaggerUiOptions } = require('./swagger');
+    app.use('/api-docs', swaggerUi.serve);
+    app.get('/api-docs', swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+    
+    // Serve swagger spec as JSON
+    app.get('/api-docs.json', (req, res) => {
+      res.setHeader('Content-Type', 'application/json');
+      res.send(swaggerSpec);
+    });
+    
+    logger.info('📚 API Documentation available at: http://localhost:' + (process.env.PORT || 5001) + '/api-docs');
+
+    // Step 9b: Configure API routes
+    logger.info('Step 9b: Configuring API routes...');
     app.use('/api/auth', authRoutes);
     app.use('/api/users', authMiddleware, userRoutes);
     app.use('/api/courses', authMiddleware, courseRoutes);
@@ -214,6 +270,7 @@ async function startServer() {
     app.use('/api/export', authMiddleware, exportRoutes);
     app.use('/api/certificates', authMiddleware, certificateRoutes);
     app.use('/api/social', authMiddleware, socialRoutes);
+    app.use('/api/quizzes', authMiddleware, quizRoutes);
 
     // Step 10: Configure Socket.IO
     logger.info('Step 10: Configuring Socket.IO...');
@@ -288,6 +345,9 @@ async function startServer() {
         timestamp: new Date().toISOString()
       });
     });
+
+    // Enhanced error tracking middleware (already imported at line 181)
+    app.use(errorTracker);
 
     // Global error handler
     app.use(errorHandler);

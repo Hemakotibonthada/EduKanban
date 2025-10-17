@@ -35,7 +35,9 @@ const authLogSchema = new mongoose.Schema({
       'validation_error',
       'system_error',
       'network_error',
-      'database_error'
+      'database_error',
+      'email_exists',
+      'username_exists'
     ]
   },
   sessionInfo: {

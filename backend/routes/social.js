@@ -3,6 +3,65 @@ const router = express.Router();
 const User = require('../models/User');
 const Course = require('../models/Course');
 
+/**
+ * @swagger
+ * /social/profile/{userId}:
+ *   get:
+ *     summary: Get user's public profile
+ *     description: Retrieve public profile information, courses, and social stats for a user
+ *     tags: [Social]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: Profile retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 profile:
+ *                   type: object
+ *                   properties:
+ *                     username:
+ *                       type: string
+ *                     firstName:
+ *                       type: string
+ *                     lastName:
+ *                       type: string
+ *                     bio:
+ *                       type: string
+ *                     level:
+ *                       type: number
+ *                     xp:
+ *                       type: number
+ *                     badges:
+ *                       type: array
+ *                     courses:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Course'
+ *                     stats:
+ *                       type: object
+ *                       properties:
+ *                         followers:
+ *                           type: number
+ *                         following:
+ *                           type: number
+ *                         coursesCreated:
+ *                           type: number
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
 // Get user's public profile
 router.get('/profile/:userId', async (req, res) => {
   try {
@@ -167,14 +226,28 @@ router.post('/unfollow/:userId', async (req, res) => {
 router.get('/followers/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
+    const { limit = 20, offset = 0 } = req.query;
+    
+    const parsedLimit = Math.min(parseInt(limit), 100);
+    const parsedOffset = parseInt(offset);
     
     const users = await User.find({ following: userId })
       .select('username firstName lastName avatar level xp')
-      .limit(50);
+      .limit(parsedLimit)
+      .skip(parsedOffset)
+      .sort({ createdAt: -1 });
+
+    const total = await User.countDocuments({ following: userId });
 
     res.json({
       success: true,
-      followers: users
+      followers: users,
+      pagination: {
+        total,
+        limit: parsedLimit,
+        offset: parsedOffset,
+        hasMore: parsedOffset + parsedLimit < total
+      }
     });
   } catch (error) {
     console.error('Get followers error:', error);
@@ -190,12 +263,39 @@ router.get('/followers/:userId', async (req, res) => {
 router.get('/following/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
+    const { limit = 20, offset = 0 } = req.query;
     
-    const user = await User.findById(userId).populate('following', 'username firstName lastName avatar level xp');
+    const parsedLimit = Math.min(parseInt(limit), 100);
+    const parsedOffset = parseInt(offset);
+    
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    const following = user.following || [];
+    const total = following.length;
+    
+    // Paginate the following array
+    const paginatedIds = following.slice(parsedOffset, parsedOffset + parsedLimit);
+    
+    const users = await User.find({ _id: { $in: paginatedIds } })
+      .select('username firstName lastName avatar level xp')
+      .sort({ createdAt: -1 });
 
     res.json({
       success: true,
-      following: user.following || []
+      following: users,
+      pagination: {
+        total,
+        limit: parsedLimit,
+        offset: parsedOffset,
+        hasMore: parsedOffset + parsedLimit < total
+      }
     });
   } catch (error) {
     console.error('Get following error:', error);

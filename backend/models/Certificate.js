@@ -74,6 +74,8 @@ const certificateSchema = new mongoose.Schema({
 certificateSchema.index({ user: 1, course: 1 });
 certificateSchema.index({ certificateId: 1 });
 certificateSchema.index({ verificationCode: 1 });
+certificateSchema.index({ user: 1, issueDate: -1 });
+certificateSchema.index({ isRevoked: 1 });
 
 // Virtual for certificate URL
 certificateSchema.virtual('verificationUrl').get(function() {
