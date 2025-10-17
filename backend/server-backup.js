@@ -133,11 +133,8 @@ async function startServer() {
         }
       },
       credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-      exposedHeaders: ['Content-Range', 'X-Content-Range'],
-      preflightContinue: false,
-      optionsSuccessStatus: 204
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+      allowedHeaders: ['Content-Type', 'Authorization']
     }));
 
     // Step 7: Configure middleware
@@ -197,6 +194,8 @@ async function startServer() {
 
     // Step 9: Configure API routes
     logger.info('Step 9: Configuring API routes...');
+    // Step 9: Configure API routes
+    logger.info('Step 9: Configuring API routes...');
     app.use('/api/auth', authRoutes);
     app.use('/api/users', authMiddleware, userRoutes);
     app.use('/api/courses', authMiddleware, courseRoutes);
@@ -215,6 +214,274 @@ async function startServer() {
     app.use('/api/certificates', authMiddleware, certificateRoutes);
     app.use('/api/social', authMiddleware, socialRoutes);
 
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
+
+// Socket.IO for real-time chat
+const User = require('./models/User');
+const DirectMessage = require('./models/DirectMessage');
+const jwt = require('jsonwebtoken');
+
+// Socket.IO authentication middleware
+io.use(async (socket, next) => {
+  try {
+    const token = socket.handshake.auth.token;
+    if (!token) {
+      return next(new Error('Authentication error'));
+    }
+    
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    socket.userId = decoded.userId;
+    next();
+  } catch (error) {
+    next(new Error('Authentication error'));
+  }
+});
+
+// Track online users
+const onlineUsers = new Map();
+
+io.on('connection', async (socket) => {
+  console.log('✅ User connected:', socket.id, '| User ID:', socket.userId);
+
+  // Update user online status
+  try {
+    await User.findByIdAndUpdate(socket.userId, {
+      'onlineStatus.isOnline': true,
+      'onlineStatus.status': 'online',
+      'onlineStatus.lastSeen': new Date()
+    });
+    
+    onlineUsers.set(socket.userId, socket.id);
+    console.log(`👤 User ${socket.userId} marked as online | Total online: ${onlineUsers.size}`);
+    
+    // Broadcast to all friends that user is online
+    const user = await User.findById(socket.userId).populate('friends', '_id');
+    if (user && user.friends) {
+      console.log(`📢 Broadcasting online status to ${user.friends.length} friends`);
+      let broadcastCount = 0;
+      user.friends.forEach(friend => {
+        const friendSocketId = onlineUsers.get(friend._id.toString());
+        if (friendSocketId) {
+          io.to(friendSocketId).emit('friend_online', {
+            userId: socket.userId,
+            status: 'online'
+          });
+          broadcastCount++;
+        }
+      });
+      console.log(`✅ Notified ${broadcastCount} online friends`);
+    }
+  } catch (error) {
+    console.error('Error updating online status:', error);
+  }
+
+  // Join user to their personal room
+  socket.join(`user_${socket.userId}`);
+  console.log(`User ${socket.userId} joined their room`);
+
+  // Join community rooms
+  socket.on('join_community', async (communityId) => {
+    socket.join(`community_${communityId}`);
+    console.log(`User ${socket.userId} joined community ${communityId}`);
+  });
+
+  // Join channel rooms
+  socket.on('join_channel', async (channelId) => {
+    socket.join(`channel_${channelId}`);
+    console.log(`User ${socket.userId} joined channel ${channelId}`);
+  });
+
+  // Join group rooms
+  socket.on('join_group', async (groupId) => {
+    socket.join(`group_${groupId}`);
+    console.log(`User ${socket.userId} joined group ${groupId}`);
+  });
+
+  // Handle direct messages
+  socket.on('send_message', async (data) => {
+    const { targetType, targetId, content, messageType = 'text', replyTo } = data;
+    
+    try {
+      const message = new DirectMessage({
+        sender: socket.userId,
+        targetType,
+        targetId,
+        content,
+        messageType,
+        replyTo
+      });
+      
+      await message.save();
+      await message.populate('sender', 'username firstName lastName avatar');
+      
+      console.log(`📨 Message from ${socket.userId} to ${targetType}:${targetId}`);
+      
+      // Emit to appropriate room
+      if (targetType === 'user') {
+        // For direct messages, send to BOTH sender and recipient rooms
+        io.to(`user_${targetId}`).emit('new_message', message);
+        io.to(`user_${socket.userId}`).emit('new_message', message);
+        console.log(`✅ Message sent to user ${targetId} and ${socket.userId}`);
+      } else if (targetType === 'channel') {
+        io.to(`channel_${targetId}`).emit('new_message', message);
+        console.log(`✅ Message sent to channel ${targetId}`);
+      } else if (targetType === 'group') {
+        io.to(`group_${targetId}`).emit('new_message', message);
+        console.log(`✅ Message sent to group ${targetId}`);
+      } else if (targetType === 'community') {
+        io.to(`community_${targetId}`).emit('new_message', message);
+        console.log(`✅ Message sent to community ${targetId}`);
+      }
+      
+      // Confirm to sender
+      socket.emit('message_sent', { tempId: data.tempId, message });
+    } catch (error) {
+      console.error('Send message error:', error);
+      socket.emit('message_error', { tempId: data.tempId, error: error.message });
+    }
+  });
+
+  // Handle typing indicators
+  socket.on('typing', (data) => {
+    const { targetType, targetId, isTyping } = data;
+    
+    if (targetType === 'user') {
+      io.to(`user_${targetId}`).emit('user_typing', {
+        userId: socket.userId,
+        isTyping
+      });
+    } else if (targetType === 'channel') {
+      socket.to(`channel_${targetId}`).emit('user_typing', {
+        userId: socket.userId,
+        isTyping
+      });
+    } else if (targetType === 'group') {
+      socket.to(`group_${targetId}`).emit('user_typing', {
+        userId: socket.userId,
+        isTyping
+      });
+    }
+  });
+
+  // Handle message reactions
+  socket.on('add_reaction', async (data) => {
+    const { messageId, emoji } = data;
+    
+    try {
+      const message = await DirectMessage.findById(messageId);
+      if (message) {
+        message.addReaction(socket.userId, emoji);
+        await message.save();
+        
+        // Broadcast to relevant room
+        if (message.targetType === 'channel') {
+          io.to(`channel_${message.targetId}`).emit('reaction_added', {
+            messageId,
+            userId: socket.userId,
+            emoji
+          });
+        } else if (message.targetType === 'group') {
+          io.to(`group_${message.targetId}`).emit('reaction_added', {
+            messageId,
+            userId: socket.userId,
+            emoji
+          });
+        } else if (message.targetType === 'user') {
+          io.to(`user_${message.targetId}`).emit('reaction_added', {
+            messageId,
+            userId: socket.userId,
+            emoji
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Add reaction error:', error);
+    }
+  });
+
+  // Handle delete message
+  socket.on('delete_message', async (data) => {
+    const { messageId } = data;
+    
+    try {
+      const message = await DirectMessage.findById(messageId);
+      if (message && message.sender.toString() === socket.userId.toString()) {
+        // Broadcast to relevant room
+        if (message.targetType === 'user') {
+          io.to(`user_${message.targetId}`).emit('message_deleted', { messageId });
+          io.to(`user_${socket.userId}`).emit('message_deleted', { messageId });
+        } else if (message.targetType === 'channel') {
+          io.to(`channel_${message.targetId}`).emit('message_deleted', { messageId });
+        } else if (message.targetType === 'group') {
+          io.to(`group_${message.targetId}`).emit('message_deleted', { messageId });
+        } else if (message.targetType === 'community') {
+          io.to(`community_${message.targetId}`).emit('message_deleted', { messageId });
+        }
+        console.log(`🗑️ Message ${messageId} deleted by ${socket.userId}`);
+      }
+    } catch (error) {
+      console.error('Delete message error:', error);
+    }
+  });
+
+  // Handle edit message
+  socket.on('edit_message', async (data) => {
+    const { messageId, content } = data;
+    
+    try {
+      const message = await DirectMessage.findById(messageId);
+      if (message && message.sender.toString() === socket.userId.toString()) {
+        // Broadcast to relevant room
+        if (message.targetType === 'user') {
+          io.to(`user_${message.targetId}`).emit('message_edited', { messageId, content });
+          io.to(`user_${socket.userId}`).emit('message_edited', { messageId, content });
+        } else if (message.targetType === 'channel') {
+          io.to(`channel_${message.targetId}`).emit('message_edited', { messageId, content });
+        } else if (message.targetType === 'group') {
+          io.to(`group_${message.targetId}`).emit('message_edited', { messageId, content });
+        } else if (message.targetType === 'community') {
+          io.to(`community_${message.targetId}`).emit('message_edited', { messageId, content });
+        }
+        console.log(`✏️ Message ${messageId} edited by ${socket.userId}`);
+      }
+    } catch (error) {
+      console.error('Edit message error:', error);
+    }
+  });
+
+  // Handle read receipts
+  socket.on('mark_read', async (data) => {
+    const { messageId, conversationId } = data;
+    
+    try {
+      if (messageId) {
+        const message = await DirectMessage.findById(messageId);
+        if (message) {
+          message.markAsRead(socket.userId);
+          await message.save();
+          
+          // Notify sender
+          const senderSocketId = onlineUsers.get(message.sender.toString());
+          if (senderSocketId) {
+            io.to(senderSocketId).emit('message_read', {
+              messageId,
+              readBy: socket.userId,
+              readAt: new Date()
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Mark read error:', error);
+    }
+  });
+
+  // Handle status changes
+  socket.on('change_status', async (status) => {
+    try {
+      await User.findByIdAndUpdate(socket.userId, {
+        'onlineStatus.status': status
     // Step 10: Configure Socket.IO
     logger.info('Step 10: Configuring Socket.IO...');
     
@@ -256,7 +523,7 @@ async function startServer() {
         onlineUsers.set(socket.userId, socket.id);
         socket.join(`user_${socket.userId}`);
         
-        // Handle various socket events
+        // Handle various socket events (keeping existing logic)
         require('./socketHandlers')(socket, io, onlineUsers);
         
       } catch (error) {
@@ -325,7 +592,6 @@ async function startServer() {
 // Graceful shutdown handling
 process.on('SIGTERM', () => {
   logger.info('SIGTERM received, shutting down gracefully...');
-  const mongoose = require('mongoose');
   mongoose.connection.close(() => {
     logger.info('Database connection closed');
     process.exit(0);
@@ -334,7 +600,6 @@ process.on('SIGTERM', () => {
 
 process.on('SIGINT', () => {
   logger.info('SIGINT received, shutting down gracefully...');
-  const mongoose = require('mongoose');
   mongoose.connection.close(() => {
     logger.info('Database connection closed');
     process.exit(0);

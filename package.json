@@ -30,5 +30,8 @@
     "ai"
   ],
   "author": "Your Name",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "date-fns": "^4.1.0"
+  }
 }
