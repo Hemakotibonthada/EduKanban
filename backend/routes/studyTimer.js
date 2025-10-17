@@ -3,6 +3,43 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const { StudySession } = require('../models/StudySession');
 
+/**
+ * @swagger
+ * /study-timer/today:
+ *   get:
+ *     summary: Get today's study statistics
+ *     description: Retrieve study time, pomodoros, and break time for today
+ *     tags: [Study Timer]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Today's statistics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 stats:
+ *                   type: object
+ *                   properties:
+ *                     pomodorosCompleted:
+ *                       type: number
+ *                     totalStudyTime:
+ *                       type: number
+ *                       description: Total study time in minutes
+ *                     totalBreakTime:
+ *                       type: number
+ *                       description: Total break time in minutes
+ *                     longestStreak:
+ *                       type: number
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
 // Get today's study statistics
 router.get('/today', auth, async (req, res) => {
   try {
@@ -40,6 +77,55 @@ router.get('/today', auth, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /study-timer/session:
+ *   post:
+ *     summary: Save a completed study session
+ *     description: Record a pomodoro or break session
+ *     tags: [Study Timer]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - duration
+ *               - mode
+ *             properties:
+ *               duration:
+ *                 type: number
+ *                 description: Session duration in minutes
+ *               mode:
+ *                 type: string
+ *                 enum: [pomodoro, short-break, long-break]
+ *               completedAt:
+ *                 type: string
+ *                 format: date-time
+ *     responses:
+ *       201:
+ *         description: Session saved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 session:
+ *                   type: object
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
 // Save a completed study session
 router.post('/session', auth, async (req, res) => {
   try {

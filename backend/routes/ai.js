@@ -7,6 +7,8 @@ const ActivityLog = require('../models/ActivityLog');
 const CourseTemplate = require('../models/CourseTemplate');
 const CourseTemplateService = require('../services/CourseTemplateService');
 const OpenAIService = require('../services/OpenAIService');
+const AIConversation = require('../models/AIConversation');
+const AIMessage = require('../models/AIMessage');
 const axios = require('axios');
 
 const router = express.Router();
@@ -276,6 +278,59 @@ Continue to the practical exercises to reinforce your learning, then take the as
   return content;
 };
 
+/**
+ * @swagger
+ * /ai/generate-course:
+ *   post:
+ *     summary: Generate a personalized course using AI
+ *     description: Create a full course with modules and tasks based on user input. Uses template caching for efficiency.
+ *     tags: [AI]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - courseTopic
+ *               - timeCommitment
+ *               - knowledgeLevel
+ *             properties:
+ *               courseTopic:
+ *                 type: string
+ *                 example: "Machine Learning Fundamentals"
+ *               timeCommitment:
+ *                 type: string
+ *                 example: "2 hours per week"
+ *               knowledgeLevel:
+ *                 type: string
+ *                 enum: [Beginner, Intermediate, Advanced, Expert]
+ *                 example: "Beginner"
+ *     responses:
+ *       200:
+ *         description: Course generated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 fromCache:
+ *                   type: boolean
+ *                 course:
+ *                   $ref: '#/components/schemas/Course'
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
 // POST /api/ai/generate-course
 router.post('/generate-course', courseGenerationValidation, async (req, res) => {
   try {
@@ -717,5 +772,421 @@ router.post('/chat', [
     });
   }
 });
+
+// ===============================
+// AI CONVERSATION ENDPOINTS
+// ===============================
+
+// GET /api/ai/conversations - Get user's AI conversations
+router.get('/conversations', async (req, res) => {
+  try {
+    const { status = 'active', page = 1, limit = 20, sortBy = 'lastActivity' } = req.query;
+    
+    const conversations = await AIConversation.findByUser(req.userId, {
+      status,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      sortBy,
+      sortOrder: -1
+    });
+
+    res.json({
+      success: true,
+      data: {
+        conversations,
+        page: parseInt(page),
+        hasMore: conversations.length === parseInt(limit)
+      }
+    });
+  } catch (error) {
+    console.error('Get AI conversations error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch conversations',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// POST /api/ai/conversations - Create new AI conversation
+router.post('/conversations', [
+  body('title').optional().trim().isLength({ max: 200 }).withMessage('Title must be less than 200 characters'),
+  body('initialMessage').optional().trim().isLength({ max: 8000 }).withMessage('Initial message too long')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
+    const { title, initialMessage, metadata } = req.body;
+
+    // Create conversation
+    const conversation = await AIConversation.createNew(req.userId, {
+      title: title || 'AI Assistant Chat',
+      metadata: metadata || {}
+    });
+
+    let messages = [];
+
+    // Add initial message if provided
+    if (initialMessage) {
+      const userMessage = await AIMessage.createUserMessage(
+        conversation._id,
+        req.userId,
+        initialMessage
+      );
+
+      // Generate AI response
+      let aiResponse;
+      try {
+        if (OpenAIService.isAvailable()) {
+          const response = await OpenAIService.generateSimpleResponse(initialMessage, {
+            options: conversation.settings
+          });
+          
+          aiResponse = await AIMessage.createAIMessage(
+            conversation._id,
+            response.content,
+            response.metadata
+          );
+        } else {
+          // Fallback response
+          aiResponse = await AIMessage.createAIMessage(
+            conversation._id,
+            "Hello! I'm your AI learning assistant. I'm here to help you with your studies and answer any questions you have. How can I assist you today?"
+          );
+        }
+      } catch (aiError) {
+        console.error('AI response error:', aiError);
+        aiResponse = await AIMessage.createAIMessage(
+          conversation._id,
+          "Hello! I'm your AI learning assistant. I'm ready to help you learn and grow. What would you like to explore today?"
+        );
+      }
+
+      messages = [userMessage, aiResponse];
+      
+      // Update conversation
+      conversation.lastMessage = aiResponse._id;
+      conversation.messageCount = 2;
+      await conversation.save();
+    }
+
+    res.status(201).json({
+      success: true,
+      data: {
+        conversation,
+        messages
+      }
+    });
+  } catch (error) {
+    console.error('Create AI conversation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create conversation',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// GET /api/ai/conversations/:id/messages - Get messages in a conversation
+router.get('/conversations/:id/messages', async (req, res) => {
+  try {
+    const { page = 1, limit = 50 } = req.query;
+    const conversationId = req.params.id;
+
+    // Check if conversation exists and belongs to user
+    const conversation = await AIConversation.findOne({
+      _id: conversationId,
+      user: req.userId,
+      status: { $ne: 'deleted' }
+    });
+
+    if (!conversation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Conversation not found'
+      });
+    }
+
+    // Get messages
+    const messages = await AIMessage.findByConversation(conversationId, {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      sortBy: 'createdAt',
+      sortOrder: 1
+    });
+
+    res.json({
+      success: true,
+      data: {
+        conversation,
+        messages,
+        page: parseInt(page),
+        hasMore: messages.length === parseInt(limit)
+      }
+    });
+  } catch (error) {
+    console.error('Get AI messages error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch messages',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// POST /api/ai/conversations/:id/messages - Send message in conversation
+router.post('/conversations/:id/messages', [
+  body('content').notEmpty().trim().isLength({ max: 8000 }).withMessage('Message content is required and must be less than 8000 characters'),
+  body('role').optional().isIn(['user', 'assistant']).withMessage('Invalid role')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
+    const { content, role = 'user' } = req.body;
+    const conversationId = req.params.id;
+
+    // Check if conversation exists and belongs to user
+    const conversation = await AIConversation.findOne({
+      _id: conversationId,
+      user: req.userId,
+      status: { $ne: 'deleted' }
+    });
+
+    if (!conversation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Conversation not found'
+      });
+    }
+
+    // Create user message
+    const userMessage = await AIMessage.createUserMessage(
+      conversationId,
+      req.userId,
+      content
+    );
+
+    // Get recent messages for context (last 10 messages)
+    const recentMessages = await AIMessage.findByConversation(conversationId, {
+      limit: 10,
+      sortBy: 'createdAt',
+      sortOrder: -1
+    });
+
+    // Reverse to get chronological order and prepare for AI
+    const contextMessages = recentMessages
+      .reverse()
+      .slice(-9) // Take last 9 messages (excluding the one we just added)
+      .map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+
+    // Add the new message
+    contextMessages.push({
+      role: 'user',
+      content: content
+    });
+
+    // Generate AI response
+    let aiMessage;
+    try {
+      if (OpenAIService.isAvailable()) {
+        const response = await OpenAIService.generateChatResponse(contextMessages, {
+          ...conversation.settings,
+          systemPrompt: conversation.settings.systemPrompt || 
+            `You are a helpful AI learning assistant for EduKanban. The user's name is available in their profile. Provide educational, encouraging, and practical responses. Keep responses conversational and helpful.`
+        });
+        
+        aiMessage = await AIMessage.createAIMessage(
+          conversationId,
+          response.content,
+          response.metadata
+        );
+      } else {
+        // Enhanced fallback responses based on content analysis
+        let fallbackResponse = generateEnhancedFallbackResponse(content);
+        
+        aiMessage = await AIMessage.createAIMessage(
+          conversationId,
+          fallbackResponse,
+          {
+            aiModel: 'fallback',
+            processingTime: 50
+          }
+        );
+      }
+    } catch (aiError) {
+      console.error('AI response generation error:', aiError);
+      
+      // Check if it's a quota/rate limit error
+      if (aiError.message.includes('quota') || aiError.message.includes('429') || aiError.message.includes('rate limit')) {
+        aiMessage = await AIMessage.createAIMessage(
+          conversationId,
+          `I apologize, but I'm currently experiencing high demand and have reached my API usage limit. However, I can still help you!\n\n${generateEnhancedFallbackResponse(content)}\n\n💡 **Tip**: While I'm in basic mode, I can still provide study guidance, learning strategies, and helpful advice based on common educational principles.`,
+          {
+            aiModel: 'fallback-quota-exceeded',
+            processingTime: 10
+          }
+        );
+      } else {
+        // Create error recovery message for other errors
+        aiMessage = await AIMessage.createAIMessage(
+          conversationId,
+          "I'm having a bit of trouble processing that right now. Could you try rephrasing your question or let me know what specific topic you'd like help with?",
+          {
+            aiModel: 'fallback-error',
+            processingTime: 10
+          }
+        );
+      }
+    }
+
+    // Update conversation
+    conversation.lastMessage = aiMessage._id;
+    await conversation.incrementMessageCount();
+    await conversation.incrementMessageCount(); // Once for user, once for AI
+
+    res.json({
+      success: true,
+      data: {
+        userMessage,
+        aiMessage,
+        conversation: {
+          id: conversation._id,
+          messageCount: conversation.messageCount,
+          lastActivity: conversation.lastActivity
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Send AI message error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send message',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// DELETE /api/ai/conversations/:id/messages/:messageId - Delete a message
+router.delete('/conversations/:id/messages/:messageId', async (req, res) => {
+  try {
+    const { id: conversationId, messageId } = req.params;
+
+    // Check if conversation belongs to user
+    const conversation = await AIConversation.findOne({
+      _id: conversationId,
+      user: req.userId,
+      status: { $ne: 'deleted' }
+    });
+
+    if (!conversation) {
+      return res.status(404).json({
+        success: false,
+        message: 'Conversation not found'
+      });
+    }
+
+    // Find and delete message
+    const message = await AIMessage.findOne({
+      _id: messageId,
+      conversation: conversationId
+    });
+
+    if (!message) {
+      return res.status(404).json({
+        success: false,
+        message: 'Message not found'
+      });
+    }
+
+    // Soft delete the message
+    await message.softDelete(req.userId);
+
+    res.json({
+      success: true,
+      message: 'Message deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete AI message error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete message',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// GET /api/ai/capabilities - Get AI service capabilities
+router.get('/capabilities', (req, res) => {
+  try {
+    const isOpenAIAvailable = OpenAIService.isAvailable();
+    
+    res.json({
+      success: true,
+      data: {
+        openai: {
+          available: isOpenAIAvailable,
+          models: isOpenAIAvailable ? ['gpt-3.5-turbo', 'gpt-4'] : [],
+          error: !isOpenAIAvailable ? OpenAIService.initializationError : null
+        },
+        features: [
+          'chat',
+          'conversation-persistence',
+          'context-awareness',
+          'learning-assistance',
+          'course-help',
+          'code-assistance'
+        ],
+        limits: {
+          maxMessageLength: 8000,
+          maxConversationHistory: 50,
+          maxTokensPerRequest: 4000
+        },
+        supportedLanguages: ['en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'ko', 'zh']
+      }
+    });
+  } catch (error) {
+    console.error('Get AI capabilities error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get capabilities',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// Helper function for enhanced fallback responses
+function generateEnhancedFallbackResponse(userMessage) {
+  const lowerMessage = userMessage.toLowerCase();
+  
+  // More sophisticated fallback responses
+  if (lowerMessage.includes('help') || lowerMessage.includes('how to')) {
+    return `I'd be happy to help you with that! While I'm currently running in basic mode, I can still provide guidance on:\n\n📚 **Study Strategies** - Effective learning techniques\n💡 **Problem Solving** - Breaking down complex topics\n🎯 **Goal Setting** - Planning your learning journey\n📝 **Note Taking** - Better retention methods\n\nWhat specific area would you like assistance with?`;
+  } else if (lowerMessage.includes('code') || lowerMessage.includes('programming')) {
+    return `Great question about programming! Even in basic mode, I can help with:\n\n🔧 **Debugging Approach** - Systematic problem-solving steps\n📖 **Learning Resources** - Where to find reliable documentation\n💭 **Code Review** - General best practices to consider\n🏗️ **Project Structure** - Organizing your code effectively\n\nCould you tell me more about what specific programming challenge you're facing?`;
+  } else if (lowerMessage.includes('study') || lowerMessage.includes('learn')) {
+    return `Learning effectively is a skill in itself! Here are some proven strategies:\n\n⏰ **Spaced Repetition** - Review material at increasing intervals\n🎯 **Active Learning** - Engage with material, don't just read\n🔄 **Practice Testing** - Quiz yourself regularly\n🧠 **Elaborative Interrogation** - Ask yourself 'why' and 'how'\n📊 **Progress Tracking** - Monitor your improvement\n\nWhat subject or skill are you currently working on?`;
+  } else if (lowerMessage.includes('career') || lowerMessage.includes('job')) {
+    return `Career development is exciting! Here's my advice for building a strong foundation:\n\n🎯 **Skill Building** - Focus on both technical and soft skills\n🌐 **Network Building** - Connect with professionals in your field\n📁 **Portfolio Development** - Showcase your best work\n📈 **Continuous Learning** - Stay updated with industry trends\n🎖️ **Certification** - Consider relevant credentials\n\nWhat career path are you most interested in exploring?`;
+  } else {
+    return `That's an interesting point! While I'm currently in basic mode, I'm still here to help you learn and grow.\n\n**I can assist with:**\n• Study strategies and learning techniques\n• Breaking down complex topics\n• Programming and technical concepts\n• Career guidance and skill development\n• Course planning and goal setting\n\nTo give you the most helpful response, could you tell me more about what you're trying to learn or accomplish? The more specific you are, the better I can guide you! 🚀`;
+  }
+}
 
 module.exports = router;

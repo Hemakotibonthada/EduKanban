@@ -6,6 +6,49 @@ const crypto = require('crypto');
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * /chat/conversations:
+ *   get:
+ *     summary: Get user's conversations
+ *     description: Retrieve all active conversations for the authenticated user
+ *     tags: [Chat]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Conversations retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     conversations:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                           participants:
+ *                             type: array
+ *                             items:
+ *                               $ref: '#/components/schemas/User'
+ *                           lastMessage:
+ *                             type: object
+ *                           lastActivity:
+ *                             type: string
+ *                             format: date-time
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
 // GET /api/chat/conversations
 router.get('/conversations', async (req, res) => {
   try {
@@ -31,6 +74,55 @@ router.get('/conversations', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /chat/conversations:
+ *   post:
+ *     summary: Create a new conversation
+ *     description: Start a new conversation with another user
+ *     tags: [Chat]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - participantId
+ *             properties:
+ *               participantId:
+ *                 type: string
+ *                 description: ID of the user to start conversation with
+ *               connectionReason:
+ *                 type: string
+ *                 default: username_search
+ *                 description: How the connection was initiated
+ *     responses:
+ *       201:
+ *         description: Conversation created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     conversation:
+ *                       type: object
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         description: User not found
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
 // POST /api/chat/conversations
 router.post('/conversations', async (req, res) => {
   try {

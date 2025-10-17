@@ -2,6 +2,60 @@ const express = require('express');
 const router = express.Router();
 const Notification = require('../models/Notification');
 
+/**
+ * @swagger
+ * /notifications:
+ *   get:
+ *     summary: Get user notifications
+ *     description: Retrieve paginated list of notifications for the authenticated user
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 50
+ *         description: Number of notifications to return
+ *       - in: query
+ *         name: skip
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Number of notifications to skip
+ *       - in: query
+ *         name: unreadOnly
+ *         schema:
+ *           type: boolean
+ *           default: false
+ *         description: Only return unread notifications
+ *     responses:
+ *       200:
+ *         description: Notifications retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     notifications:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                     unreadCount:
+ *                       type: number
+ *                     total:
+ *                       type: number
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
 // Get all notifications for current user
 router.get('/', async (req, res) => {
   try {

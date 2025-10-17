@@ -32,7 +32,12 @@ const authLogSchema = new mongoose.Schema({
       'password_expired',
       'too_many_attempts',
       'invalid_token',
-      'validation_error'
+      'validation_error',
+      'system_error',
+      'network_error',
+      'database_error',
+      'email_exists',
+      'username_exists'
     ]
   },
   sessionInfo: {

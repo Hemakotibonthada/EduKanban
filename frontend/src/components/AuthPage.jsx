@@ -232,6 +232,18 @@ const AuthPage = ({ mode, onAuthSuccess, onModeChange, onBack }) => {
             </div>
           </div>
 
+          {mode === 'login' && (
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => onModeChange('forgot-password')}
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Forgot Password?
+              </button>
+            </div>
+          )}
+
           {mode === 'register' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

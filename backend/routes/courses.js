@@ -102,15 +102,75 @@ async function autoGenerateTasksForCourse(courseId, userId) {
 // Export for use in other routes
 router.autoGenerateTasksForCourse = autoGenerateTasksForCourse;
 
+/**
+ * @swagger
+ * /courses:
+ *   get:
+ *     summary: Get user's courses
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/limitParam'
+ *       - $ref: '#/components/parameters/offsetParam'
+ *       - $ref: '#/components/parameters/statusParam'
+ *       - name: difficulty
+ *         in: query
+ *         schema:
+ *           type: string
+ *           enum: [beginner, intermediate, advanced]
+ *     responses:
+ *       200:
+ *         description: List of courses
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     courses:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Course'
+ *                     pagination:
+ *                       $ref: '#/components/schemas/Pagination'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ */
+
 // GET /api/courses - Get user's courses
 router.get('/', async (req, res) => {
   try {
-    const courses = await Course.find({ userId: req.userId })
-      .sort({ createdAt: -1 });
+    const { limit = 20, offset = 0, status, difficulty } = req.query;
+    const parsedLimit = Math.min(parseInt(limit), 100);
+    const parsedOffset = parseInt(offset);
+
+    let filter = { userId: req.userId };
+    if (status) filter.status = status;
+    if (difficulty) filter.difficulty = difficulty;
+
+    const courses = await Course.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(parsedLimit)
+      .skip(parsedOffset);
+
+    const total = await Course.countDocuments(filter);
 
     res.json({
       success: true,
-      data: { courses }
+      data: { 
+        courses,
+        pagination: {
+          total,
+          limit: parsedLimit,
+          offset: parsedOffset,
+          hasMore: parsedOffset + courses.length < total
+        }
+      }
     });
 
   } catch (error) {
@@ -375,6 +435,300 @@ router.patch('/:courseId/modules/:moduleIndex/video', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to update video URL'
+    });
+  }
+});
+
+// POST /api/courses - Create manual course
+router.post('/', async (req, res) => {
+  try {
+    const {
+      title,
+      description,
+      topic,
+      difficulty,
+      estimatedDuration,
+      timeCommitment,
+      currentKnowledgeLevel,
+      modules,
+      tags,
+      learningOutcomes,
+      prerequisites
+    } = req.body;
+
+    if (!title || !description || !topic || !difficulty) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: title, description, topic, difficulty'
+      });
+    }
+
+    const course = await Course.create({
+      title,
+      description,
+      topic,
+      userId: req.userId,
+      difficulty,
+      estimatedDuration: estimatedDuration || 10,
+      timeCommitment: timeCommitment || '5 hours per week',
+      currentKnowledgeLevel: currentKnowledgeLevel || difficulty,
+      modules: modules || [],
+      tags: tags || [],
+      learningOutcomes: learningOutcomes || [],
+      prerequisites: prerequisites || [],
+      aiGenerated: false,
+      progress: {
+        totalModules: modules?.length || 0,
+        completedModules: 0,
+        totalTasks: 0,
+        completedTasks: 0,
+        percentageComplete: 0
+      }
+    });
+
+    await ActivityLog.create({
+      userId: req.userId,
+      sessionId: req.sessionId,
+      action: 'course_created',
+      entity: { type: 'course', id: course._id, title: course.title },
+      metadata: {
+        userAgent: req.get('User-Agent'),
+        ipAddress: req.ip
+      }
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Course created successfully',
+      data: { course }
+    });
+
+  } catch (error) {
+    console.error('Create course error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create course'
+    });
+  }
+});
+
+// PUT /api/courses/:id - Update course
+router.put('/:id', async (req, res) => {
+  try {
+    const course = await Course.findOne({
+      _id: req.params.id,
+      userId: req.userId
+    });
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found'
+      });
+    }
+
+    const {
+      title,
+      description,
+      difficulty,
+      estimatedDuration,
+      timeCommitment,
+      tags,
+      learningOutcomes,
+      prerequisites,
+      status
+    } = req.body;
+
+    if (title) course.title = title;
+    if (description) course.description = description;
+    if (difficulty) course.difficulty = difficulty;
+    if (estimatedDuration) course.estimatedDuration = estimatedDuration;
+    if (timeCommitment) course.timeCommitment = timeCommitment;
+    if (tags) course.tags = tags;
+    if (learningOutcomes) course.learningOutcomes = learningOutcomes;
+    if (prerequisites) course.prerequisites = prerequisites;
+    if (status) course.status = status;
+
+    await course.save();
+
+    await ActivityLog.create({
+      userId: req.userId,
+      sessionId: req.sessionId,
+      action: 'course_updated',
+      entity: { type: 'course', id: course._id, title: course.title },
+      metadata: {
+        userAgent: req.get('User-Agent'),
+        ipAddress: req.ip
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Course updated successfully',
+      data: { course }
+    });
+
+  } catch (error) {
+    console.error('Update course error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update course'
+    });
+  }
+});
+
+// POST /api/courses/:id/enroll - Enroll in course (for shared/public courses)
+router.post('/:id/enroll', async (req, res) => {
+  try {
+    const sourceCourse = await Course.findById(req.params.id);
+
+    if (!sourceCourse) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found'
+      });
+    }
+
+    // Check if user already enrolled
+    const existingEnrollment = await Course.findOne({
+      userId: req.userId,
+      sourceTemplateId: req.params.id
+    });
+
+    if (existingEnrollment) {
+      return res.status(400).json({
+        success: false,
+        message: 'Already enrolled in this course'
+      });
+    }
+
+    // Create a copy of the course for the user
+    const enrolledCourse = await Course.create({
+      title: sourceCourse.title,
+      description: sourceCourse.description,
+      topic: sourceCourse.topic,
+      userId: req.userId,
+      difficulty: sourceCourse.difficulty,
+      estimatedDuration: sourceCourse.estimatedDuration,
+      timeCommitment: sourceCourse.timeCommitment,
+      currentKnowledgeLevel: sourceCourse.currentKnowledgeLevel,
+      modules: sourceCourse.modules,
+      tags: sourceCourse.tags,
+      learningOutcomes: sourceCourse.learningOutcomes,
+      prerequisites: sourceCourse.prerequisites,
+      aiGenerated: sourceCourse.aiGenerated,
+      sourceTemplateId: sourceCourse._id,
+      progress: {
+        totalModules: sourceCourse.modules?.length || 0,
+        completedModules: 0,
+        totalTasks: 0,
+        completedTasks: 0,
+        percentageComplete: 0
+      }
+    });
+
+    // Auto-generate tasks
+    const taskResult = await autoGenerateTasksForCourse(enrolledCourse._id, req.userId);
+    
+    if (taskResult.success) {
+      enrolledCourse.progress.totalTasks = taskResult.tasksCreated;
+      await enrolledCourse.save();
+    }
+
+    await ActivityLog.create({
+      userId: req.userId,
+      sessionId: req.sessionId,
+      action: 'course_enrolled',
+      entity: { type: 'course', id: enrolledCourse._id, title: enrolledCourse.title },
+      metadata: {
+        userAgent: req.get('User-Agent'),
+        ipAddress: req.ip
+      }
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Successfully enrolled in course',
+      data: { 
+        course: enrolledCourse,
+        tasksCreated: taskResult.tasksCreated || 0
+      }
+    });
+
+  } catch (error) {
+    console.error('Enroll course error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to enroll in course'
+    });
+  }
+});
+
+// POST /api/courses/:id/modules - Add module to course
+router.post('/:id/modules', async (req, res) => {
+  try {
+    const course = await Course.findOne({
+      _id: req.params.id,
+      userId: req.userId
+    });
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found'
+      });
+    }
+
+    const { title, description, duration, lessons, videoUrl, resources } = req.body;
+
+    if (!title || !description) {
+      return res.status(400).json({
+        success: false,
+        message: 'Module title and description are required'
+      });
+    }
+
+    const newModule = {
+      title,
+      description,
+      duration: duration || 60,
+      order: course.modules.length,
+      lessons: lessons || [],
+      videoUrl: videoUrl || null,
+      resources: resources || [],
+      isCompleted: false
+    };
+
+    course.modules.push(newModule);
+    course.progress.totalModules = course.modules.length;
+    await course.save();
+
+    await ActivityLog.create({
+      userId: req.userId,
+      sessionId: req.sessionId,
+      action: 'module_added',
+      entity: { type: 'course', id: course._id, title: course.title },
+      details: { moduleName: title },
+      metadata: {
+        userAgent: req.get('User-Agent'),
+        ipAddress: req.ip
+      }
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Module added successfully',
+      data: { 
+        course,
+        module: newModule
+      }
+    });
+
+  } catch (error) {
+    console.error('Add module error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to add module'
     });
   }
 });

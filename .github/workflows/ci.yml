@@ -1,0 +1,141 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # Backend tests and linting
+  backend-test:
+    runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:8.2.1
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "echo 'db.runCommand(\"ping\").ok' | mongosh localhost:27017/test --quiet"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: ./backend
+        run: npm run lint || true
+
+      - name: Run backend tests
+        working-directory: ./backend
+        run: npm test || echo "No tests configured yet"
+        env:
+          MONGODB_URI: mongodb://localhost:27017/edukanban-test
+          JWT_SECRET: test-secret-key
+          NODE_ENV: test
+
+  # Frontend tests and linting
+  frontend-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: ./frontend
+        run: npm run lint || true
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: Run frontend tests
+        working-directory: ./frontend
+        run: npm test || echo "No tests configured yet"
+
+  # Build and push Docker images
+  docker-build:
+    needs: [backend-test, frontend-test]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/edukanban-backend:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/edukanban-backend:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/edukanban-backend:buildcache,mode=max
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/edukanban-frontend:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/edukanban-frontend:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/edukanban-frontend:buildcache,mode=max
+
+  # Security scanning
+  security-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'

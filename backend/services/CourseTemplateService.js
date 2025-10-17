@@ -205,6 +205,15 @@ class CourseTemplateService {
     // Create tasks from template modules
     await this.createTasksFromTemplate(personalizedCourse._id, template.modules, userId);
     
+    // Generate final exam for the course
+    try {
+      const exam = await this.generateCourseExam(personalizedCourse._id, userId);
+      console.log(`✅ Generated exam for course: ${personalizedCourse.title} [${exam._id}]`);
+    } catch (examError) {
+      console.warn(`⚠️ Could not generate exam for course: ${examError.message}`);
+      // Don't fail course creation if exam generation fails
+    }
+    
     return personalizedCourse;
   }
   
@@ -432,6 +441,188 @@ class CourseTemplateService {
     
     console.log(`✅ Created ${createdTasks.length} tasks for course: ${course.title}`);
     return createdTasks;
+  }
+  
+  /**
+   * Generate final exam for a course
+   */
+  static async generateCourseExam(courseId, userId) {
+    const Exam = require('../models/Exam');
+    const Course = require('../models/Course');
+    const OpenAIService = require('./OpenAIService');
+    
+    try {
+      const course = await Course.findById(courseId);
+      if (!course) {
+        throw new Error('Course not found');
+      }
+      
+      console.log(`📝 Generating final exam for course: ${course.title}`);
+      
+      let examQuestions = [];
+      
+      // Try to generate questions with OpenAI if configured
+      if (OpenAIService.isConfigured()) {
+        try {
+          examQuestions = await this.generateExamQuestionsWithAI(course);
+        } catch (aiError) {
+          console.warn('⚠️ AI exam generation failed, using template:', aiError.message);
+          examQuestions = this.generateTemplateExamQuestions(course);
+        }
+      } else {
+        examQuestions = this.generateTemplateExamQuestions(course);
+      }
+      
+      // Create the exam
+      const exam = await Exam.create({
+        courseId: course._id,
+        moduleId: null, // Final course exam
+        title: `Final Exam: ${course.title}`,
+        description: `Comprehensive assessment covering all modules of ${course.title}. You must score ${70}% or higher to pass and receive your certificate.`,
+        questions: examQuestions,
+        passingScore: 70,
+        duration: Math.max(30, examQuestions.length * 2), // 2 minutes per question, minimum 30 minutes
+        attemptsAllowed: 3,
+        createdBy: userId,
+        isActive: true
+      });
+      
+      console.log(`✅ Created final exam with ${examQuestions.length} questions`);
+      return exam;
+    } catch (error) {
+      console.error('❌ Error generating course exam:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Generate exam questions using OpenAI
+   */
+  static async generateExamQuestionsWithAI(course) {
+    const OpenAIService = require('./OpenAIService');
+    
+    // Build a comprehensive prompt
+    const moduleTopics = course.modules.map(m => `- ${m.title}: ${m.description}`).join('\n');
+    
+    const prompt = `Create a comprehensive final exam for the course "${course.title}".
+
+Course Description: ${course.description}
+
+Course Modules:
+${moduleTopics}
+
+Generate 15-20 multiple-choice questions that test understanding across all modules. 
+
+For each question, provide:
+1. Question text that tests conceptual understanding
+2. Four answer options (A, B, C, D)
+3. The correct answer (letter only)
+4. Brief explanation of why the answer is correct
+5. Category (use the module title it relates to)
+
+Return as JSON array with this structure:
+[
+  {
+    "questionText": "What is...",
+    "options": [
+      {"text": "Option A", "isCorrect": false},
+      {"text": "Option B", "isCorrect": true},
+      {"text": "Option C", "isCorrect": false},
+      {"text": "Option D", "isCorrect": false}
+    ],
+    "correctAnswer": "Option B",
+    "explanation": "Because...",
+    "category": "Module 1: Introduction",
+    "points": 1
+  }
+]`;
+
+    const completion = await OpenAIService.client.chat.completions.create({
+      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are an expert educator creating comprehensive course assessments. Return valid JSON only.'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      temperature: 0.7,
+      max_completion_tokens: 3000,
+      response_format: { type: 'json_object' }
+    });
+
+    const response = JSON.parse(completion.choices[0].message.content);
+    return response.questions || response;
+  }
+  
+  /**
+   * Generate template exam questions (fallback)
+   */
+  static generateTemplateExamQuestions(course) {
+    const questions = [];
+    const modules = course.modules || [];
+    
+    // Generate 2-3 questions per module
+    modules.forEach((module, index) => {
+      const moduleNumber = module.moduleNumber || index + 1;
+      const category = `Module ${moduleNumber}: ${module.title}`;
+      
+      // Question 1: Understanding/Knowledge
+      questions.push({
+        questionText: `What is the main focus of ${module.title}?`,
+        type: 'multiple-choice',
+        options: [
+          { text: module.description || 'Understanding core concepts', isCorrect: true },
+          { text: 'Advanced techniques only', isCorrect: false },
+          { text: 'Historical background', isCorrect: false },
+          { text: 'Future predictions', isCorrect: false }
+        ],
+        correctAnswer: module.description || 'Understanding core concepts',
+        explanation: `${module.title} focuses on ${module.description}`,
+        category: category,
+        points: 1
+      });
+      
+      // Question 2: Application
+      if (module.learningObjectives && module.learningObjectives.length > 0) {
+        const objective = module.learningObjectives[0];
+        questions.push({
+          questionText: `Which of the following best describes a key learning objective of ${module.title}?`,
+          type: 'multiple-choice',
+          options: [
+            { text: objective, isCorrect: true },
+            { text: 'Memorizing terminology', isCorrect: false },
+            { text: 'Passing the exam', isCorrect: false },
+            { text: 'Reading all materials', isCorrect: false }
+          ],
+          correctAnswer: objective,
+          explanation: `One of the main objectives is: ${objective}`,
+          category: category,
+          points: 1
+        });
+      }
+    });
+    
+    // Add 3 general questions
+    questions.push({
+      questionText: `What is the overall goal of the "${course.title}" course?`,
+      type: 'multiple-choice',
+      options: [
+        { text: course.description || 'Master the subject comprehensively', isCorrect: true },
+        { text: 'Get a certificate quickly', isCorrect: false },
+        { text: 'Learn basic terminology', isCorrect: false },
+        { text: 'Complete assignments', isCorrect: false }
+      ],
+      correctAnswer: course.description || 'Master the subject comprehensively',
+      explanation: `The course aims to: ${course.description}`,
+      category: 'Course Overview',
+      points: 1
+    });
+    
+    return questions;
   }
   
   static hasSignificantChanges(oldTemplate, newContent) {

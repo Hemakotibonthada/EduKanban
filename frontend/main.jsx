@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 import { registerServiceWorker, initInstallPrompt } from './src/utils/serviceWorkerUtils.js'
+import performanceMonitor from './src/utils/performance.js'
+
+// Initialize performance monitoring
+performanceMonitor.init();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -23,3 +27,11 @@ if (import.meta.env.PROD) {
 
 // Initialize install prompt
 initInstallPrompt();
+
+// Log performance summary on page unload (development only)
+if (import.meta.env.DEV) {
+  window.addEventListener('beforeunload', () => {
+    const summary = performanceMonitor.getSummary();
+    console.log('📊 Performance Summary:', summary);
+  });
+}

@@ -334,6 +334,16 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
   };
 
   const loadMessages = async () => {
+    // Skip loading messages for AI chat - it uses its own message management
+    if (selectedChatType === 'ai') {
+      return;
+    }
+
+    // Skip if no valid chat is selected
+    if (!selectedChat || !selectedChatType) {
+      return;
+    }
+
     setLoading(true);
     try {
       let url = '';
@@ -346,9 +356,20 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
         url = `${API_URL}/chat-enhanced/groups/${selectedChat}/messages`;
       }
 
+      // Double-check we have a valid URL
+      if (!url) {
+        console.warn('⚠️ No valid URL for loading messages');
+        return;
+      }
+
       const response = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` }
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const data = await response.json();
       if (data.success) {
         setMessages(data.data.messages);
@@ -912,7 +933,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
               </div>
             )}
             
-            <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+            <span className="text-sm whitespace-pre-wrap break-words">{message.content}</span>
             
             {message.attachments && message.attachments.length > 0 && (
               <div className="mt-2 space-y-2">
@@ -1524,7 +1545,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                     </div>
                     <div className="min-w-0 flex-1">
                       <h2 className="font-semibold text-gray-900 truncate text-sm md:text-base">AI Learning Guide</h2>
-                      <p className="text-xs text-purple-600 truncate flex items-center gap-1">
+                      <div className="text-xs text-purple-600 truncate flex items-center gap-1">
                         {aiIsTyping ? (
                           <>
                             <span className="inline-flex gap-0.5">
@@ -1540,7 +1561,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                             <span>Always available to help</span>
                           </>
                         )}
-                      </p>
+                      </div>
                     </div>
                   </>
                 ) : (
@@ -1697,14 +1718,14 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                     <p className="text-xl md:text-2xl font-bold text-blue-900 mb-2">Drop files here to upload</p>
                     <p className="text-sm md:text-base text-gray-700 mb-2">Supports:</p>
                     <div className="text-xs md:text-sm text-gray-600 max-w-lg mx-auto">
-                      <p className="mb-1">📸 <strong>Images:</strong> JPG, PNG, GIF, WebP, SVG, BMP, HEIC</p>
-                      <p className="mb-1">🎥 <strong>Videos:</strong> MP4, WebM, MOV, AVI, MKV, FLV</p>
-                      <p className="mb-1">🎵 <strong>Audio:</strong> MP3, WAV, OGG, AAC, FLAC, M4A, Opus</p>
-                      <p className="mb-1">🎤 <strong>Voice:</strong> AMR, 3GP, WebM (voice recordings)</p>
-                      <p className="mb-1">📄 <strong>Documents:</strong> PDF, DOC/X, XLS/X, PPT/X, TXT, CSV</p>
-                      <p className="mb-1">💻 <strong>Code:</strong> JS, PY, JAVA, C/C++, PHP, JSON, XML</p>
-                      <p className="mb-1">📦 <strong>Archives:</strong> ZIP, RAR, 7Z, TAR, GZ</p>
-                      <p className="mt-2 text-gray-500">Maximum file size: 100MB</p>
+                      <div className="mb-1">📸 <strong>Images:</strong> JPG, PNG, GIF, WebP, SVG, BMP, HEIC</div>
+                      <div className="mb-1">🎥 <strong>Videos:</strong> MP4, WebM, MOV, AVI, MKV, FLV</div>
+                      <div className="mb-1">🎵 <strong>Audio:</strong> MP3, WAV, OGG, AAC, FLAC, M4A, Opus</div>
+                      <div className="mb-1">🎤 <strong>Voice:</strong> AMR, 3GP, WebM (voice recordings)</div>
+                      <div className="mb-1">📄 <strong>Documents:</strong> PDF, DOC/X, XLS/X, PPT/X, TXT, CSV</div>
+                      <div className="mb-1">💻 <strong>Code:</strong> JS, PY, JAVA, C/C++, PHP, JSON, XML</div>
+                      <div className="mb-1">📦 <strong>Archives:</strong> ZIP, RAR, 7Z, TAR, GZ</div>
+                      <div className="mt-2 text-gray-500">Maximum file size: 100MB</div>
                     </div>
                   </div>
                 </motion.div>
@@ -1726,9 +1747,9 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                         <Globe className="w-10 h-10 text-white" />
                       </div>
                       <h3 className="text-2xl font-bold text-gray-900 mb-2">Welcome to AI Learning Guide!</h3>
-                      <p className="text-gray-600 text-center max-w-md mb-6">
+                      <div className="text-gray-600 text-center max-w-md mb-6">
                         I'm your personal AI assistant. Ask me anything about your courses, get study tips, or explore new topics!
-                      </p>
+                      </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
                         {[
                           { icon: "🎓", text: "Explain a concept", question: "Can you explain machine learning?" },
@@ -1752,33 +1773,35 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                   )}
                   
                   {/* AI Chat Messages */}
-                  {aiMessages.map(message => (
-                    <div
-                      key={message._id}
-                      className={`flex items-start gap-2 md:gap-3 mb-4 ${
-                        message.sender.type === 'user' ? 'flex-row-reverse' : 'flex-row'
-                      }`}
-                    >
-                      <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        message.sender.type === 'user'
-                          ? 'bg-gradient-to-br from-blue-500 to-purple-500'
-                          : 'bg-gradient-to-br from-purple-500 to-blue-500'
-                      }`}>
-                        {message.sender.type === 'user' ? (
-                          <span className="text-white text-xs md:text-sm font-semibold">
-                            {user.firstName?.[0]}{user.lastName?.[0]}
-                          </span>
-                        ) : (
-                          <Globe className="w-5 h-5 md:w-6 md:h-6 text-white" />
-                        )}
-                      </div>
-                      
-                      <div className={`flex flex-col max-w-[75%] md:max-w-[60%] ${
-                        message.sender.type === 'user' ? 'items-end' : 'items-start'
-                      }`}>
-                        <div className={`px-4 py-2 md:py-3 rounded-2xl ${
-                          message.sender.type === 'user'
-                            ? 'bg-blue-600 text-white'
+                  {aiMessages.map(message => {
+                    const isUser = message.role === 'user' || message.sender?.type === 'user';
+                    return (
+                      <div
+                        key={message._id}
+                        className={`flex items-start gap-2 md:gap-3 mb-4 ${
+                          isUser ? 'flex-row-reverse' : 'flex-row'
+                        }`}
+                      >
+                        <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                          isUser
+                            ? 'bg-gradient-to-br from-blue-500 to-purple-500'
+                            : 'bg-gradient-to-br from-purple-500 to-blue-500'
+                        }`}>
+                          {isUser ? (
+                            <span className="text-white text-xs md:text-sm font-semibold">
+                              {user.firstName?.[0]}{user.lastName?.[0]}
+                            </span>
+                          ) : (
+                            <Globe className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                          )}
+                        </div>
+                        
+                        <div className={`flex flex-col max-w-[75%] md:max-w-[60%] ${
+                          isUser ? 'items-end' : 'items-start'
+                        }`}>
+                          <div className={`px-4 py-2 md:py-3 rounded-2xl ${
+                            isUser
+                              ? 'bg-blue-600 text-white'
                             : message.isError
                             ? 'bg-red-50 text-red-800 border border-red-200'
                             : 'bg-gradient-to-r from-purple-50 to-blue-50 text-gray-800 border border-purple-100'
@@ -1795,7 +1818,8 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                         </div>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
 
                   {/* AI Typing Indicator */}
                   {aiIsTyping && (

@@ -25,9 +25,12 @@ import {
   SortAsc,
   X,
   CheckSquare,
-  Square
+  Square,
+  FileCheck
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ExamPage from './ExamPage';
+import ExamResultsModal from './ExamResultsModal';
 import {
   DndContext,
   DragOverlay,
@@ -59,6 +62,13 @@ const EnhancedKanbanBoard = ({ user, token }) => {
   const [expandedCourses, setExpandedCourses] = useState({});
   const [selectedTasks, setSelectedTasks] = useState(new Set());
   const [bulkMode, setBulkMode] = useState(false);
+  
+  // Exam-related state
+  const [showExamPage, setShowExamPage] = useState(false);
+  const [currentExam, setCurrentExam] = useState(null);
+  const [examTask, setExamTask] = useState(null);
+  const [examResults, setExamResults] = useState(null);
+  const [showExamResults, setShowExamResults] = useState(false);
 
   const [filters, setFilters] = useState({
     course: '',
@@ -278,7 +288,7 @@ const EnhancedKanbanBoard = ({ user, token }) => {
     setActiveId(event.active.id);
   };
 
-  const handleDragEnd = (event) => {
+  const handleDragEnd = async (event) => {
     const { active, over } = event;
 
     if (!over) {
@@ -291,7 +301,15 @@ const EnhancedKanbanBoard = ({ user, token }) => {
 
     if (activeTask && columns.find(c => c.id === overColumn)) {
       if (activeTask.status !== overColumn) {
-        updateTask(activeTask._id, { status: overColumn });
+        // Check if moving from 'review' to 'completed' and exam is required
+        if (activeTask.status === 'review' && overColumn === 'completed' && activeTask.examRequired && !activeTask.examPassed) {
+          // Open exam modal instead of updating status
+          setExamTask(activeTask);
+          await openExam(activeTask);
+        } else {
+          // Normal status update
+          updateTask(activeTask._id, { status: overColumn });
+        }
       }
     }
 
@@ -300,6 +318,46 @@ const EnhancedKanbanBoard = ({ user, token }) => {
 
   const handleDragCancel = () => {
     setActiveId(null);
+  };
+
+  // Exam functions
+  const openExam = async (task) => {
+    if (!task.examId) {
+      toast.error('No exam found for this task');
+      return;
+    }
+
+    setExamTask(task);
+    setCurrentExam({ examId: task.examId, courseId: task.courseId });
+    setShowExamPage(true);
+  };
+
+  const handleExamComplete = (results) => {
+    setShowExamPage(false);
+    setExamResults(results);
+    setShowExamResults(true);
+    
+    // Refresh tasks to get updated status
+    fetchTasks();
+  };
+
+  const handleExamResultsClose = () => {
+    setShowExamResults(false);
+    setExamResults(null);
+    setExamTask(null);
+  };
+
+  const handleExamRetry = () => {
+    setShowExamResults(false);
+    if (examTask && examTask.examId) {
+      setShowExamPage(true);
+    }
+  };
+
+  const handleViewCertificate = (certificate) => {
+    // Navigate to certificate page or open in new window
+    const certificateUrl = `/certificates/${certificate.certificateId}`;
+    window.open(certificateUrl, '_blank');
   };
 
   const toggleCourseExpansion = (courseId) => {
@@ -539,6 +597,28 @@ const EnhancedKanbanBoard = ({ user, token }) => {
               )}
             </div>
           </div>
+
+          {/* Exam Button for tasks with exams */}
+          {task.examRequired && task.examId && (
+            <div className="ml-6 mt-2 pt-2 border-t border-gray-100">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openExam(task);
+                }}
+                className={`w-full flex items-center justify-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  task.examPassed
+                    ? 'bg-green-50 text-green-700 hover:bg-green-100'
+                    : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                }`}
+              >
+                <FileCheck className="w-4 h-4" />
+                <span>
+                  {task.examPassed ? 'Exam Passed ✓' : 'Take Exam'}
+                </span>
+              </button>
+            </div>
+          )}
         </motion.div>
       </div>
     );
@@ -1074,6 +1154,29 @@ const EnhancedKanbanBoard = ({ user, token }) => {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Exam Page Modal */}
+      {showExamPage && currentExam && (
+        <ExamPage
+          examId={currentExam.examId}
+          courseId={currentExam.courseId}
+          onClose={() => {
+            setShowExamPage(false);
+            setCurrentExam(null);
+          }}
+          onComplete={handleExamComplete}
+        />
+      )}
+
+      {/* Exam Results Modal */}
+      {showExamResults && examResults && (
+        <ExamResultsModal
+          results={examResults}
+          onClose={handleExamResultsClose}
+          onRetry={handleExamRetry}
+          onViewCertificate={handleViewCertificate}
+        />
       )}
     </div>
   );

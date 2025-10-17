@@ -4,7 +4,8 @@ const taskSchema = new mongoose.Schema({
   moduleId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Module',
-    required: true
+    required: false,  // Made optional to allow course-level tasks
+    default: null
   },
   courseId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -51,6 +52,24 @@ const taskSchema = new mongoose.Schema({
   order: {
     type: Number,
     required: true
+  },
+  examId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Exam',
+    required: false,
+    default: null
+  },
+  examRequired: {
+    type: Boolean,
+    default: false
+  },
+  examAttempts: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'ExamAttempt'
+  }],
+  examPassed: {
+    type: Boolean,
+    default: false
   },
   content: {
     instructions: {
@@ -166,5 +185,9 @@ taskSchema.index({ courseId: 1, status: 1 });
 taskSchema.index({ userId: 1, status: 1 });
 taskSchema.index({ moduleId: 1, order: 1 });
 taskSchema.index({ type: 1 });
+taskSchema.index({ userId: 1, courseId: 1 });
+taskSchema.index({ priority: 1 });
+taskSchema.index({ completedAt: -1 });
+taskSchema.index({ status: 1, priority: 1 });
 
 module.exports = mongoose.model('Task', taskSchema);
