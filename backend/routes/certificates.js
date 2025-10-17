@@ -44,6 +44,108 @@ const Certificate = require('../models/Certificate');
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
+// Generate certificate after passing exam
+router.post('/generate-from-exam/:examAttemptId', async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { examAttemptId } = req.params;
+    
+    const ExamAttempt = require('../models/ExamAttempt');
+    
+    // Get the exam attempt
+    const examAttempt = await ExamAttempt.findById(examAttemptId)
+      .populate('examId')
+      .populate('courseId');
+    
+    if (!examAttempt) {
+      return res.status(404).json({
+        success: false,
+        message: 'Exam attempt not found'
+      });
+    }
+    
+    // Verify this is the user's attempt
+    if (examAttempt.userId.toString() !== userId.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized access'
+      });
+    }
+    
+    // Verify the exam was passed
+    if (!examAttempt.passed) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot generate certificate - exam not passed',
+        percentage: examAttempt.percentage,
+        passingScore: examAttempt.examId.passingScore
+      });
+    }
+    
+    const course = examAttempt.courseId;
+    const user = await User.findById(userId).select('username firstName lastName email');
+    
+    // Check if certificate already exists
+    let certificate = await Certificate.findOne({
+      user: userId,
+      course: course._id
+    });
+    
+    if (!certificate) {
+      // Generate unique certificate ID and verification code
+      const certificateId = `EDUKANBAN-${Date.now()}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+      const verificationCode = crypto.randomBytes(16).toString('hex');
+      
+      // Determine grade based on exam percentage
+      const gradeData = calculateGradeFromPercentage(examAttempt.percentage);
+      
+      // Create certificate record
+      certificate = await Certificate.create({
+        user: userId,
+        course: course._id,
+        certificateId,
+        verificationCode,
+        issueDate: new Date(),
+        courseName: course.title,
+        userName: user.firstName ? `${user.firstName} ${user.lastName}` : user.username,
+        completionDate: examAttempt.completedAt,
+        duration: course.estimatedDuration,
+        grade: gradeData.grade,
+        percentage: examAttempt.percentage,
+        examAttempt: examAttempt._id,
+        weakAreasAddressed: examAttempt.weakAreas.map(wa => ({
+          category: wa.category,
+          status: 'identified'
+        })),
+        skills: extractSkills(course)
+      });
+      
+      console.log(`✅ Certificate generated from exam: ${certificateId}`);
+    }
+    
+    res.json({
+      success: true,
+      message: 'Certificate generated successfully',
+      certificate: {
+        certificateId: certificate.certificateId,
+        verificationCode: certificate.verificationCode,
+        verificationUrl: certificate.verificationUrl,
+        percentage: certificate.percentage,
+        grade: certificate.grade,
+        issueDate: certificate.issueDate
+      }
+    });
+    
+  } catch (error) {
+    console.error('Exam certificate generation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to generate certificate',
+      error: error.message
+    });
+  }
+});
+
 // Generate certificate for completed course
 router.post('/generate/:courseId', async (req, res) => {
   try {
@@ -250,6 +352,24 @@ function calculateGrade(progress) {
   return {
     grade,
     percentage: Math.round(averageScore * 10) / 10 // Round to 1 decimal place
+  };
+}
+
+// Helper function to calculate grade from exam percentage
+function calculateGradeFromPercentage(percentage) {
+  let grade = 'Pass';
+  if (percentage >= 95) grade = 'A+ (Outstanding)';
+  else if (percentage >= 90) grade = 'A (Excellent)';
+  else if (percentage >= 85) grade = 'A- (Very Good)';
+  else if (percentage >= 80) grade = 'B+ (Good)';
+  else if (percentage >= 75) grade = 'B (Above Average)';
+  else if (percentage >= 70) grade = 'B- (Average)';
+  else if (percentage >= 65) grade = 'C+ (Satisfactory)';
+  else if (percentage >= 60) grade = 'C (Pass)';
+
+  return {
+    grade,
+    percentage: Math.round(percentage * 10) / 10
   };
 }
 

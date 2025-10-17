@@ -53,6 +53,24 @@ const taskSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  examId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Exam',
+    required: false,
+    default: null
+  },
+  examRequired: {
+    type: Boolean,
+    default: false
+  },
+  examAttempts: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'ExamAttempt'
+  }],
+  examPassed: {
+    type: Boolean,
+    default: false
+  },
   content: {
     instructions: {
       type: String

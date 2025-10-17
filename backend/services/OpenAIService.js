@@ -81,7 +81,7 @@ class OpenAIService {
         model: model,
         messages: chatMessages,
         temperature: temperature,
-        max_tokens: max_tokens,
+        max_completion_tokens: max_tokens,
         stream: false
       });
 
@@ -167,7 +167,7 @@ class OpenAIService {
           }
         ],
         temperature: 0.7,
-        max_tokens: 4000,
+        max_completion_tokens: 4000,
         response_format: { type: 'json_object' }
       });
 
@@ -184,7 +184,9 @@ class OpenAIService {
           error.message.includes('API key') || 
           error.message.includes('quota') || 
           error.message.includes('429') ||
-          error.message.includes('rate limit')) {
+          error.message.includes('rate limit') ||
+          error.message.includes('Unsupported parameter') ||
+          error.message.includes('400')) {
         console.log('🔄 Falling back to template course generation...');
         return this.generateFallbackCourse(courseTopic, knowledgeLevel, timeCommitment);
       }
@@ -311,7 +313,7 @@ Make the content practical, engaging, and appropriate for ${level} level learner
           }
         ],
         temperature: 0.7,
-        max_tokens: 1000
+        max_completion_tokens: 1000
       });
 
       return completion.choices[0].message.content;

@@ -42,6 +42,7 @@ async function startServer() {
     const certificateRoutes = require('./routes/certificates');
     const socialRoutes = require('./routes/social');
     const quizRoutes = require('./routes/quizzes');
+    const examRoutes = require('./routes/exams');
 
     // Import middleware
     const authMiddleware = require('./middleware/auth');
@@ -50,11 +51,44 @@ async function startServer() {
     // Step 3: Initialize Express app
     logger.info('Step 3: Initializing Express application...');
     const app = express();
+    
+    // Configure CORS FIRST - before any other middleware
+    app.use(cors({
+      origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps, Postman, etc.)
+        if (!origin) return callback(null, true);
+        
+        // Allow localhost and development origins
+        const allowedOrigins = [
+          'http://localhost:3000',
+          'http://127.0.0.1:3000',
+          'http://localhost:5173',
+          process.env.FRONTEND_URL
+        ];
+        
+        // Allow any local network IP
+        const isLocalNetwork = /^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}):\d+$/.test(origin);
+        
+        if (allowedOrigins.includes(origin) || isLocalNetwork || process.env.NODE_ENV === 'development') {
+          callback(null, true);
+        } else {
+          callback(null, true); // Allow all in development
+        }
+      },
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+      exposedHeaders: ['Content-Range', 'X-Content-Range'],
+      preflightContinue: false,
+      optionsSuccessStatus: 204
+    }));
+    
     const server = http.createServer(app);
     const io = socketIo(server, {
       cors: {
         origin: process.env.FRONTEND_URL || "http://localhost:3000",
-        methods: ["GET", "POST"]
+        methods: ["GET", "POST"],
+        credentials: true
       }
     });
 
@@ -132,39 +166,6 @@ async function startServer() {
     // Export endpoints
     app.use('/api/analytics/export', exportLimiter);
     app.use('/api/export/', exportLimiter);
-
-    // CORS configuration
-    app.use(cors({
-      origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps, Postman, etc.)
-        if (!origin) return callback(null, true);
-        
-        // Allow localhost and local network IPs
-        const allowedOrigins = [
-          'http://localhost:3000',
-          'http://127.0.0.1:3000',
-          process.env.FRONTEND_URL
-        ];
-        
-        // Allow any local network IP (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
-        const isLocalNetwork = /^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}):\d+$/.test(origin);
-        
-        if (allowedOrigins.indexOf(origin) !== -1 || isLocalNetwork) {
-          callback(null, true);
-        } else if (process.env.NODE_ENV === 'development') {
-          // In development, allow all origins
-          callback(null, true);
-        } else {
-          callback(new Error('Not allowed by CORS'));
-        }
-      },
-      credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-      exposedHeaders: ['Content-Range', 'X-Content-Range'],
-      preflightContinue: false,
-      optionsSuccessStatus: 204
-    }));
 
     // Step 7: Configure middleware
     logger.info('Step 7: Configuring middleware...');
@@ -271,6 +272,7 @@ async function startServer() {
     app.use('/api/certificates', authMiddleware, certificateRoutes);
     app.use('/api/social', authMiddleware, socialRoutes);
     app.use('/api/quizzes', authMiddleware, quizRoutes);
+    app.use('/api/exams', authMiddleware, examRoutes);
 
     // Step 10: Configure Socket.IO
     logger.info('Step 10: Configuring Socket.IO...');

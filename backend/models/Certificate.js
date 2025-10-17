@@ -48,6 +48,18 @@ const certificateSchema = new mongoose.Schema({
     min: 0,
     max: 100
   },
+  examAttempt: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'ExamAttempt'
+  },
+  weakAreasAddressed: [{
+    category: String,
+    status: {
+      type: String,
+      enum: ['identified', 'remediated', 'mastered'],
+      default: 'identified'
+    }
+  }],
   skills: [{
     type: String
   }],
