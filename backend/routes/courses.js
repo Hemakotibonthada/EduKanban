@@ -316,6 +316,94 @@ router.put('/:id/status', async (req, res) => {
   }
 });
 
+// PUT /api/courses/:id/complete - Mark course as complete
+router.put('/:id/complete', async (req, res) => {
+  try {
+    const course = await Course.findOne({
+      _id: req.params.id,
+      userId: req.userId
+    });
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found'
+      });
+    }
+
+    // Update course status to completed
+    course.status = 'completed';
+    course.completedAt = new Date();
+    await course.save();
+
+    // Log completion activity
+    try {
+      await ActivityLog.create({
+        userId: req.userId,
+        sessionId: req.sessionId,
+        action: 'course_completed',
+        entity: { type: 'course', id: course._id, title: course.title },
+        details: { completedAt: course.completedAt },
+        metadata: {
+          userAgent: req.get('User-Agent'),
+          ipAddress: req.ip
+        }
+      });
+    } catch (logError) {
+      console.error('Failed to log course completion:', logError);
+    }
+
+    // Try to generate certificate
+    try {
+      const Certificate = require('../models/Certificate');
+      
+      // Check if certificate already exists
+      const existingCert = await Certificate.findOne({
+        userId: req.userId,
+        courseId: course._id
+      });
+
+      if (!existingCert) {
+        await Certificate.create({
+          userId: req.userId,
+          courseId: course._id,
+          courseName: course.title,
+          issueDate: new Date(),
+          certificateNumber: `CERT-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+          metadata: {
+            completionDate: course.completedAt,
+            difficulty: course.difficulty,
+            estimatedDuration: course.estimatedDuration
+          }
+        });
+      }
+    } catch (certError) {
+      console.error('Failed to generate certificate:', certError);
+      // Don't fail the request if certificate generation fails
+    }
+
+    res.json({
+      success: true,
+      message: 'Course completed successfully! 🎉',
+      data: { 
+        course: {
+          _id: course._id,
+          title: course.title,
+          status: course.status,
+          completedAt: course.completedAt
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Complete course error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to complete course'
+    });
+  }
+});
+
 // GET /api/courses/:id/progress - Get course progress
 router.get('/:id/progress', async (req, res) => {
   try {

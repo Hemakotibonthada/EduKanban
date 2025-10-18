@@ -63,6 +63,38 @@ const CourseContentPage = ({ user, token, courseId, onBack }) => {
     toast.success('Module marked as complete!');
   };
 
+  const completeCourse = async () => {
+    try {
+      const response = await fetch(`http://localhost:5001/api/courses/${courseId}/complete`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        }
+      });
+      
+      if (response.ok) {
+        toast.success('🎉 Congratulations! Course completed!', {
+          duration: 5000,
+          icon: '🏆',
+        });
+        // Mark all modules as complete
+        const allModules = new Set(course.modules.map((_, idx) => idx));
+        setCompletedModules(allModules);
+        
+        // Navigate back after a short delay
+        setTimeout(() => {
+          onBack();
+        }, 2000);
+      } else {
+        toast.error('Failed to complete course');
+      }
+    } catch (error) {
+      console.error('Error completing course:', error);
+      toast.error('Network error completing course');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -314,14 +346,24 @@ const CourseContentPage = ({ user, token, courseId, onBack }) => {
                   </button>
                 )}
 
-                <button
-                  onClick={() => setCurrentModuleIndex(Math.min(course.modules.length - 1, currentModuleIndex + 1))}
-                  disabled={currentModuleIndex === course.modules.length - 1}
-                  className="flex items-center space-x-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <span>Next Module</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+                {/* Show Complete Course button on last module, otherwise Next Module */}
+                {currentModuleIndex === course.modules.length - 1 ? (
+                  <button
+                    onClick={completeCourse}
+                    className="flex items-center space-x-2 px-4 py-2 text-white bg-gradient-to-r from-green-600 to-blue-600 rounded-lg hover:from-green-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    <Award className="w-5 h-5" />
+                    <span className="font-semibold">Complete Course</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setCurrentModuleIndex(currentModuleIndex + 1)}
+                    className="flex items-center space-x-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <span>Next Module</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </motion.div>
           </div>

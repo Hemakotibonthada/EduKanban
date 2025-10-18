@@ -298,6 +298,64 @@ class CourseTemplateService {
   static countTotalTasks(modules) {
     return modules.reduce((total, module) => total + (module.tasks?.length || 3), 0);
   }
+
+  /**
+   * Create tasks from an array of task data for a specific module
+   * @param {Array} tasksData - Array of task objects with title, description, type, etc.
+   * @param {String} courseId - Course ObjectId
+   * @param {String} moduleId - Module ObjectId  
+   * @param {String} userId - User ObjectId
+   * @returns {Array} Created task documents
+   */
+  static async createTasksFromArray(tasksData, courseId, moduleId, userId) {
+    const Task = require('../models/Task');
+    
+    if (!tasksData || !Array.isArray(tasksData) || tasksData.length === 0) {
+      return [];
+    }
+
+    // Map template task types to Task model types
+    const typeMapping = {
+      'reading': 'LEARN',
+      'exercise': 'PRACTICE',
+      'quiz': 'TEST',
+      'project': 'PROJECT',
+      'assignment': 'PROJECT'
+    };
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const createdTasks = [];
+
+    for (let i = 0; i < tasksData.length; i++) {
+      const taskData = tasksData[i];
+      const taskDueDate = new Date(today);
+      taskDueDate.setDate(taskDueDate.getDate() + i);
+      
+      try {
+        const task = await Task.create({
+          title: taskData.title,
+          description: taskData.description || taskData.instructions || 'Complete this task',
+          courseId,
+          moduleId,
+          userId,
+          type: typeMapping[taskData.type?.toLowerCase()] || 'LEARN',
+          estimatedDuration: taskData.estimatedTime || taskData.estimatedDuration || 30,
+          order: taskData.order || (i + 1),
+          status: 'todo',
+          priority: i === 0 ? 'high' : 'medium',
+          dueDate: taskDueDate,
+          difficulty: taskData.difficulty || 'Medium'
+        });
+        createdTasks.push(task);
+      } catch (error) {
+        console.error(`Failed to create task ${i + 1}:`, error.message);
+        // Continue with next task instead of failing completely
+      }
+    }
+
+    return createdTasks;
+  }
   
   static async createTasksFromTemplate(courseId, modules, userId) {
     const Task = require('../models/Task');

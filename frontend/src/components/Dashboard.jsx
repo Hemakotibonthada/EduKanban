@@ -23,12 +23,15 @@ import {
   ChevronDown,
   FileText,
   Download,
-  Sparkles
+  Sparkles,
+  Code
 } from 'lucide-react';
 import { API_BASE_URL } from '../config/api';
 import EnhancedKanbanBoard from './EnhancedKanbanBoard';
 import ProfilePage from './ProfilePage';
 import CourseGenerationPage from './CourseGenerationPage';
+import Workground from './Workground';
+import ProgressiveCourseGeneration from './ProgressiveCourseGeneration';
 import CoursesListPage from './CoursesListPage';
 import CourseContentPage from './CourseContentPageSimple';
 import Analytics from './Analytics';
@@ -78,6 +81,7 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
       category: 'Learning Tools',
       items: [
         { id: 'create-course', label: 'Create Course', icon: Plus, color: 'from-yellow-500 to-orange-500' },
+        { id: 'workground', label: 'Code Playground', icon: Code, color: 'from-purple-500 to-indigo-500' },
         { id: 'calendar', label: 'Calendar', icon: CalendarIcon, color: 'from-teal-500 to-green-500' },
         { id: 'search', label: 'Global Search', icon: Search, color: 'from-indigo-500 to-blue-500' },
       ]
@@ -187,7 +191,7 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
         <ChatPortalEnhanced 
           user={user} 
           token={token} 
-          onNavigateHome={() => setActiveView('overview')}
+          onNavigateHome={() => setActiveView('dashboard')}
         />
       ) : (
         <>
@@ -560,7 +564,7 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
         )}
 
         {activeView === 'create-course' && (
-          <CourseGenerationPage 
+          <ProgressiveCourseGeneration 
             user={user} 
             token={token} 
             onCourseCreated={(course) => {
@@ -568,6 +572,10 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
               setActiveView('courses');
             }} 
           />
+        )}
+
+        {activeView === 'workground' && (
+          <Workground user={user} token={token} />
         )}
 
         {activeView === 'profile' && (

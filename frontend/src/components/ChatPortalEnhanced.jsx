@@ -13,7 +13,9 @@ import { useDropzone } from 'react-dropzone';
 import toast from 'react-hot-toast';
 import { getBackendURL, getSocketURL } from '../config/api';
 import { CreateCommunityModal, CreateGroupModal, UserSearchModal } from './ChatModals';
-import { useAIChat } from '../hooks/useAIChat';
+import { useAIChatStream } from '../hooks/useAIChatStream';
+import MarkdownMessage from './MarkdownMessage';
+import AIConversationSidebar from './AIConversationSidebar';
 
 const API_URL = getBackendURL();
 const SOCKET_URL = getSocketURL();
@@ -38,14 +40,23 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
   const [messages, setMessages] = useState([]);
   const [friendRequests, setFriendRequests] = useState({ sent: [], received: [] });
   
-  // AI Chat hook
+  // AI Chat hook with streaming and conversation persistence
   const {
     messages: aiMessages,
-    isLoading: aiIsTyping,
+    isStreaming: aiIsTyping,
+    currentStreamMessage,
     error: aiError,
-    sendMessage: sendAIMessage,
-    clearMessages: clearAIMessages
-  } = useAIChat(token);
+    currentConversation,
+    conversations: aiConversations,
+    isLoadingConversations,
+    sendMessageStream: sendAIMessage,
+    clearMessages: clearAIMessages,
+    loadConversations,
+    loadConversation,
+    startNewConversation,
+    archiveConversation,
+    deleteConversation
+  } = useAIChatStream(token, { autoSave: true });
   
   // UI state
   const [newMessage, setNewMessage] = useState('');
@@ -244,7 +255,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
   useEffect(() => {
     loadFriends();
     loadFriendRequests();
-    loadConversations();
+    loadDirectConversations();
     loadCommunities();
     loadGroups();
   }, []);
@@ -291,7 +302,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
     }
   };
 
-  const loadConversations = async () => {
+  const loadDirectConversations = async () => {
     try {
       const response = await fetch(`${API_URL}/chat-enhanced/conversations`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -1302,6 +1313,30 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
           )}
 
           {activeTab === 'ai-guide' && (
+            <>
+              <AIConversationSidebar
+                conversations={aiConversations}
+                currentConversation={currentConversation}
+                isLoading={isLoadingConversations}
+                onSelectConversation={(id) => {
+                  loadConversation(id);
+                  setSelectedChat('ai-guide');
+                  setSelectedChatType('ai');
+                }}
+                onNewConversation={async () => {
+                  await startNewConversation();
+                  setSelectedChat('ai-guide');
+                  setSelectedChatType('ai');
+                }}
+                onArchiveConversation={archiveConversation}
+                onDeleteConversation={deleteConversation}
+                onSearchConversations={(query) => loadConversations({ search: query })}
+              />
+            </>
+          )}
+
+          {/* Keep the old AI Guide intro for when no conversation is selected - moved to chat area */}
+          {activeTab === 'ai-guide-old-intro' && (
             <div className="p-4 space-y-4">
               {/* AI Guide Header */}
               <div className="bg-gradient-to-r from-purple-100 to-blue-100 p-4 rounded-lg border border-purple-200">
@@ -1796,7 +1831,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                           )}
                         </div>
                         
-                        <div className={`flex flex-col max-w-[75%] md:max-w-[60%] ${
+                        <div className={`flex flex-col max-w-[75%] md:max-w-[70%] ${
                           isUser ? 'items-end' : 'items-start'
                         }`}>
                           <div className={`px-4 py-2 md:py-3 rounded-2xl ${
@@ -1806,9 +1841,16 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                             ? 'bg-red-50 text-red-800 border border-red-200'
                             : 'bg-gradient-to-r from-purple-50 to-blue-50 text-gray-800 border border-purple-100'
                         }`}>
-                          <div className="text-sm md:text-base whitespace-pre-wrap break-words">
-                            {message.content}
-                          </div>
+                          {isUser ? (
+                            <div className="text-sm md:text-base whitespace-pre-wrap break-words">
+                              {message.content}
+                            </div>
+                          ) : (
+                            <MarkdownMessage 
+                              content={message.content} 
+                              className="text-sm md:text-base"
+                            />
+                          )}
                         </div>
                         <div className="text-xs text-gray-500 mt-1 px-2">
                           {new Date(message.timestamp || message.createdAt).toLocaleTimeString('en-US', { 
@@ -1820,6 +1862,24 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                     </div>
                     );
                   })}
+
+                  {/* Streaming Message */}
+                  {currentStreamMessage && (
+                    <div className="flex items-start gap-2 md:gap-3 mb-4">
+                      <div className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-purple-500 to-blue-500">
+                        <Globe className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                      </div>
+                      <div className="flex flex-col max-w-[75%] md:max-w-[70%] items-start">
+                        <div className="px-4 py-2 md:py-3 rounded-2xl bg-gradient-to-r from-purple-50 to-blue-50 text-gray-800 border border-purple-100">
+                          <MarkdownMessage 
+                            content={currentStreamMessage} 
+                            className="text-sm md:text-base"
+                          />
+                          <span className="inline-block w-2 h-4 ml-1 bg-purple-500 animate-pulse"></span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* AI Typing Indicator */}
                   {aiIsTyping && (

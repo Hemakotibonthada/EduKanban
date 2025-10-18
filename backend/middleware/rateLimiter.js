@@ -143,7 +143,7 @@ const authLimiter = createRateLimiter({
 // Moderate rate limiter for API endpoints
 const apiLimiter = createRateLimiter({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || (process.env.NODE_ENV === 'development' ? 1000 : 100),
   message: 'Too many requests from this IP, please try again later'
 });
 
@@ -158,7 +158,7 @@ const writeLimiter = createRateLimiter({
 // Lenient limiter for read operations
 const readLimiter = createRateLimiter({
   windowMs: 60 * 1000, // 1 minute
-  max: 100,
+  max: process.env.NODE_ENV === 'development' ? 500 : 100,
   message: 'Too many read requests, please slow down',
   skipSuccessfulRequests: true
 });

@@ -127,6 +127,58 @@ class OpenAIService {
   }
 
   /**
+   * Stream AI chat response for real-time interaction
+   */
+  async *streamChat(messages, options = {}) {
+    this.initialize();
+
+    if (!this.isAvailable()) {
+      throw new Error(this.initializationError || 'OpenAI service not available');
+    }
+
+    const {
+      model = 'gpt-3.5-turbo',
+      temperature = 0.7,
+      max_tokens = 1000,
+      systemPrompt = 'You are a helpful AI learning assistant for EduKanban. Provide educational, encouraging, and practical responses to help users learn effectively.'
+    } = options;
+
+    try {
+      // Prepare messages array with system prompt
+      const chatMessages = [
+        { role: 'system', content: systemPrompt },
+        ...messages.map(msg => ({
+          role: msg.role,
+          content: msg.content
+        }))
+      ];
+
+      console.log(`🤖 Streaming AI response with model: ${model}`);
+
+      const stream = await this.client.chat.completions.create({
+        model: model,
+        messages: chatMessages,
+        temperature: temperature,
+        max_completion_tokens: max_tokens,
+        stream: true
+      });
+
+      for await (const chunk of stream) {
+        const content = chunk.choices[0]?.delta?.content;
+        if (content) {
+          yield content;
+        }
+      }
+
+      console.log(`✅ AI streaming completed`);
+
+    } catch (error) {
+      console.error('❌ OpenAI streaming error:', error);
+      throw new Error(`OpenAI Streaming Error: ${error.message}`);
+    }
+  }
+
+  /**
    * Get initialization status
    */
   getStatus() {
@@ -167,7 +219,7 @@ class OpenAIService {
           }
         ],
         temperature: 0.7,
-        max_completion_tokens: 4000,
+        max_completion_tokens: 16000, // Increased for comprehensive course content
         response_format: { type: 'json_object' }
       });
 

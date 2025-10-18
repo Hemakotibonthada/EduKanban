@@ -273,6 +273,7 @@ async function startServer() {
     app.use('/api/social', authMiddleware, socialRoutes);
     app.use('/api/quizzes', authMiddleware, quizRoutes);
     app.use('/api/exams', authMiddleware, examRoutes);
+    app.use('/api/workground', authMiddleware, require('./routes/workground'));
 
     // Step 10: Configure Socket.IO
     logger.info('Step 10: Configuring Socket.IO...');
