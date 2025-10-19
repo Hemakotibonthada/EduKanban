@@ -318,19 +318,19 @@ const LearningPathVisualizer = ({ user, token, onNavigate }) => {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileHover={{ opacity: 1, y: 0 }}
-          className="absolute top-28 left-1/2 transform -translate-x-1/2 bg-white rounded-xl shadow-2xl p-4 w-64 z-10 border-2 border-gray-100"
+          className="absolute top-28 left-1/2 transform -translate-x-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-4 w-64 z-10 border-2 border-gray-100 dark:border-gray-700"
         >
           <div className="flex items-start justify-between mb-2">
             <div className="flex-1">
-              <h4 className="font-bold text-gray-900 mb-1">{node.title}</h4>
-              <p className="text-xs text-gray-500">Level {node.level}</p>
+              <h4 className="font-bold text-gray-900 dark:text-white mb-1">{node.title}</h4>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Level {node.level}</p>
             </div>
-            <div className={`px-2 py-1 rounded-full text-xs font-medium ${config.text} bg-gray-100`}>
+            <div className={`px-2 py-1 rounded-full text-xs font-medium ${config.text} bg-gray-100 dark:bg-gray-700`}>
               {status}
             </div>
           </div>
 
-          <div className="space-y-2 text-sm text-gray-600">
+          <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
             <div className="flex items-center space-x-2">
               <Clock className="w-4 h-4" />
               <span>{node.duration}</span>
@@ -342,8 +342,8 @@ const LearningPathVisualizer = ({ user, token, onNavigate }) => {
           </div>
 
           {node.prerequisites.length > 0 && (
-            <div className="mt-3 pt-3 border-t border-gray-200">
-              <p className="text-xs font-medium text-gray-700 mb-1">Prerequisites:</p>
+            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+              <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Prerequisites:</p>
               <div className="flex flex-wrap gap-1">
                 {node.prerequisites.map(prereq => {
                   const prereqNode = selectedPath.nodes.find(n => n.id === prereq);
@@ -353,8 +353,8 @@ const LearningPathVisualizer = ({ user, token, onNavigate }) => {
                       key={prereq}
                       className={`text-xs px-2 py-0.5 rounded-full ${
                         prereqStatus === 'completed'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-600'
+                          ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                          : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
                       }`}
                     >
                       {prereqNode?.title.substring(0, 15)}...
@@ -366,7 +366,7 @@ const LearningPathVisualizer = ({ user, token, onNavigate }) => {
           )}
 
           {status !== 'locked' && (
-            <button className="mt-3 w-full py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all flex items-center justify-center space-x-2">
+            <button className="mt-3 w-full py-2 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-700 dark:to-purple-700 text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all flex items-center justify-center space-x-2">
               <span>{status === 'completed' ? 'Review' : status === 'current' ? 'Continue' : 'Start'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
@@ -410,43 +410,43 @@ const LearningPathVisualizer = ({ user, token, onNavigate }) => {
       <motion.div
         whileHover={{ scale: 1.02 }}
         onClick={() => setSelectedPath(path)}
-        className={`bg-white rounded-xl shadow-lg p-6 cursor-pointer transition-all border-2 ${
+        className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 cursor-pointer transition-all border-2 ${
           selectedPath?._id === path._id
-            ? 'border-blue-500 shadow-xl'
-            : 'border-gray-200 hover:border-blue-300'
+            ? 'border-blue-500 dark:border-blue-400 shadow-xl'
+            : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500'
         }`}
       >
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
-            <h3 className="text-xl font-bold text-gray-900 mb-2">{path.title}</h3>
-            <p className="text-sm text-gray-600 mb-3">{path.description}</p>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{path.title}</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{path.description}</p>
           </div>
           {selectedPath?._id === path._id && (
-            <CheckCircle className="w-6 h-6 text-blue-600" />
+            <CheckCircle className="w-6 h-6 text-blue-600 dark:text-blue-400" />
           )}
         </div>
 
         <div className="grid grid-cols-3 gap-4 mb-4">
           <div className="text-center">
-            <p className="text-2xl font-bold text-blue-600">{path.totalCourses}</p>
-            <p className="text-xs text-gray-500">Courses</p>
+            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{path.totalCourses}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Courses</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-purple-600">{path.estimatedDuration}</p>
-            <p className="text-xs text-gray-500">Duration</p>
+            <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{path.estimatedDuration}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Duration</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-green-600">{completedCount}</p>
-            <p className="text-xs text-gray-500">Completed</p>
+            <p className="text-2xl font-bold text-green-600 dark:text-green-400">{completedCount}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Completed</p>
           </div>
         </div>
 
         <div className="mb-3">
           <div className="flex items-center justify-between text-sm mb-1">
-            <span className="text-gray-600">Progress</span>
-            <span className="font-semibold text-gray-900">{Math.round(progress)}%</span>
+            <span className="text-gray-600 dark:text-gray-400">Progress</span>
+            <span className="font-semibold text-gray-900 dark:text-white">{Math.round(progress)}%</span>
           </div>
-          <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
@@ -473,18 +473,18 @@ const LearningPathVisualizer = ({ user, token, onNavigate }) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-lg p-8 text-white">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-700 dark:to-purple-700 rounded-2xl shadow-lg p-8 text-white">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold mb-2 flex items-center space-x-3">
               <Map className="w-10 h-10" />
               <span>Learning Paths</span>
             </h1>
-            <p className="text-blue-100 text-lg">
+            <p className="text-blue-100 dark:text-blue-200 text-lg">
               Visualize your journey and track your progress
             </p>
           </div>
-          <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
+          <div className="bg-white/20 dark:bg-white/10 backdrop-blur-sm rounded-xl p-4">
             <Compass className="w-12 h-12" />
           </div>
         </div>
@@ -499,10 +499,10 @@ const LearningPathVisualizer = ({ user, token, onNavigate }) => {
 
       {/* Skill Tree Visualization */}
       {selectedPath && selectedPath.nodes.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-lg p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 flex items-center space-x-2">
-              <Sparkles className="w-7 h-7 text-blue-600" />
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center space-x-2">
+              <Sparkles className="w-7 h-7 text-blue-600 dark:text-blue-400" />
               <span>Skill Tree: {selectedPath.title}</span>
             </h2>
 
@@ -513,7 +513,7 @@ const LearningPathVisualizer = ({ user, token, onNavigate }) => {
                 return (
                   <div key={status} className="flex items-center space-x-2">
                     <div className={`w-4 h-4 rounded-full bg-gradient-to-br ${config.bg}`}></div>
-                    <span className="capitalize text-gray-600">{status}</span>
+                    <span className="capitalize text-gray-600 dark:text-gray-400">{status}</span>
                   </div>
                 );
               })}
@@ -521,7 +521,7 @@ const LearningPathVisualizer = ({ user, token, onNavigate }) => {
           </div>
 
           {/* SVG Canvas for Connections */}
-          <div className="relative bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 overflow-auto" style={{ minHeight: '1000px' }}>
+          <div className="relative bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 rounded-xl p-8 overflow-auto" style={{ minHeight: '1000px' }}>
             <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }}>
               {selectedPath.nodes.map(node =>
                 (node.prerequisites || []).map(prereq => {
@@ -548,9 +548,9 @@ const LearningPathVisualizer = ({ user, token, onNavigate }) => {
           </div>
 
           {/* Next Steps Suggestion */}
-          <div className="mt-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border-2 border-blue-200">
-            <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center space-x-2">
-              <TrendingUp className="w-6 h-6 text-blue-600" />
+          <div className="mt-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl p-6 border-2 border-blue-200 dark:border-blue-700">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center space-x-2">
+              <TrendingUp className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               <span>Suggested Next Steps</span>
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -560,15 +560,15 @@ const LearningPathVisualizer = ({ user, token, onNavigate }) => {
                 .map(node => (
                   <div
                     key={node.id}
-                    className="bg-white rounded-lg p-4 border-2 border-yellow-200 hover:border-yellow-400 transition-all cursor-pointer"
+                    className="bg-white dark:bg-gray-800 rounded-lg p-4 border-2 border-yellow-200 dark:border-yellow-600 hover:border-yellow-400 dark:hover:border-yellow-500 transition-all cursor-pointer"
                     onClick={() => handleNodeClick(node)}
                   >
                     <div className="flex items-center space-x-3 mb-2">
-                      <Star className="w-5 h-5 text-yellow-500" />
-                      <h4 className="font-semibold text-gray-900">{node.title}</h4>
+                      <Star className="w-5 h-5 text-yellow-500 dark:text-yellow-400" />
+                      <h4 className="font-semibold text-gray-900 dark:text-white">{node.title}</h4>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">Level {node.level}</p>
-                    <div className="flex items-center justify-between text-xs text-gray-500">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Level {node.level}</p>
+                    <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                       <span>{node.duration}</span>
                       <span>{node.xp} XP</span>
                     </div>

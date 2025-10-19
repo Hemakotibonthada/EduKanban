@@ -290,7 +290,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
             }
             return newMap;
           });
-        }, 5000);
+        }, 5001);
       }
     });
 

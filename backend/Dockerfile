@@ -13,14 +13,14 @@ RUN npm ci --only=production
 COPY backend/ ./
 
 # Expose backend port
-EXPOSE 5000
+EXPOSE 5001
 
 # Set environment
 ENV NODE_ENV=production
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:5000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+  CMD node -e "require('http').get('http://localhost:5001/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Start backend server
 CMD ["node", "server.js"]

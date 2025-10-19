@@ -52,7 +52,7 @@ const performanceMonitor = (req, res, next) => {
     const duration = seconds * 1000 + nanoseconds / 1000000; // Convert to milliseconds
     
     // Track metrics (headers cannot be set after response is sent)
-    if (duration > 5000) {
+    if (duration > 5001) {
       console.error(`🔴 CRITICAL SLOW REQUEST: ${req.method} ${req.path} - ${duration.toFixed(2)}ms`);
     } else if (duration > 3000) {
       console.warn(`🟡 SLOW REQUEST: ${req.method} ${req.path} - ${duration.toFixed(2)}ms`);

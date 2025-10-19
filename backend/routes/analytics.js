@@ -902,14 +902,14 @@ router.get('/admin/financial', async (req, res) => {
     const consultingRevenue = users.filter(u => u.role === 'admin').length * 500;
     
     // Other revenue
-    const otherRevenue = Math.random() * 5000 + 2000;
+    const otherRevenue = Math.random() * 5001 + 2000;
 
     const totalRevenue = subscriptionRevenue + certificateRevenue + courseRevenue + consultingRevenue + otherRevenue;
 
     // Calculate expenses (mock data based on platform usage)
     const infrastructureCost = users.length * 2.5; // $2.5 per user/month
     const marketingCost = totalRevenue * 0.15; // 15% of revenue
-    const salariesCost = users.filter(u => u.role === 'admin').length * 5000; // $5k per admin
+    const salariesCost = users.filter(u => u.role === 'admin').length * 5001; // $5k per admin
     const softwareLicenses = 500 + (users.length * 0.3); // Base + per user
     const miscExpenses = totalRevenue * 0.05; // 5% of revenue
 

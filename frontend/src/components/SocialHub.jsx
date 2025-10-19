@@ -20,7 +20,8 @@ import {
   Share2,
   Loader,
   ExternalLink,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  Flame
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -203,6 +204,9 @@ const SocialHub = ({ user, token }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
       <div className="max-w-7xl mx-auto">
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Main Content */}
+          <div className="lg:col-span-2">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -424,6 +428,47 @@ const SocialHub = ({ user, token }) => {
             )}
           </AnimatePresence>
         )}
+          </div>
+
+          {/* Sidebar - Trending Topics */}
+          <div className="lg:col-span-1">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="sticky top-6"
+            >
+              <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center space-x-2">
+                  <Flame className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                  <span>Trending Topics</span>
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                    <span className="font-semibold text-gray-900 dark:text-white">#ReactJS</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">528 posts</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                    <span className="font-semibold text-gray-900 dark:text-white">#DataScience</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">550 posts</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                    <span className="font-semibold text-gray-900 dark:text-white">#100DaysOfCode</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">498 posts</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                    <span className="font-semibold text-gray-900 dark:text-white">#WebDev</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">464 posts</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                    <span className="font-semibold text-gray-900 dark:text-white">#AI</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">461 posts</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
       </div>
 
       {/* Profile Modal */}

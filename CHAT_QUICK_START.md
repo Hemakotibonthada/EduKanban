@@ -319,26 +319,26 @@ useEffect(() => {
 ### Test AI Conversation Flow
 ```bash
 # 1. Create conversation
-curl -X POST http://localhost:5000/api/ai/conversations \
+curl -X POST http://localhost:5001/api/ai/conversations \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"title":"Test Chat"}'
 
 # 2. Add message
-curl -X POST http://localhost:5000/api/ai/conversations/$CONV_ID/messages \
+curl -X POST http://localhost:5001/api/ai/conversations/$CONV_ID/messages \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"role":"user","content":"Hello"}'
 
 # 3. Get messages
-curl http://localhost:5000/api/ai/conversations/$CONV_ID \
+curl http://localhost:5001/api/ai/conversations/$CONV_ID \
   -H "Authorization: Bearer $TOKEN"
 ```
 
 ### Test Reactions
 ```bash
 # Add reaction
-curl -X POST http://localhost:5000/api/chat/messages/$MSG_ID/reactions \
+curl -X POST http://localhost:5001/api/chat/messages/$MSG_ID/reactions \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"emoji":"👍"}'
@@ -347,7 +347,7 @@ curl -X POST http://localhost:5000/api/chat/messages/$MSG_ID/reactions \
 ### Test Threading
 ```bash
 # Reply to message
-curl -X POST http://localhost:5000/api/chat/messages/$MSG_ID/reply \
+curl -X POST http://localhost:5001/api/chat/messages/$MSG_ID/reply \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"content":"This is a reply"}'

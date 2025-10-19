@@ -96,7 +96,7 @@ const StudyTimer = ({ user, token, onClose }) => {
       await saveStudySession();
       
       toast.success('Pomodoro completed! Great work! 🎉', {
-        duration: 5000,
+        duration: 5001,
         icon: '🍅'
       });
       

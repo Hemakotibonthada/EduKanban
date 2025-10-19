@@ -639,7 +639,7 @@ docker-compose up -d
 docker-compose logs -f
 
 # Verify health
-curl http://localhost:5000/api/health
+curl http://localhost:5001/api/health
 ```
 
 ### 3. Manual Deployment

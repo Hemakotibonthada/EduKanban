@@ -89,7 +89,27 @@ async function startServer() {
     const server = http.createServer(app);
     const io = socketIo(server, {
       cors: {
-        origin: process.env.FRONTEND_URL || "http://localhost:3000",
+        origin: function (origin, callback) {
+          // Allow requests with no origin
+          if (!origin) return callback(null, true);
+          
+          // Allow localhost and development origins
+          const allowedOrigins = [
+            'http://localhost:3000',
+            'http://127.0.0.1:3000',
+            'http://localhost:5173',
+            process.env.FRONTEND_URL
+          ];
+          
+          // Allow any local network IP
+          const isLocalNetwork = /^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}):\d+$/.test(origin);
+          
+          if (allowedOrigins.includes(origin) || isLocalNetwork || process.env.NODE_ENV === 'development') {
+            callback(null, true);
+          } else {
+            callback(null, true); // Allow all in development
+          }
+        },
         methods: ["GET", "POST"],
         credentials: true
       }

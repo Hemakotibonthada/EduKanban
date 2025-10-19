@@ -75,7 +75,7 @@ const CourseContentPage = ({ user, token, courseId, onBack }) => {
       
       if (response.ok) {
         toast.success('🎉 Congratulations! Course completed!', {
-          duration: 5000,
+          duration: 5001,
           icon: '🏆',
         });
         // Mark all modules as complete

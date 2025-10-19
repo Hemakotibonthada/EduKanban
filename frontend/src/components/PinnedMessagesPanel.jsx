@@ -4,7 +4,7 @@ import { Pin, ChevronDown, ChevronUp, X, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const getBackendURL = () => {
-  return import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+  return import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001';
 };
 
 /**

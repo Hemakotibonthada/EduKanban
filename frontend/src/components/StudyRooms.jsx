@@ -249,7 +249,7 @@ const StudyRooms = ({ user, token }) => {
       </div>
 
       {/* Tabs */}
-      <div className="bg-white rounded-xl shadow-lg p-2">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2">
         <div className="flex items-center space-x-2">
           {['browse', 'myRooms', 'scheduled'].map(tab => (
             <button
@@ -258,7 +258,7 @@ const StudyRooms = ({ user, token }) => {
               className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all ${
                 activeTab === tab
                   ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
               {tab === 'browse' ? 'Browse Rooms' : tab === 'myRooms' ? 'My Rooms' : 'Scheduled'}
@@ -269,7 +269,7 @@ const StudyRooms = ({ user, token }) => {
 
       {/* Search and Filters */}
       {activeTab === 'browse' && (
-        <div className="bg-white rounded-xl shadow-lg p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -278,13 +278,13 @@ const StudyRooms = ({ user, token }) => {
                 placeholder="Search study rooms..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
+                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-purple-500 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400"
               />
             </div>
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
-              className="px-6 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
+              className="px-6 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:border-purple-500 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               {categories.map(cat => (
                 <option key={cat} value={cat.toLowerCase()}>{cat}</option>
@@ -302,7 +302,7 @@ const StudyRooms = ({ user, token }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all group"
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all group border dark:border-gray-700"
           >
             {/* Room Header */}
             <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-6 text-white">
@@ -334,14 +334,14 @@ const StudyRooms = ({ user, token }) => {
                   {room.host.avatar}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-900">{room.host.name}</p>
-                  <p className="text-xs text-gray-500">Host</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">{room.host.name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Host</p>
                 </div>
               </div>
 
               {/* Schedule */}
               {room.scheduledTime && (
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                   <Calendar className="w-4 h-4" />
                   <span>{formatTime(room.scheduledTime)}</span>
                   <Clock className="w-4 h-4 ml-2" />
@@ -352,8 +352,8 @@ const StudyRooms = ({ user, token }) => {
               {/* Participants */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <Users className="w-4 h-4 text-gray-600" />
-                  <span className="text-sm text-gray-600">
+                  <Users className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
                     {room.participants.length}/{room.maxParticipants} participants
                   </span>
                 </div>

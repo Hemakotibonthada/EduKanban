@@ -256,7 +256,7 @@ const EnhancedWellnessCenter = ({ user, token }) => {
           <div className="flex items-center space-x-3">
             <button
               onClick={() => setShowMoodTracker(true)}
-              className="px-6 py-3 bg-white text-pink-600 rounded-xl font-semibold hover:shadow-xl transition-all flex items-center space-x-2"
+              className="px-6 py-3 bg-white dark:bg-gray-800 text-pink-600 dark:text-pink-400 rounded-xl font-semibold hover:shadow-xl transition-all flex items-center space-x-2"
             >
               <Smile className="w-5 h-5" />
               <span>Track Mood</span>
@@ -305,7 +305,7 @@ const EnhancedWellnessCenter = ({ user, token }) => {
       </div>
 
       {/* Tabs */}
-      <div className="bg-white rounded-xl shadow-lg p-2">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2">
         <div className="flex items-center space-x-2 overflow-x-auto">
           {['dashboard', 'exercises', 'mood', 'resources'].map(tab => (
             <button
@@ -314,7 +314,7 @@ const EnhancedWellnessCenter = ({ user, token }) => {
               className={`px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap ${
                 activeTab === tab
                   ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-lg'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
               }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -329,13 +329,13 @@ const EnhancedWellnessCenter = ({ user, token }) => {
           {/* Today's Activities */}
           <div className="lg:col-span-2 space-y-6">
             {/* Breathing Exercise Card */}
-            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl shadow-lg p-8 border-2 border-blue-200">
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-2xl shadow-lg p-8 border-2 border-blue-200 dark:border-blue-800">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Guided Breathing</h2>
-                  <p className="text-gray-600">4-7-8 technique for instant calm</p>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Guided Breathing</h2>
+                  <p className="text-gray-600 dark:text-gray-400">4-7-8 technique for instant calm</p>
                 </div>
-                <Wind className="w-12 h-12 text-blue-600" />
+                <Wind className="w-12 h-12 text-blue-600 dark:text-blue-400" />
               </div>
 
               {breathingActive ? (
@@ -349,11 +349,11 @@ const EnhancedWellnessCenter = ({ user, token }) => {
                   >
                     <Wind className="w-16 h-16 text-white" />
                   </motion.div>
-                  <p className="text-3xl font-bold text-gray-900 capitalize mb-2">{breathingPhase}</p>
-                  <p className="text-gray-600">Round {breathingCount + 1} of 4</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white capitalize mb-2">{breathingPhase}</p>
+                  <p className="text-gray-600 dark:text-gray-400">Round {breathingCount + 1} of 4</p>
                   <button
                     onClick={() => setBreathingActive(false)}
-                    className="mt-6 px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
+                    className="mt-6 px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
                   >
                     Stop
                   </button>
@@ -413,8 +413,8 @@ const EnhancedWellnessCenter = ({ user, token }) => {
             </div>
 
             {/* Upcoming Activities */}
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Today's Schedule</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Today's Schedule</h2>
               <div className="space-y-3">
                 {upcomingActivities.map((activity, index) => {
                   const Icon = activity.icon;
@@ -424,20 +424,20 @@ const EnhancedWellnessCenter = ({ user, token }) => {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                      className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                     >
                       <div className="flex items-center space-x-4">
                         <div className={`w-12 h-12 bg-gradient-to-br ${activity.color} rounded-xl flex items-center justify-center shadow-lg`}>
                           <Icon className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-gray-900">{activity.title}</h3>
-                          <p className="text-sm text-gray-600">{activity.duration} minutes</p>
+                          <h3 className="font-bold text-gray-900 dark:text-white">{activity.title}</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">{activity.duration} minutes</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold text-gray-900">{activity.time}</p>
-                        <button className="text-sm text-purple-600 hover:text-purple-700 font-medium">
+                        <p className="font-semibold text-gray-900 dark:text-white">{activity.time}</p>
+                        <button className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium">
                           Start now →
                         </button>
                       </div>
@@ -451,7 +451,7 @@ const EnhancedWellnessCenter = ({ user, token }) => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Today's Mood */}
-            <div className="bg-white rounded-2xl shadow-lg p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Today's Mood</h3>
               {todayMood ? (
                 <div className="text-center">
@@ -515,7 +515,7 @@ const EnhancedWellnessCenter = ({ user, token }) => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all"
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all"
               >
                 <div className={`bg-gradient-to-r ${exercise.color} p-6 text-white`}>
                   <div className="flex items-center justify-between mb-3">
@@ -529,14 +529,14 @@ const EnhancedWellnessCenter = ({ user, token }) => {
                 </div>
 
                 <div className="p-6">
-                  <h4 className="font-bold text-gray-900 mb-3">Steps:</h4>
+                  <h4 className="font-bold text-gray-900 dark:text-white mb-3">Steps:</h4>
                   <ol className="space-y-2 mb-6">
                     {exercise.steps.map((step, i) => (
                       <li key={i} className="flex items-start space-x-3">
                         <span className="flex-shrink-0 w-6 h-6 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
                           {i + 1}
                         </span>
-                        <span className="text-gray-700">{step}</span>
+                        <span className="text-gray-700 dark:text-gray-300">{step}</span>
                       </li>
                     ))}
                   </ol>
@@ -568,19 +568,19 @@ const EnhancedWellnessCenter = ({ user, token }) => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all cursor-pointer"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all cursor-pointer"
               >
                 <div className={`w-12 h-12 bg-gradient-to-br ${colorClasses[resource.color]} rounded-xl flex items-center justify-center mb-4 shadow-lg`}>
                   <Icon className="w-6 h-6 text-white" />
                 </div>
-                <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+                <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full text-xs font-medium">
                   {resource.category}
                 </span>
-                <h3 className="text-xl font-bold text-gray-900 mt-3 mb-2">{resource.title}</h3>
-                <p className="text-gray-600 text-sm mb-4">{resource.description}</p>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-3 mb-2">{resource.title}</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">{resource.description}</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500">{resource.readTime} min read</span>
-                  <button className="text-purple-600 font-semibold hover:text-purple-700">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">{resource.readTime} min read</span>
+                  <button className="text-purple-600 dark:text-purple-400 font-semibold hover:text-purple-700 dark:hover:text-purple-300">
                     Read more →
                   </button>
                 </div>
@@ -605,10 +605,10 @@ const EnhancedWellnessCenter = ({ user, token }) => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8"
+              className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-8"
             >
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">How are you feeling?</h2>
-              <p className="text-gray-600 mb-6">Select your current mood</p>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">How are you feeling?</h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">Select your current mood</p>
 
               <div className="grid grid-cols-5 gap-3 mb-6">
                 {moodOptions.map((mood) => (
@@ -617,19 +617,19 @@ const EnhancedWellnessCenter = ({ user, token }) => {
                     onClick={() => handleMoodSelect(mood)}
                     className={`flex flex-col items-center space-y-2 p-4 rounded-xl border-2 transition-all hover:shadow-lg ${
                       todayMood?.value === mood.value
-                        ? 'border-purple-500 bg-purple-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                     }`}
                   >
                     <span className="text-4xl">{mood.emoji}</span>
-                    <span className="text-xs font-medium text-gray-700">{mood.label}</span>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{mood.label}</span>
                   </button>
                 ))}
               </div>
 
               <button
                 onClick={() => setShowMoodTracker(false)}
-                className="w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
+                className="w-full px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
               >
                 Cancel
               </button>

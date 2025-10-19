@@ -91,7 +91,7 @@ const GlobalSearch = ({ user, token, onSelectCourse, onSelectTask }) => {
     const parts = text.split(new RegExp(`(${query})`, 'gi'));
     return parts.map((part, index) => 
       part.toLowerCase() === query.toLowerCase() ? (
-        <mark key={index} className="bg-yellow-200 text-gray-900 px-0.5 rounded">
+        <mark key={index} className="bg-yellow-200 dark:bg-yellow-600 text-gray-900 dark:text-gray-900 px-0.5 rounded">
           {part}
         </mark>
       ) : (
@@ -105,27 +105,27 @@ const GlobalSearch = ({ user, token, onSelectCourse, onSelectTask }) => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Search Header */}
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4 flex items-center gap-3">
-          <Search className="w-8 h-8 text-blue-600" />
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6 border dark:border-gray-700">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-3">
+          <Search className="w-8 h-8 text-blue-600 dark:text-blue-400" />
           <span>Global Search</span>
         </h1>
         
         {/* Search Input */}
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
           <input
             ref={searchInputRef}
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search courses, tasks, modules... (⌘K)"
-            className="w-full pl-12 pr-12 py-4 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-lg"
+            className="w-full pl-12 pr-12 py-4 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 rounded-lg focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 transition-all text-lg"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
             >
               <X className="w-5 h-5" />
             </button>
@@ -136,7 +136,7 @@ const GlobalSearch = ({ user, token, onSelectCourse, onSelectTask }) => {
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
           >
             <Filter className="w-4 h-4" />
             <span>Filters</span>
@@ -152,7 +152,7 @@ const GlobalSearch = ({ user, token, onSelectCourse, onSelectTask }) => {
               <select
                 value={filters.type}
                 onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-                className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800"
               >
                 <option value="all">All Types</option>
                 <option value="courses">Courses Only</option>
@@ -164,7 +164,7 @@ const GlobalSearch = ({ user, token, onSelectCourse, onSelectTask }) => {
               <select
                 value={filters.difficulty}
                 onChange={(e) => setFilters({ ...filters, difficulty: e.target.value })}
-                className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800"
               >
                 <option value="all">All Levels</option>
                 <option value="beginner">Beginner</option>
@@ -176,7 +176,7 @@ const GlobalSearch = ({ user, token, onSelectCourse, onSelectTask }) => {
               <select
                 value={filters.status}
                 onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800"
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
@@ -187,7 +187,7 @@ const GlobalSearch = ({ user, token, onSelectCourse, onSelectTask }) => {
               <select
                 value={filters.sortBy}
                 onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
-                className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800"
               >
                 <option value="relevance">Most Relevant</option>
                 <option value="recent">Most Recent</option>
@@ -196,7 +196,7 @@ const GlobalSearch = ({ user, token, onSelectCourse, onSelectTask }) => {
 
               <button
                 onClick={() => setFilters({ type: 'all', difficulty: 'all', status: 'all', sortBy: 'relevance' })}
-                className="px-3 py-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                className="px-3 py-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
               >
                 Clear Filters
               </button>
@@ -206,7 +206,7 @@ const GlobalSearch = ({ user, token, onSelectCourse, onSelectTask }) => {
 
         {/* Results Count */}
         {searchQuery && (
-          <div className="mt-4 text-sm text-gray-600">
+          <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
             {isSearching ? (
               <span>Searching...</span>
             ) : (
@@ -220,19 +220,19 @@ const GlobalSearch = ({ user, token, onSelectCourse, onSelectTask }) => {
       {searchQuery && (
         <AnimatePresence>
           {isSearching ? (
-            <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-              <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-600">Searching...</p>
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-12 text-center border dark:border-gray-700">
+              <div className="w-12 h-12 border-4 border-blue-600 dark:border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-gray-400">Searching...</p>
             </div>
           ) : totalResults === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-xl shadow-sm p-12 text-center"
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-12 text-center border dark:border-gray-700"
             >
-              <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No results found</h3>
-              <p className="text-gray-600">Try adjusting your search or filters</p>
+              <Search className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No results found</h3>
+              <p className="text-gray-600 dark:text-gray-400">Try adjusting your search or filters</p>
             </motion.div>
           ) : (
             <div className="space-y-6">
@@ -241,10 +241,10 @@ const GlobalSearch = ({ user, token, onSelectCourse, onSelectTask }) => {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-xl shadow-sm p-6"
+                  className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border dark:border-gray-700"
                 >
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-blue-600" />
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     <span>Courses ({searchResults.courses.length})</span>
                   </h2>
                   <div className="grid gap-4">
@@ -252,15 +252,15 @@ const GlobalSearch = ({ user, token, onSelectCourse, onSelectTask }) => {
                       <button
                         key={course._id}
                         onClick={() => onSelectCourse && onSelectCourse(course._id)}
-                        className="text-left p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all"
+                        className="text-left p-4 border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-md transition-all"
                       >
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                           {highlightText(course.title, searchQuery)}
                         </h3>
-                        <p className="text-gray-600 text-sm mb-2">
+                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
                           {highlightText(course.description?.substring(0, 150) + '...', searchQuery)}
                         </p>
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                        <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                           {course.difficulty && (
                             <span className="flex items-center gap-1">
                               <Target className="w-4 h-4" />
@@ -274,7 +274,7 @@ const GlobalSearch = ({ user, token, onSelectCourse, onSelectTask }) => {
                             </span>
                           )}
                           <span className={`px-2 py-1 rounded text-xs font-medium ${
-                            course.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                            course.status === 'completed' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
                           }`}>
                             {course.status || 'active'}
                           </span>
@@ -291,10 +291,10 @@ const GlobalSearch = ({ user, token, onSelectCourse, onSelectTask }) => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="bg-white rounded-xl shadow-sm p-6"
+                  className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border dark:border-gray-700"
                 >
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <CheckSquare className="w-5 h-5 text-green-600" />
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <CheckSquare className="w-5 h-5 text-green-600 dark:text-green-400" />
                     <span>Tasks ({searchResults.tasks.length})</span>
                   </h2>
                   <div className="grid gap-4">
@@ -302,20 +302,20 @@ const GlobalSearch = ({ user, token, onSelectCourse, onSelectTask }) => {
                       <button
                         key={task._id}
                         onClick={() => onSelectTask && onSelectTask(task._id)}
-                        className="text-left p-4 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:shadow-md transition-all"
+                        className="text-left p-4 border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg hover:border-green-500 dark:hover:border-green-400 hover:shadow-md transition-all"
                       >
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                           {highlightText(task.title, searchQuery)}
                         </h3>
-                        <p className="text-gray-600 text-sm mb-2">
+                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
                           {highlightText(task.description?.substring(0, 150) + '...', searchQuery)}
                         </p>
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                        <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                           {task.difficulty && (
                             <span className={`px-2 py-1 rounded text-xs font-medium ${
-                              task.difficulty === 'easy' ? 'bg-green-100 text-green-700' :
-                              task.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                              'bg-red-100 text-red-700'
+                              task.difficulty === 'easy' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
+                              task.difficulty === 'medium' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' :
+                              'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                             }`}>
                               {task.difficulty}
                             </span>
@@ -327,9 +327,9 @@ const GlobalSearch = ({ user, token, onSelectCourse, onSelectTask }) => {
                             </span>
                           )}
                           <span className={`px-2 py-1 rounded text-xs font-medium ${
-                            task.status === 'completed' ? 'bg-green-100 text-green-700' :
-                            task.status === 'in-progress' ? 'bg-blue-100 text-blue-700' :
-                            'bg-gray-100 text-gray-700'
+                            task.status === 'completed' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
+                            task.status === 'in-progress' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' :
+                            'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                           }`}>
                             {task.status || 'todo'}
                           </span>
@@ -346,26 +346,26 @@ const GlobalSearch = ({ user, token, onSelectCourse, onSelectTask }) => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="bg-white rounded-xl shadow-sm p-6"
+                  className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border dark:border-gray-700"
                 >
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    <Hash className="w-5 h-5 text-purple-600" />
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <Hash className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                     <span>Modules ({searchResults.modules.length})</span>
                   </h2>
                   <div className="grid gap-4">
                     {searchResults.modules.map((module) => (
                       <div
                         key={module._id}
-                        className="p-4 border-2 border-gray-200 rounded-lg"
+                        className="p-4 border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg"
                       >
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                           {highlightText(module.title, searchQuery)}
                         </h3>
-                        <p className="text-gray-600 text-sm mb-2">
+                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
                           {highlightText(module.description?.substring(0, 150) + '...', searchQuery)}
                         </p>
-                        <div className="text-sm text-gray-500">
-                          <span className="text-purple-600 font-medium">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          <span className="text-purple-600 dark:text-purple-400 font-medium">
                             Module {module.moduleNumber}
                           </span>
                           {module.courseName && <span> • {module.courseName}</span>}
@@ -382,14 +382,14 @@ const GlobalSearch = ({ user, token, onSelectCourse, onSelectTask }) => {
 
       {/* Empty State */}
       {!searchQuery && (
-        <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-          <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">Start Searching</h3>
-          <p className="text-gray-600 mb-4">Type in the search box to find courses, tasks, and modules</p>
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-12 text-center border dark:border-gray-700">
+          <Search className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Start Searching</h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">Type in the search box to find courses, tasks, and modules</p>
           <div className="flex flex-wrap justify-center gap-2">
-            <span className="px-3 py-1 bg-gray-100 rounded-lg text-sm text-gray-700">Try "React"</span>
-            <span className="px-3 py-1 bg-gray-100 rounded-lg text-sm text-gray-700">Try "Python basics"</span>
-            <span className="px-3 py-1 bg-gray-100 rounded-lg text-sm text-gray-700">Try "Task planning"</span>
+            <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300">Try "React"</span>
+            <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300">Try "Python basics"</span>
+            <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300">Try "Task planning"</span>
           </div>
         </div>
       )}

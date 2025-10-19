@@ -77,6 +77,15 @@ const LearningAnalyticsAI = ({ user, token }) => {
     fetchAnalytics();
   }, []);
 
+  // Helper to get chart colors based on theme
+  const getChartTextColor = () => {
+    return document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151';
+  };
+
+  const getChartGridColor = () => {
+    return document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb';
+  };
+
   const fetchAnalytics = async () => {
     setIsLoading(true);
     try {
@@ -180,7 +189,7 @@ const LearningAnalyticsAI = ({ user, token }) => {
           </div>
           <button
             onClick={fetchAnalytics}
-            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:shadow-lg transition-shadow"
+            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-500 dark:to-pink-500 text-white rounded-xl hover:shadow-lg transition-shadow"
           >
             Refresh Insights
           </button>
@@ -212,9 +221,9 @@ const LearningAnalyticsAI = ({ user, token }) => {
         </div>
 
         {/* AI Insights */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8 border dark:border-gray-700">
           <div className="flex items-center space-x-3 mb-6">
-            <Brain className="w-6 h-6 text-purple-600" />
+            <Brain className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
               AI-Powered Insights
             </h2>
@@ -230,7 +239,7 @@ const LearningAnalyticsAI = ({ user, token }) => {
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Weekly Progress */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 border dark:border-gray-700">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
               Weekly Progress
             </h3>
@@ -239,17 +248,28 @@ const LearningAnalyticsAI = ({ user, token }) => {
               options={{
                 responsive: true,
                 plugins: {
-                  legend: { position: 'bottom' }
+                  legend: { 
+                    position: 'bottom',
+                    labels: { color: getChartTextColor() }
+                  }
                 },
                 scales: {
-                  y: { beginAtZero: true }
+                  x: {
+                    ticks: { color: getChartTextColor() },
+                    grid: { color: getChartGridColor() }
+                  },
+                  y: { 
+                    beginAtZero: true,
+                    ticks: { color: getChartTextColor() },
+                    grid: { color: getChartGridColor() }
+                  }
                 }
               }}
             />
           </div>
 
           {/* Study Time by Hour */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 border dark:border-gray-700">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
               Productivity by Time of Day
             </h3>
@@ -261,14 +281,23 @@ const LearningAnalyticsAI = ({ user, token }) => {
                   legend: { display: false }
                 },
                 scales: {
-                  y: { beginAtZero: true, max: 100 }
+                  x: {
+                    ticks: { color: getChartTextColor() },
+                    grid: { color: getChartGridColor() }
+                  },
+                  y: { 
+                    beginAtZero: true, 
+                    max: 100,
+                    ticks: { color: getChartTextColor() },
+                    grid: { color: getChartGridColor() }
+                  }
                 }
               }}
             />
           </div>
 
           {/* Performance by Subject */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 border dark:border-gray-700">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
               Performance by Subject
             </h3>
@@ -277,16 +306,19 @@ const LearningAnalyticsAI = ({ user, token }) => {
               options={{
                 responsive: true,
                 plugins: {
-                  legend: { position: 'bottom' }
+                  legend: { 
+                    position: 'bottom',
+                    labels: { color: getChartTextColor() }
+                  }
                 }
               }}
             />
           </div>
 
           {/* Optimal Study Times */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 border dark:border-gray-700">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-              <Clock className="w-5 h-5 inline mr-2" />
+              <Clock className="w-5 h-5 inline mr-2 dark:text-blue-400" />
               Your Optimal Study Times
             </h3>
             <div className="space-y-3">
@@ -304,10 +336,10 @@ const LearningAnalyticsAI = ({ user, token }) => {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-purple-600">
+                    <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                       {time.efficiency}%
                     </p>
-                    <p className="text-xs text-gray-500">efficiency</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">efficiency</p>
                   </div>
                 </div>
               ))}
@@ -316,9 +348,9 @@ const LearningAnalyticsAI = ({ user, token }) => {
         </div>
 
         {/* Recommendations */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border dark:border-gray-700">
           <div className="flex items-center space-x-3 mb-6">
-            <Lightbulb className="w-6 h-6 text-yellow-500" />
+            <Lightbulb className="w-6 h-6 text-yellow-500 dark:text-yellow-400" />
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
               Personalized Recommendations
             </h2>
@@ -339,7 +371,7 @@ const LearningAnalyticsAI = ({ user, token }) => {
 const ScoreCard = ({ title, score, icon: Icon, color, description }) => (
   <motion.div
     whileHover={{ y: -4 }}
-    className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6"
+    className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 border dark:border-gray-700"
   >
     <div className="flex items-center justify-between mb-4">
       <div className={`w-12 h-12 bg-gradient-to-br ${color} rounded-xl flex items-center justify-center`}>
@@ -348,7 +380,7 @@ const ScoreCard = ({ title, score, icon: Icon, color, description }) => (
       <div className="text-right">
         <p className="text-3xl font-bold text-gray-900 dark:text-white">
           {score}
-          <span className="text-lg text-gray-500">/100</span>
+          <span className="text-lg text-gray-500 dark:text-gray-400">/100</span>
         </p>
       </div>
     </div>
@@ -374,13 +406,13 @@ const InsightCard = ({ insight }) => {
   const getIcon = () => {
     switch (insight.type) {
       case 'positive':
-        return <TrendingUp className="w-5 h-5 text-green-600" />;
+        return <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />;
       case 'negative':
-        return <TrendingDown className="w-5 h-5 text-red-600" />;
+        return <TrendingDown className="w-5 h-5 text-red-600 dark:text-red-400" />;
       case 'neutral':
-        return <Activity className="w-5 h-5 text-blue-600" />;
+        return <Activity className="w-5 h-5 text-blue-600 dark:text-blue-400" />;
       default:
-        return <AlertCircle className="w-5 h-5 text-gray-600" />;
+        return <AlertCircle className="w-5 h-5 text-gray-600 dark:text-gray-400" />;
     }
   };
 
@@ -435,7 +467,7 @@ const RecommendationCard = ({ recommendation }) => (
       <span className="text-xs text-purple-600 dark:text-purple-400 font-medium">
         {recommendation.category}
       </span>
-      <span className="text-xs text-gray-500">
+      <span className="text-xs text-gray-500 dark:text-gray-400">
         Impact: {recommendation.impact}
       </span>
     </div>

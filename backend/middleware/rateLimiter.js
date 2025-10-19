@@ -143,7 +143,7 @@ const authLimiter = createRateLimiter({
 // Moderate rate limiter for API endpoints
 const apiLimiter = createRateLimiter({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || (process.env.NODE_ENV === 'development' ? 5000 : 100),
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || (process.env.NODE_ENV === 'development' ? 5001 : 100),
   message: 'Too many requests from this IP, please try again later'
 });
 

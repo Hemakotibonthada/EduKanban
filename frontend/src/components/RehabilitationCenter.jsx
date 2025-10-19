@@ -123,7 +123,7 @@ const RehabilitationCenter = ({ user, token }) => {
                   <p className="text-sm">{milestone.celebrationMessage}</p>
                 </div>
               </div>,
-              { duration: 5000 }
+              { duration: 5001 }
             );
           });
         }

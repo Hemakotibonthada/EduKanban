@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 const getBackendURL = () => {
-  return import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+  return import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001';
 };
 
 /**

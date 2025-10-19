@@ -48,7 +48,7 @@ const GamificationDashboard = ({ user, token }) => {
                 <p className="text-sm">{badge.name} - +{badge.xp} XP</p>
               </div>
             </div>,
-            { duration: 5000, position: 'top-center' }
+            { duration: 5001, position: 'top-center' }
           );
         }
       }
@@ -104,13 +104,13 @@ const GamificationDashboard = ({ user, token }) => {
     { id: 'speed_demon', name: 'Speed Demon', description: 'Complete a course in under 24 hours', icon: Zap, color: 'from-yellow-500 to-red-500', xp: 300 },
     { id: 'social_butterfly', name: 'Social Butterfly', description: 'Connect with 10 friends', icon: Users, color: 'from-blue-500 to-purple-500', xp: 150 },
     { id: 'task_master', name: 'Task Master', description: 'Complete 100 tasks', icon: CheckCircle, color: 'from-green-500 to-emerald-500', xp: 750 },
-    { id: 'legendary', name: 'Legendary Learner', description: 'Reach Level 50', icon: Medal, color: 'from-yellow-400 to-yellow-600', xp: 5000 },
+    { id: 'legendary', name: 'Legendary Learner', description: 'Reach Level 50', icon: Medal, color: 'from-yellow-400 to-yellow-600', xp: 5001 },
     { id: 'rising_star', name: 'Rising Star', description: 'Reach top 10 on leaderboard', icon: TrendingUp, color: 'from-red-500 to-pink-500', xp: 1500 }
   ];
 
   const getRankInfo = (xp) => {
     if (xp >= 10000) return { name: 'Legend', color: 'from-yellow-400 to-yellow-600' };
-    if (xp >= 5000) return { name: 'Master', color: 'from-purple-500 to-pink-500' };
+    if (xp >= 5001) return { name: 'Master', color: 'from-purple-500 to-pink-500' };
     if (xp >= 2500) return { name: 'Expert', color: 'from-blue-500 to-purple-500' };
     if (xp >= 1000) return { name: 'Advanced', color: 'from-green-500 to-teal-500' };
     if (xp >= 500) return { name: 'Intermediate', color: 'from-orange-500 to-red-500' };
@@ -133,15 +133,15 @@ const GamificationDashboard = ({ user, token }) => {
   const progressToNextLevel = ((userStats.totalXP - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 flex items-center gap-3">
-            <Trophy className="w-10 h-10 text-yellow-500" />
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+            <Trophy className="w-10 h-10 text-yellow-500 dark:text-yellow-400" />
             Your Achievements
           </h1>
-          <p className="text-gray-600 mt-2">Track your learning progress and earn rewards!</p>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">Track your learning progress and earn rewards!</p>
         </div>
 
         {/* Stats Overview */}
@@ -162,20 +162,20 @@ const GamificationDashboard = ({ user, token }) => {
           {/* XP Card */}
           <motion.div
             whileHover={{ scale: 1.05 }}
-            className="bg-white rounded-xl p-6 shadow-lg"
+            className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border dark:border-gray-700"
           >
             <div className="flex items-center justify-between mb-4">
-              <Zap className="w-8 h-8 text-yellow-500" />
-              <span className="text-sm font-semibold text-gray-600">TOTAL XP</span>
+              <Zap className="w-8 h-8 text-yellow-500 dark:text-yellow-400" />
+              <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">TOTAL XP</span>
             </div>
-            <div className="text-3xl font-bold text-gray-900 mb-2">{userStats.totalXP}</div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{userStats.totalXP}</div>
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div
                 className="bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full transition-all duration-500"
                 style={{ width: `${progressToNextLevel}%` }}
               />
             </div>
-            <div className="text-xs text-gray-600 mt-1">
+            <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
               {nextLevelXP - userStats.totalXP} XP to Level {level + 1}
             </div>
           </motion.div>
@@ -210,8 +210,8 @@ const GamificationDashboard = ({ user, token }) => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Badges Collection */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Badge Collection</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border dark:border-gray-700">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Badge Collection</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {allBadges.map((badge) => {
                   const Icon = badge.icon;
@@ -224,21 +224,21 @@ const GamificationDashboard = ({ user, token }) => {
                       className={`rounded-lg p-4 border-2 transition-all ${
                         isEarned
                           ? `bg-gradient-to-br ${badge.color} text-white border-transparent shadow-lg`
-                          : 'bg-gray-50 text-gray-400 border-gray-200'
+                          : 'bg-gray-50 dark:bg-gray-900 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-700'
                       }`}
                     >
                       <div className="flex flex-col items-center text-center">
                         <div className={`p-3 rounded-full mb-3 ${
-                          isEarned ? 'bg-white/20' : 'bg-gray-200'
+                          isEarned ? 'bg-white/20' : 'bg-gray-200 dark:bg-gray-700'
                         }`}>
                           <Icon className="w-6 h-6" />
                         </div>
                         <h3 className="font-semibold text-sm mb-1">{badge.name}</h3>
-                        <p className={`text-xs ${isEarned ? 'opacity-90' : 'text-gray-500'}`}>
+                        <p className={`text-xs ${isEarned ? 'opacity-90' : 'text-gray-500 dark:text-gray-500'}`}>
                           {badge.description}
                         </p>
                         <div className={`mt-2 px-2 py-1 rounded text-xs font-semibold ${
-                          isEarned ? 'bg-white/20' : 'bg-gray-200 text-gray-600'
+                          isEarned ? 'bg-white/20' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                         }`}>
                           +{badge.xp} XP
                         </div>
@@ -251,9 +251,9 @@ const GamificationDashboard = ({ user, token }) => {
           </div>
 
           {/* Leaderboard */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <Trophy className="w-6 h-6 text-yellow-500" />
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border dark:border-gray-700">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+              <Trophy className="w-6 h-6 text-yellow-500 dark:text-yellow-400" />
               Leaderboard
             </h2>
             <div className="space-y-3">
@@ -266,7 +266,7 @@ const GamificationDashboard = ({ user, token }) => {
                   className={`flex items-center gap-3 p-3 rounded-lg ${
                     entry.userId === user._id
                       ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
-                      : 'bg-gray-50'
+                      : 'bg-gray-50 dark:bg-gray-900'
                   }`}
                 >
                   <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold ${
@@ -278,25 +278,25 @@ const GamificationDashboard = ({ user, token }) => {
                       ? 'bg-orange-400 text-orange-900'
                       : entry.userId === user._id
                       ? 'bg-white/20'
-                      : 'bg-gray-200 text-gray-700'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                   }`}>
                     {index + 1}
                   </div>
                   <div className="flex-1">
                     <div className={`font-semibold ${
-                      entry.userId === user._id ? '' : 'text-gray-900'
+                      entry.userId === user._id ? '' : 'text-gray-900 dark:text-white'
                     }`}>
                       {entry.name}
                       {entry.userId === user._id && ' (You)'}
                     </div>
                     <div className={`text-xs ${
-                      entry.userId === user._id ? 'opacity-90' : 'text-gray-600'
+                      entry.userId === user._id ? 'opacity-90' : 'text-gray-600 dark:text-gray-400'
                     }`}>
                       Level {getLevelFromXP(entry.xp)}
                     </div>
                   </div>
                   <div className={`font-bold ${
-                    entry.userId === user._id ? '' : 'text-blue-600'
+                    entry.userId === user._id ? '' : 'text-blue-600 dark:text-blue-400'
                   }`}>
                     {entry.xp} XP
                   </div>
@@ -308,8 +308,8 @@ const GamificationDashboard = ({ user, token }) => {
 
         {/* Recent Achievements */}
         {recentAchievements.length > 0 && (
-          <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Recent Achievements</h2>
+          <div className="mt-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border dark:border-gray-700">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Recent Achievements</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {recentAchievements.map((achievement, index) => (
                 <motion.div
@@ -317,16 +317,16 @@ const GamificationDashboard = ({ user, token }) => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border-2 border-green-200"
+                  className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg p-4 border-2 border-green-200 dark:border-green-800"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-500 rounded-lg">
+                    <div className="p-2 bg-green-500 dark:bg-green-600 rounded-lg">
                       <Star className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{achievement.title}</h3>
-                      <p className="text-sm text-gray-600">{achievement.description}</p>
-                      <span className="text-xs text-green-600 font-semibold">
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{achievement.title}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{achievement.description}</p>
+                      <span className="text-xs text-green-600 dark:text-green-400 font-semibold">
                         +{achievement.xp} XP
                       </span>
                     </div>

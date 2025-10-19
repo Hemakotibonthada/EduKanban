@@ -131,7 +131,7 @@ This document summarizes ALL features that have been implemented across the enti
   - Intermediate (500-999 XP)
   - Advanced (1000-2499 XP)
   - Expert (2500-4999 XP)
-  - Master (5000-9999 XP)
+  - Master (5001-9999 XP)
   - Legend (10000+ XP)
 
 - **Badge Collection (12 Badges):**

@@ -38,7 +38,7 @@ const ForgotPasswordPage = ({ onBack }) => {
         if (data.resetToken) {
           console.log('Reset Token:', data.resetToken);
           console.log('Reset URL:', data.resetUrl);
-          toast.success(`Development: Check console for reset link`, { duration: 5000 });
+          toast.success(`Development: Check console for reset link`, { duration: 5001 });
         }
       } else {
         toast.error(data.message || 'Failed to send reset email');

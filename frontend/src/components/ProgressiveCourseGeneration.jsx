@@ -228,7 +228,7 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
         toast.success(
           '🎉 Course Generation Complete!\nYour personalized course is ready to start learning.',
           {
-            duration: 5000,
+            duration: 5001,
             style: {
               background: '#10B981',
               color: '#fff',
@@ -301,22 +301,22 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
       {/* Progress Bar */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-bold text-gray-900">Create AI-Powered Course</h1>
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create AI-Powered Course</h1>
+          <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
             <span>Step {step} of 4</span>
           </div>
         </div>
         
-        <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
           <motion.div
-            className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 h-2 rounded-full"
             initial={{ width: '25%' }}
             animate={{ width: `${(step / 4) * 100}%` }}
             transition={{ duration: 0.3 }}
           />
         </div>
         
-        <div className="flex justify-between mt-2 text-xs text-gray-500">
+        <div className="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
           <span>Course Details</span>
           <span>Preferences</span>
           <span>Generate</span>
@@ -333,18 +333,18 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="bg-white rounded-xl p-8 shadow-lg border"
+            className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-lg border dark:border-gray-700"
           >
             <div className="flex items-center space-x-3 mb-6">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <BookOpen className="w-6 h-6 text-blue-600" />
+              <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-300" />
               </div>
-              <h2 className="text-xl font-semibold text-gray-900">Course Details</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Course Details</h2>
             </div>
 
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Course Title *
                 </label>
                 <input
@@ -357,27 +357,27 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
                       ? `e.g., Complete ${customSubject} Mastery`
                       : "e.g., Complete Python Programming"
                   }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
                 {showCustomInput && customSubject && (
-                  <p className="text-xs text-blue-600 mt-1">
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                     💡 Suggested: "Complete {customSubject} Mastery" or "Advanced {customSubject} Course"
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Subject *
                 </label>
                 <select
                   name="subject"
                   value={showCustomInput ? 'Other' : formData.subject}
                   onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
                     showCustomInput 
-                      ? 'border-blue-400 bg-blue-50' 
-                      : 'border-gray-300'
+                      ? 'border-blue-400 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/30' 
+                      : 'border-gray-300 dark:border-gray-600'
                   }`}
                 >
                   <option value="">Select a subject</option>
@@ -393,10 +393,10 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200"
+                    className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-700"
                   >
-                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                      <Lightbulb className="w-4 h-4 mr-2 text-blue-600" />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
+                      <Lightbulb className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
                       What do you want to learn? *
                     </label>
                     <input
@@ -404,14 +404,14 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
                       value={customSubject}
                       onChange={handleCustomSubjectChange}
                       placeholder="e.g., Advanced Quantum Computing, Digital Art Creation, Sustainable Agriculture, Blockchain Development..."
-                      className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                      className="w-full px-4 py-3 border border-blue-300 dark:border-blue-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                       autoFocus
                     />
-                    <div className="mt-2 p-3 bg-blue-100 rounded-lg">
-                      <p className="text-xs text-blue-700 font-medium mb-1">
+                    <div className="mt-2 p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                      <p className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">
                         🚀 AI Course Generation Tips:
                       </p>
-                      <ul className="text-xs text-blue-600 space-y-1">
+                      <ul className="text-xs text-blue-600 dark:text-blue-400 space-y-1">
                         <li>• Be specific about your learning goals</li>
                         <li>• Include any particular tools or technologies you want to focus on</li>
                         <li>• Mention your preferred application areas or use cases</li>
@@ -423,14 +423,14 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Duration
                   </label>
                   <select
                     name="duration"
                     value={formData.duration}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     <option value="2 weeks">2 weeks</option>
                     <option value="4 weeks">4 weeks</option>
@@ -441,14 +441,14 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Difficulty Level
                   </label>
                   <select
                     name="difficulty"
                     value={formData.difficulty}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     <option value="Beginner">Beginner</option>
                     <option value="Intermediate">Intermediate</option>
@@ -461,7 +461,7 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
             <div className="flex justify-end mt-8">
               <button
                 onClick={handleNext}
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center space-x-2"
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center space-x-2"
               >
                 <span>Next</span>
                 <ArrowRight className="w-4 h-4" />
@@ -478,26 +478,26 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="bg-white rounded-xl p-8 shadow-lg border"
+            className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-lg border dark:border-gray-700"
           >
             <div className="flex items-center space-x-3 mb-6">
-              <div className="p-3 bg-purple-100 rounded-lg">
-                <User className="w-6 h-6 text-purple-600" />
+              <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                <User className="w-6 h-6 text-purple-600 dark:text-purple-300" />
               </div>
-              <h2 className="text-xl font-semibold text-gray-900">Learning Preferences</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Learning Preferences</h2>
             </div>
 
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Your Knowledge Level
                   </label>
                   <select
                     name="knowledgeLevel"
                     value={formData.knowledgeLevel}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     <option value="Beginner">Beginner</option>
                     <option value="Intermediate">Intermediate</option>
@@ -507,7 +507,7 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Time Commitment
                   </label>
                   <input
@@ -516,7 +516,7 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
                     value={formData.timeCommitment}
                     onChange={handleInputChange}
                     placeholder="e.g., 5 hours per week"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   />
                 </div>
               </div>
@@ -525,13 +525,13 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
             <div className="flex justify-between mt-8">
               <button
                 onClick={handlePrevious}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 Previous
               </button>
               <button
                 onClick={handleNext}
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center space-x-2"
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center space-x-2"
               >
                 <span>Generate Course</span>
                 <ArrowRight className="w-4 h-4" />
@@ -548,21 +548,21 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="bg-white rounded-xl p-8 shadow-lg border"
+            className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-lg border dark:border-gray-700"
           >
             <div className="text-center mb-8">
               <div className="flex items-center justify-center space-x-3 mb-4">
-                <div className="p-3 bg-green-100 rounded-lg">
-                  <Brain className="w-6 h-6 text-green-600" />
+                <div className="p-3 bg-green-100 dark:bg-green-900 rounded-lg">
+                  <Brain className="w-6 h-6 text-green-600 dark:text-green-300" />
                 </div>
-                <h2 className="text-xl font-semibold text-gray-900">Generating Your Course</h2>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Generating Your Course</h2>
               </div>
 
               {!generating ? (
                 <div className="space-y-6">
-                  <div className="bg-gray-50 rounded-lg p-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Course Summary</h3>
-                    <div className="text-left space-y-2">
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Course Summary</h3>
+                    <div className="text-left space-y-2 text-gray-900 dark:text-gray-300">
                       <p><strong>Title:</strong> {formData.title}</p>
                       <p><strong>Subject:</strong> {formData.subject}</p>
                       <p><strong>Duration:</strong> {formData.duration}</p>
@@ -571,7 +571,7 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-center space-x-2 text-blue-600">
+                  <div className="flex items-center justify-center space-x-2 text-blue-600 dark:text-blue-400">
                     <Sparkles className="w-5 h-5" />
                     <span className="text-sm font-medium">
                       Watch your course come to life, module by module!
@@ -580,7 +580,7 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
 
                   <button
                     onClick={generateCourseProgressive}
-                    className="px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center space-x-3 mx-auto"
+                    className="px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 dark:from-green-500 dark:to-blue-500 text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center space-x-3 mx-auto"
                   >
                     <Lightbulb className="w-5 h-5" />
                     <span>Generate My Course</span>
@@ -589,27 +589,27 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
               ) : (
                 <div className="space-y-6">
                   {/* Progress Bar */}
-                  <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                     <motion.div
-                      className="bg-gradient-to-r from-green-500 to-blue-500 h-3 rounded-full"
+                      className="bg-gradient-to-r from-green-500 to-blue-500 dark:from-green-400 dark:to-blue-400 h-3 rounded-full"
                       initial={{ width: '0%' }}
                       animate={{ width: `${progress}%` }}
                       transition={{ duration: 0.3 }}
                     />
                   </div>
-                  <div className="text-sm font-medium text-gray-700">{progress}% Complete</div>
+                  <div className="text-sm font-medium text-gray-700 dark:text-gray-300">{progress}% Complete</div>
 
                   {/* Current Status */}
                   <div className="flex items-center justify-center space-x-3">
                     <div className="relative">
-                      <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                      <div className="w-12 h-12 border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin"></div>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <Brain className="w-5 h-5 text-blue-600" />
+                        <Brain className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                       </div>
                     </div>
                     <div className="text-left">
-                      <h3 className="text-lg font-medium text-gray-900">{currentStatus}</h3>
-                      <p className="text-sm text-gray-600">Please wait while we craft your course...</p>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">{currentStatus}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Please wait while we craft your course...</p>
                     </div>
                   </div>
 
@@ -618,20 +618,20 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5 }}
-                    className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4"
+                    className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4 mt-4"
                   >
                     <div className="flex items-start space-x-3">
-                      <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                       <div className="text-left">
-                        <h4 className="text-sm font-semibold text-blue-900 mb-1">
+                        <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">
                           Course Generation in Progress
                         </h4>
-                        <p className="text-xs text-blue-800 leading-relaxed">
+                        <p className="text-xs text-blue-800 dark:text-blue-400 leading-relaxed">
                           This may take a little longer based on response time and course complexity. 
                           We're creating comprehensive content with modules, tasks, and resources tailored to your needs. 
                           <span className="font-medium"> We'll notify you once the course is completed!</span>
                         </p>
-                        <p className="text-xs text-blue-700 mt-2 flex items-center">
+                        <p className="text-xs text-blue-700 dark:text-blue-400 mt-2 flex items-center">
                           <Clock className="w-3 h-3 mr-1" />
                           Estimated time: 1-3 minutes
                         </p>
@@ -642,7 +642,7 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
                   {/* Module Creation Progress */}
                   {modules.length > 0 && (
                     <div className="mt-8">
-                      <h4 className="text-lg font-semibold text-gray-900 mb-4">Modules Being Created</h4>
+                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Modules Being Created</h4>
                       <div className="space-y-3 max-h-96 overflow-y-auto">
                         <AnimatePresence>
                           {modules.map((module, index) => (
@@ -654,23 +654,23 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
                               exit="exit"
                               className={`p-4 rounded-lg border-2 ${
                                 module.status === 'completed' 
-                                  ? 'bg-green-50 border-green-500' 
-                                  : 'bg-blue-50 border-blue-500'
+                                  ? 'bg-green-50 dark:bg-green-900/20 border-green-500 dark:border-green-600' 
+                                  : 'bg-blue-50 dark:bg-blue-900/20 border-blue-500 dark:border-blue-600'
                               }`}
                             >
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-3">
                                   {module.status === 'completed' ? (
-                                    <CheckCircle className="w-6 h-6 text-green-600" />
+                                    <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
                                   ) : (
-                                    <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                    <div className="w-6 h-6 border-2 border-blue-600 dark:border-blue-400 border-t-transparent rounded-full animate-spin"></div>
                                   )}
                                   <div>
-                                    <h5 className="font-medium text-gray-900">
+                                    <h5 className="font-medium text-gray-900 dark:text-white">
                                       Module {module.moduleNumber}: {module.title}
                                     </h5>
                                     {module.status === 'completed' && module.tasksCount > 0 && (
-                                      <p className="text-xs text-gray-600">
+                                      <p className="text-xs text-gray-600 dark:text-gray-400">
                                         {module.tasksCount} tasks created
                                       </p>
                                     )}
@@ -680,7 +680,7 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
                                   <motion.div
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
-                                    className="bg-green-500 text-white p-2 rounded-full"
+                                    className="bg-green-500 dark:bg-green-600 text-white p-2 rounded-full"
                                   >
                                     <Check className="w-4 h-4" />
                                   </motion.div>
@@ -699,7 +699,7 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
                 <div className="flex justify-start mt-8">
                   <button
                     onClick={handlePrevious}
-                    className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
                     Previous
                   </button>
@@ -717,7 +717,7 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="bg-white rounded-xl p-8 shadow-lg border"
+            className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-lg border dark:border-gray-700"
           >
             <div className="text-center">
               <motion.div
@@ -726,31 +726,31 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
                 transition={{ type: 'spring', stiffness: 200 }}
                 className="flex items-center justify-center mb-6"
               >
-                <div className="p-4 bg-green-100 rounded-full">
-                  <Award className="w-12 h-12 text-green-600" />
+                <div className="p-4 bg-green-100 dark:bg-green-900 rounded-full">
+                  <Award className="w-12 h-12 text-green-600 dark:text-green-300" />
                 </div>
               </motion.div>
 
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">🎉 Course Created Successfully!</h2>
-              <p className="text-gray-600 mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">🎉 Course Created Successfully!</h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-8">
                 Your personalized learning journey is ready to begin
               </p>
 
-              <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 mb-8">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{generatedCourse.title}</h3>
-                <p className="text-gray-600 mb-4">{generatedCourse.description}</p>
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-6 mb-8 border dark:border-blue-800">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{generatedCourse.title}</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">{generatedCourse.description}</p>
                 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-900 dark:text-gray-300">
                   <div className="flex items-center justify-center space-x-2">
-                    <BookOpen className="w-4 h-4 text-purple-600" />
+                    <BookOpen className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                     <span>{generatedCourse.totalModules || modules.length} Modules</span>
                   </div>
                   <div className="flex items-center justify-center space-x-2">
-                    <Target className="w-4 h-4 text-green-600" />
+                    <Target className="w-4 h-4 text-green-600 dark:text-green-400" />
                     <span>{formData.difficulty}</span>
                   </div>
                   <div className="flex items-center justify-center space-x-2">
-                    <Clock className="w-4 h-4 text-blue-600" />
+                    <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                     <span>{formData.duration}</span>
                   </div>
                 </div>
@@ -758,20 +758,20 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
 
               {modules.length > 0 && (
                 <div className="mb-8 text-left">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Course Modules</h4>
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Course Modules</h4>
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {modules.filter(m => m.status === 'completed').map((module) => (
                       <div
                         key={module.moduleNumber}
-                        className="p-3 bg-gray-50 rounded-lg border flex items-center space-x-3"
+                        className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border dark:border-gray-600 flex items-center space-x-3"
                       >
-                        <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                        <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
                         <div>
-                          <span className="font-medium text-gray-900">
+                          <span className="font-medium text-gray-900 dark:text-white">
                             Module {module.moduleNumber}: {module.title}
                           </span>
                           {module.tasksCount > 0 && (
-                            <span className="text-xs text-gray-600 ml-2">
+                            <span className="text-xs text-gray-600 dark:text-gray-400 ml-2">
                               ({module.tasksCount} tasks)
                             </span>
                           )}
@@ -789,7 +789,7 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
                     onCourseCreated(generatedCourse);
                   }
                 }}
-                className="px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center space-x-3 mx-auto"
+                className="px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 dark:from-green-500 dark:to-blue-500 text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center space-x-3 mx-auto"
               >
                 <Play className="w-5 h-5" />
                 <span>Start Learning Now</span>
