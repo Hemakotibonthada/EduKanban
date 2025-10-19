@@ -62,17 +62,17 @@ const AIConversationSidebar = ({
   };
 
   return (
-    <div className="h-full flex flex-col bg-white border-r border-gray-200">
+    <div className="h-full flex flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-800">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <MessageCircle className="w-5 h-5 text-purple-600" />
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+            <MessageCircle className="w-5 h-5 text-purple-600 dark:text-purple-400" />
             AI Conversations
           </h2>
           <button
             onClick={onNewConversation}
-            className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            className="p-2 bg-purple-600 dark:bg-purple-700 text-white rounded-lg hover:bg-purple-700 dark:hover:bg-purple-600 transition-colors"
             title="New Conversation"
           >
             <Plus className="w-4 h-4" />
@@ -81,13 +81,13 @@ const AIConversationSidebar = ({
 
         {/* Search Bar */}
         <div className="relative mb-2">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
           <input
             type="text"
             placeholder="Search conversations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
           />
         </div>
 
@@ -95,7 +95,7 @@ const AIConversationSidebar = ({
         <div className="relative">
           <button
             onClick={() => setShowFilterMenu(!showFilterMenu)}
-            className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm hover:bg-gray-100 transition-colors"
+            className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-white"
           >
             <span className="flex items-center gap-2">
               <Filter className="w-4 h-4" />
@@ -115,7 +115,7 @@ const AIConversationSidebar = ({
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 overflow-hidden"
+                  className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20 overflow-hidden"
                 >
                   {['active', 'archived', 'all'].map((status) => (
                     <button
@@ -124,8 +124,8 @@ const AIConversationSidebar = ({
                         setFilterStatus(status);
                         setShowFilterMenu(false);
                       }}
-                      className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 transition-colors ${
-                        filterStatus === status ? 'bg-purple-50 text-purple-600' : 'text-gray-700'
+                      className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                        filterStatus === status ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400' : 'text-gray-700 dark:text-gray-300'
                       }`}
                     >
                       <span className="capitalize">{status}</span>
@@ -144,18 +144,18 @@ const AIConversationSidebar = ({
           <div className="p-4 space-y-3">
             {[1, 2, 3].map((i) => (
               <div key={i} className="animate-pulse">
-                <div className="h-16 bg-gray-100 rounded-lg"></div>
+                <div className="h-16 bg-gray-100 dark:bg-gray-800 rounded-lg"></div>
               </div>
             ))}
           </div>
         ) : filteredConversations.length === 0 ? (
           <div className="p-8 text-center">
-            <MessageCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-sm text-gray-500 mb-1">No conversations yet</p>
-            <p className="text-xs text-gray-400">Start chatting with AI Guide!</p>
+            <MessageCircle className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">No conversations yet</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">Start chatting with AI Guide!</p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 dark:divide-gray-800">
             {filteredConversations.map((conversation) => {
               const isActive = currentConversation?._id === conversation._id;
               const isArchived = conversation.status === 'archived';
@@ -163,8 +163,8 @@ const AIConversationSidebar = ({
               return (
                 <div
                   key={conversation._id}
-                  className={`relative p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
-                    isActive ? 'bg-purple-50 border-l-4 border-l-purple-600' : ''
+                  className={`relative p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors ${
+                    isActive ? 'bg-purple-50 dark:bg-purple-900/20 border-l-4 border-l-purple-600 dark:border-l-purple-400' : ''
                   }`}
                   onClick={() => onSelectConversation(conversation._id)}
                 >
@@ -172,21 +172,21 @@ const AIConversationSidebar = ({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         {isArchived && (
-                          <Archive className="w-3 h-3 text-gray-400 flex-shrink-0" />
+                          <Archive className="w-3 h-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                         )}
-                        <h3 className="font-medium text-sm text-gray-900 truncate">
+                        <h3 className="font-medium text-sm text-gray-900 dark:text-white truncate">
                           {conversation.title || 'Untitled Conversation'}
                         </h3>
                       </div>
                       
                       {conversation.lastMessage?.content && (
-                        <p className="text-xs text-gray-500 truncate mb-1">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate mb-1">
                           {conversation.lastMessage.content.substring(0, 60)}
                           {conversation.lastMessage.content.length > 60 ? '...' : ''}
                         </p>
                       )}
 
-                      <div className="flex items-center gap-3 text-xs text-gray-400">
+                      <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
                           {formatLastActivity(conversation.lastActivity)}
@@ -198,7 +198,7 @@ const AIConversationSidebar = ({
                       </div>
 
                       {conversation.metadata?.category && (
-                        <span className="inline-block mt-1 px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full">
+                        <span className="inline-block mt-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs rounded-full">
                           {conversation.metadata.category}
                         </span>
                       )}
@@ -213,9 +213,9 @@ const AIConversationSidebar = ({
                             showConversationMenu === conversation._id ? null : conversation._id
                           );
                         }}
-                        className="p-1 hover:bg-gray-200 rounded transition-colors"
+                        className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
                       >
-                        <MoreVertical className="w-4 h-4 text-gray-500" />
+                        <MoreVertical className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                       </button>
 
                       <AnimatePresence>
@@ -229,14 +229,14 @@ const AIConversationSidebar = ({
                               initial={{ opacity: 0, scale: 0.95 }}
                               animate={{ opacity: 1, scale: 1 }}
                               exit={{ opacity: 0, scale: 0.95 }}
-                              className="absolute right-0 top-full mt-1 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-20 overflow-hidden"
+                              className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20 overflow-hidden"
                             >
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleArchive(conversation._id, isArchived);
                                 }}
-                                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-gray-700"
+                                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 text-gray-700 dark:text-gray-300"
                               >
                                 <Archive className="w-4 h-4" />
                                 {isArchived ? 'Restore' : 'Archive'}
@@ -246,7 +246,7 @@ const AIConversationSidebar = ({
                                   e.stopPropagation();
                                   handleDelete(conversation._id);
                                 }}
-                                className="w-full px-4 py-2 text-left text-sm hover:bg-red-50 flex items-center gap-2 text-red-600"
+                                className="w-full px-4 py-2 text-left text-sm hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center gap-2 text-red-600 dark:text-red-400"
                               >
                                 <Trash2 className="w-4 h-4" />
                                 Delete
@@ -265,8 +265,8 @@ const AIConversationSidebar = ({
       </div>
 
       {/* Footer Stats */}
-      <div className="p-3 border-t border-gray-200 bg-gray-50">
-        <div className="text-xs text-gray-500 text-center">
+      <div className="p-3 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800">
+        <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
           {filteredConversations.length} conversation{filteredConversations.length !== 1 ? 's' : ''}
         </div>
       </div>

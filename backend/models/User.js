@@ -42,6 +42,20 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  role: {
+    type: String,
+    enum: ['user', 'admin', 'instructor', 'moderator'],
+    default: 'user',
+    index: true
+  },
+  phone: {
+    type: String,
+    default: null
+  },
+  location: {
+    type: String,
+    default: null
+  },
   profile: {
     knowledgeLevel: {
       type: String,
@@ -59,6 +73,31 @@ const userSchema = new mongoose.Schema({
       type: String,
       enum: ['Visual', 'Auditory', 'Kinesthetic', 'Reading'],
       default: 'Visual'
+    },
+    jobTitle: {
+      type: String,
+      default: null
+    },
+    company: {
+      type: String,
+      default: null
+    },
+    birthDate: {
+      type: Date,
+      default: null
+    },
+    skills: [{
+      type: String
+    }],
+    interests: [{
+      type: String
+    }],
+    socialLinks: {
+      website: { type: String, default: null },
+      github: { type: String, default: null },
+      linkedin: { type: String, default: null },
+      twitter: { type: String, default: null },
+      instagram: { type: String, default: null }
     }
   },
   stats: {

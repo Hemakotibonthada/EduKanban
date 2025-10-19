@@ -403,7 +403,7 @@ router.post('/', async (req, res) => {
 // PUT /api/tasks/:id - Update task details
 router.put('/:id', async (req, res) => {
   try {
-    const { title, description, priority, estimatedDuration, content } = req.body;
+    const { title, description, priority, estimatedDuration, content, status, dueDate, estimatedTime } = req.body;
 
     const updateData = {};
     if (title) updateData.title = title;
@@ -411,12 +411,15 @@ router.put('/:id', async (req, res) => {
     if (priority) updateData.priority = priority;
     if (estimatedDuration) updateData.estimatedDuration = estimatedDuration;
     if (content) updateData.content = content;
+    if (status) updateData.status = status;
+    if (dueDate) updateData.dueDate = dueDate;
+    if (estimatedTime) updateData.estimatedTime = estimatedTime;
 
     const task = await Task.findOneAndUpdate(
       { _id: req.params.id, userId: req.userId },
       updateData,
       { new: true, runValidators: true }
-    );
+    ).populate('courseId', 'title').populate('moduleId', 'title');
 
     if (!task) {
       return res.status(404).json({
@@ -431,6 +434,7 @@ router.put('/:id', async (req, res) => {
       action: 'task_updated',
       entity: { type: 'task', id: task._id, title: task.title },
       metadata: {
+        updatedFields: Object.keys(updateData),
         userAgent: req.get('User-Agent'),
         ipAddress: req.ip
       }
@@ -439,7 +443,7 @@ router.put('/:id', async (req, res) => {
     res.json({
       success: true,
       message: 'Task updated successfully',
-      data: { task }
+      data: task
     });
 
   } catch (error) {

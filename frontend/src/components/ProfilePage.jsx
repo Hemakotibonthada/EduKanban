@@ -214,14 +214,14 @@ const ProfilePage = ({ user, token }) => {
   };
 
   const StatCard = ({ icon, label, value, color = 'blue' }) => (
-    <div className="bg-white rounded-xl p-6 shadow-sm border">
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
       <div className="flex items-center space-x-3">
-        <div className={`p-3 bg-${color}-100 rounded-lg`}>
+        <div className={`p-3 bg-${color}-100 dark:bg-${color}-900/30 rounded-lg`}>
           {icon}
         </div>
         <div>
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
-          <p className="text-sm text-gray-600">{label}</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{label}</p>
         </div>
       </div>
     </div>
@@ -286,7 +286,7 @@ const ProfilePage = ({ user, token }) => {
           
           <button
             onClick={() => setIsEditing(!isEditing)}
-            className="px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg transition-all duration-200 flex items-center space-x-2"
+            className="px-6 py-3 bg-white/20 hover:bg-white/30 rounded-lg transition-all duration-200 flex items-center space-x-2"
           >
             <Edit3 className="w-5 h-5" />
             <span>{isEditing ? 'Cancel' : 'Edit Profile'}</span>
@@ -329,10 +329,10 @@ const ProfilePage = ({ user, token }) => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl p-6 shadow-sm border"
+          className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700"
         >
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 flex items-center space-x-2">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center space-x-2">
               <User className="w-5 h-5" />
               <span>Personal Information</span>
             </h2>
@@ -341,7 +341,7 @@ const ProfilePage = ({ user, token }) => {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   First Name
                 </label>
                 {isEditing ? (
@@ -350,15 +350,15 @@ const ProfilePage = ({ user, token }) => {
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 ) : (
-                  <p className="text-gray-900 py-2">{user.firstName}</p>
+                  <p className="text-gray-900 dark:text-white py-2">{user.firstName}</p>
                 )}
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Last Name
                 </label>
                 {isEditing ? (
@@ -367,16 +367,16 @@ const ProfilePage = ({ user, token }) => {
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 ) : (
-                  <p className="text-gray-900 py-2">{user.lastName}</p>
+                  <p className="text-gray-900 dark:text-white py-2">{user.lastName}</p>
                 )}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Username
               </label>
               {isEditing ? (
@@ -385,18 +385,18 @@ const ProfilePage = ({ user, token }) => {
                   name="username"
                   value={formData.username}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               ) : (
-                <p className="text-gray-900 py-2">@{user.username}</p>
+                <p className="text-gray-900 dark:text-white py-2">@{user.username}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Email
               </label>
-              <p className="text-gray-900 py-2 flex items-center space-x-2">
+              <p className="text-gray-900 dark:text-white py-2 flex items-center space-x-2">
                 <Mail className="w-4 h-4 text-gray-400" />
                 <span>{user.email}</span>
               </p>
@@ -409,16 +409,16 @@ const ProfilePage = ({ user, token }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white rounded-xl p-6 shadow-sm border"
+          className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700"
         >
-          <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center space-x-2">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center space-x-2">
             <Target className="w-5 h-5" />
             <span>Learning Preferences</span>
           </h2>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Knowledge Level
               </label>
               {isEditing ? (
@@ -426,7 +426,7 @@ const ProfilePage = ({ user, token }) => {
                   name="profile.knowledgeLevel"
                   value={formData.profile.knowledgeLevel}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="Beginner">Beginner</option>
                   <option value="Intermediate">Intermediate</option>
@@ -434,12 +434,12 @@ const ProfilePage = ({ user, token }) => {
                   <option value="Expert">Expert</option>
                 </select>
               ) : (
-                <p className="text-gray-900 py-2">{user.profile?.knowledgeLevel || 'Beginner'}</p>
+                <p className="text-gray-900 dark:text-white py-2">{user.profile?.knowledgeLevel || 'Beginner'}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Time Commitment
               </label>
               {isEditing ? (
@@ -520,16 +520,16 @@ const ProfilePage = ({ user, token }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="bg-white rounded-xl p-6 shadow-sm border"
+        className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700"
       >
-        <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center space-x-2">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center space-x-2">
           <Settings className="w-5 h-5" />
           <span>Preferences</span>
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Theme
             </label>
             {isEditing ? (
@@ -537,19 +537,19 @@ const ProfilePage = ({ user, token }) => {
                 name="preferences.theme"
                 value={formData.preferences.theme}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="light">Light</option>
                 <option value="dark">Dark</option>
                 <option value="system">System</option>
               </select>
             ) : (
-              <p className="text-gray-900 py-2 capitalize">{user.preferences?.theme || 'system'}</p>
+              <p className="text-gray-900 dark:text-white py-2 capitalize">{user.preferences?.theme || 'system'}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Language
             </label>
             {isEditing ? (
@@ -557,7 +557,7 @@ const ProfilePage = ({ user, token }) => {
                 name="preferences.language"
                 value={formData.preferences.language}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="en">English</option>
                 <option value="es">Spanish</option>
@@ -565,7 +565,7 @@ const ProfilePage = ({ user, token }) => {
                 <option value="de">German</option>
               </select>
             ) : (
-              <p className="text-gray-900 py-2">
+              <p className="text-gray-900 dark:text-white py-2">
                 {user.preferences?.language === 'en' ? 'English' : 
                  user.preferences?.language === 'es' ? 'Spanish' :
                  user.preferences?.language === 'fr' ? 'French' :
@@ -618,7 +618,7 @@ const ProfilePage = ({ user, token }) => {
         >
           <button
             onClick={handleCancel}
-            className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2"
+            className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center space-x-2"
           >
             <X className="w-4 h-4" />
             <span>Cancel</span>

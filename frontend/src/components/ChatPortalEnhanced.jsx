@@ -14,8 +14,22 @@ import toast from 'react-hot-toast';
 import { getBackendURL, getSocketURL } from '../config/api';
 import { CreateCommunityModal, CreateGroupModal, UserSearchModal } from './ChatModals';
 import { useAIChatStream } from '../hooks/useAIChatStream';
+import useRealtimeChat from '../hooks/useRealtimeChat';
 import MarkdownMessage from './MarkdownMessage';
 import AIConversationSidebar from './AIConversationSidebar';
+
+// Enhanced Message Components
+import MessageReactionPicker from './MessageReactionPicker';
+import MessageReactions from './MessageReactions';
+import MessageActions from './MessageActions';
+import ReadReceipt from './ReadReceipt';
+import ThreadView from './ThreadView';
+import FilePreview from './FilePreview';
+
+// Conversation Components
+import ConversationMenu from './ConversationMenu';
+import MessageSearch from './MessageSearch';
+import PinnedMessagesPanel from './PinnedMessagesPanel';
 
 const API_URL = getBackendURL();
 const SOCKET_URL = getSocketURL();
@@ -58,6 +72,75 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
     deleteConversation
   } = useAIChatStream(token, { autoSave: true });
   
+  // Real-time chat callbacks for enhanced features
+  const realtimeCallbacks = {
+    onReactionAdded: (data) => {
+      console.log('👍 Reaction added:', data);
+      setReactions(prev => ({
+        ...prev,
+        [data.messageId]: [...(prev[data.messageId] || []), data]
+      }));
+    },
+    
+    onReactionRemoved: (data) => {
+      console.log('👎 Reaction removed:', data);
+      setReactions(prev => ({
+        ...prev,
+        [data.messageId]: (prev[data.messageId] || []).filter(
+          r => !(r.userId === data.userId && r.reaction === data.reaction)
+        )
+      }));
+    },
+    
+    onMessageEdited: (data) => {
+      console.log('✏️ Message edited via realtime:', data);
+      setMessages(prev => prev.map(msg => 
+        msg._id === data.messageId 
+          ? { ...msg, content: data.content, edited: true }
+          : msg
+      ));
+    },
+    
+    onMessageDeleted: (data) => {
+      console.log('🗑️ Message deleted via realtime:', data);
+      setMessages(prev => prev.filter(msg => msg._id !== data.messageId));
+    },
+    
+    onMessageRead: (data) => {
+      console.log('👁️ Message read:', data);
+      setMessages(prev => prev.map(msg => 
+        msg._id === data.messageId 
+          ? { ...msg, readBy: [...(msg.readBy || []), data.userId] }
+          : msg
+      ));
+    },
+    
+    onThreadReply: (data) => {
+      console.log('💬 Thread reply:', data);
+      // Update message reply count
+      setMessages(prev => prev.map(msg => 
+        msg._id === data.parentMessageId 
+          ? { ...msg, replyCount: (msg.replyCount || 0) + 1 }
+          : msg
+      ));
+    },
+    
+    onMessagePinned: (data) => {
+      console.log('📌 Message pinned via realtime:', data);
+      setMessages(prev => prev.map(msg => 
+        msg._id === data.messageId 
+          ? { ...msg, isPinned: data.isPinned }
+          : msg
+      ));
+      // Update pinned messages list
+      if (data.isPinned) {
+        setPinnedMessages(prev => [...prev, data.messageId]);
+      } else {
+        setPinnedMessages(prev => prev.filter(id => id !== data.messageId));
+      }
+    }
+  };
+  
   // UI state
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -82,6 +165,12 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [recordingTime, setRecordingTime] = useState(0);
   
+  // Enhanced chat features state
+  const [activeThread, setActiveThread] = useState(null);
+  const [showThreadView, setShowThreadView] = useState(false);
+  const [showMessageSearch, setShowMessageSearch] = useState(false);
+  const [reactions, setReactions] = useState({}); // { messageId: [{ userId, reaction, timestamp }] }
+  
   // Modals
   const [showCreateCommunity, setShowCreateCommunity] = useState(false);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
@@ -93,6 +182,14 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
   const fileInputRef = useRef(null);
   const socketRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  
+  // Initialize real-time chat hook with enhanced features
+  const { 
+    emitTyping, 
+    joinConversation, 
+    leaveConversation,
+    isConnected 
+  } = useRealtimeChat(socketRef.current, realtimeCallbacks, user?._id);
 
   // Persist chat state to localStorage
   useEffect(() => {
@@ -266,6 +363,21 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
       loadMessages();
     }
   }, [selectedChat, selectedChatType]);
+  
+  // Join/leave conversation rooms for real-time updates
+  useEffect(() => {
+    if (selectedChat && selectedChatType !== 'ai' && isConnected) {
+      // Join conversation room
+      joinConversation(selectedChat);
+      console.log('🔗 Joined conversation room:', selectedChat);
+      
+      return () => {
+        // Leave conversation room on unmount or chat change
+        leaveConversation(selectedChat);
+        console.log('👋 Left conversation room:', selectedChat);
+      };
+    }
+  }, [selectedChat, selectedChatType, isConnected, joinConversation, leaveConversation]);
 
   const loadFriends = async () => {
     try {
@@ -455,21 +567,14 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
   };
 
   const handleTyping = () => {
-    if (socketRef.current && selectedChat) {
-      socketRef.current.emit('typing', {
-        targetType: selectedChatType,
-        targetId: selectedChat,
-        isTyping: true
-      });
+    if (selectedChat && selectedChatType !== 'ai' && emitTyping) {
+      // Use enhanced emitTyping from useRealtimeChat hook
+      emitTyping(selectedChat, true);
 
       clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = setTimeout(() => {
-        socketRef.current.emit('typing', {
-          targetType: selectedChatType,
-          targetId: selectedChat,
-          isTyping: false
-        });
-      }, 1000);
+        emitTyping(selectedChat, false);
+      }, 3000); // Increased to 3 seconds for better UX
     }
   };
 
@@ -910,9 +1015,10 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4 group`}
+      id={`message-${message._id}`}
+      className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4 group hover:bg-gray-50 dark:hover:bg-gray-800/50 p-3 rounded-lg transition-colors`}
     >
-      <div className={`flex max-w-xl ${isOwn ? 'flex-row-reverse' : 'flex-row'} gap-2`}>
+      <div className={`flex max-w-xl ${isOwn ? 'flex-row-reverse' : 'flex-row'} gap-2 w-full`}>
         {!isOwn && (
           <div className="flex-shrink-0">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
@@ -923,21 +1029,69 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
           </div>
         )}
         
-        <div className="flex flex-col">
-          {!isOwn && (
-            <span className="text-xs text-gray-500 mb-1 px-3">
-              {message.sender?.firstName} {message.sender?.lastName}
-            </span>
-          )}
+        <div className="flex flex-col flex-1 min-w-0">
+          {/* Message Header with Actions */}
+          <div className="flex items-start justify-between gap-2 mb-1">
+            <div className="flex items-center gap-2">
+              {!isOwn && (
+                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  {message.sender?.firstName} {message.sender?.lastName}
+                </span>
+              )}
+              <span className="text-xs text-gray-400">
+                {formatTime(message.createdAt)}
+              </span>
+              {message.edited && (
+                <span className="text-xs text-gray-400 italic">(edited)</span>
+              )}
+            </div>
+            
+            {/* Message Actions - Enhanced */}
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+              <MessageActions
+                message={message}
+                currentUserId={user?._id}
+                onEdit={async (messageId, newContent) => {
+                  try {
+                    await fetch(`${API_URL}/chat-enhanced/messages/${messageId}`, {
+                      method: 'PUT',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                      },
+                      body: JSON.stringify({ content: newContent })
+                    });
+                    setMessages(prev => prev.map(msg => 
+                      msg._id === messageId 
+                        ? { ...msg, content: newContent, edited: true }
+                        : msg
+                    ));
+                    toast.success('Message edited');
+                  } catch (error) {
+                    console.error('Edit message error:', error);
+                    toast.error('Failed to edit message');
+                  }
+                }}
+                onDelete={deleteMessage}
+                onReply={() => setReplyingTo(message)}
+                onPin={() => togglePinMessage(message._id)}
+                onThread={() => {
+                  setActiveThread(message._id);
+                  setShowThreadView(true);
+                }}
+                isPinned={pinnedMessages.includes(message._id)}
+              />
+            </div>
+          </div>
           
           <div className={`relative px-4 py-2 rounded-2xl ${
             isOwn 
               ? 'bg-blue-600 text-white rounded-br-sm' 
-              : 'bg-gray-100 text-gray-900 rounded-bl-sm'
+              : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-bl-sm'
           }`}>
             {message.replyTo && (
               <div className={`text-xs mb-2 p-2 rounded ${
-                isOwn ? 'bg-blue-700' : 'bg-gray-200'
+                isOwn ? 'bg-blue-700' : 'bg-gray-200 dark:bg-gray-700'
               }`}>
                 <Reply className="w-3 h-3 inline mr-1" />
                 Replying to message
@@ -946,182 +1100,101 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
             
             <span className="text-sm whitespace-pre-wrap break-words">{message.content}</span>
             
+            {/* Enhanced File Attachments with FilePreview */}
             {message.attachments && message.attachments.length > 0 && (
               <div className="mt-2 space-y-2">
                 {message.attachments.map((file, idx) => (
-                  <div key={idx} className="flex items-center gap-2 p-2 bg-black bg-opacity-10 rounded">
-                    <FileText className="w-4 h-4" />
-                    <span className="text-xs">{file.originalName}</span>
-                  </div>
+                  <FilePreview key={idx} file={file} />
                 ))}
               </div>
             )}
             
-            <div className="flex items-center gap-1 mt-1">
-              <span className={`text-xs ${isOwn ? 'text-blue-100' : 'text-gray-500'}`}>
-                {formatTime(message.createdAt)}
-              </span>
-              {message.edited && (
-                <span className={`text-xs ${isOwn ? 'text-blue-100' : 'text-gray-500'}`}>(edited)</span>
-              )}
-              {isOwn && (
-                <div className="flex items-center">
-                  {message.status === 'read' ? (
-                    <div className="relative">
-                      <Check className="w-3 h-3 text-blue-200" />
-                      <Check className="w-3 h-3 text-blue-200 absolute -right-1" />
-                    </div>
-                  ) : message.status === 'delivered' ? (
-                    <div className="relative">
-                      <Check className="w-3 h-3 text-blue-200" />
-                      <Check className="w-3 h-3 text-blue-200 absolute -right-1 opacity-50" />
-                    </div>
-                  ) : (
-                    <Clock className="w-3 h-3 text-blue-200" />
-                  )}
-                </div>
-              )}
-            </div>
+            {/* Enhanced Read Receipt */}
+            {isOwn && (
+              <div className="flex items-center justify-end mt-1">
+                <ReadReceipt
+                  message={message}
+                  currentUserId={user?._id}
+                  conversationId={selectedChat}
+                  socket={socketRef.current}
+                  onMessageRead={(messageId) => {
+                    setMessages(prev => prev.map(msg => 
+                      msg._id === messageId 
+                        ? { ...msg, readBy: [...(msg.readBy || []), user._id] }
+                        : msg
+                    ));
+                  }}
+                />
+              </div>
+            )}
           </div>
           
-          {/* Reactions */}
-          {message.reactions && message.reactions.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-1 px-2">
-              {Object.entries(
-                message.reactions.reduce((acc, r) => {
-                  acc[r.emoji] = (acc[r.emoji] || 0) + 1;
-                  return acc;
-                }, {})
-              ).map(([emoji, count]) => (
-                <span
-                  key={emoji}
-                  className="text-xs bg-gray-100 px-2 py-1 rounded-full cursor-pointer hover:bg-gray-200"
-                  onClick={() => addReaction(message._id, emoji)}
-                >
-                  {emoji} {count}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-        
-        {/* Message actions */}
-        <div className={`relative opacity-0 group-hover:opacity-100 transition-opacity flex items-start gap-1 ${isOwn ? 'flex-row-reverse' : ''}`}>
-          <button
-            onClick={() => setReplyingTo(message)}
-            className="p-1 hover:bg-gray-200 rounded"
-            title="Reply"
-          >
-            <Reply className="w-4 h-4 text-gray-500" />
-          </button>
-          <div className="relative">
+          {/* Enhanced Reactions with MessageReactions component */}
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
+            <MessageReactions
+              messageId={message._id}
+              currentUserId={user?._id}
+              onReactionToggle={async (messageId, reaction) => {
+                try {
+                  const hasReacted = reactions[messageId]?.some(
+                    r => r.userId === user._id && r.reaction === reaction
+                  );
+                  
+                  if (hasReacted) {
+                    await fetch(`${API_URL}/chat-enhanced/messages/${messageId}/reactions/${reaction}`, {
+                      method: 'DELETE',
+                      headers: { Authorization: `Bearer ${token}` }
+                    });
+                  } else {
+                    await fetch(`${API_URL}/chat-enhanced/messages/${messageId}/reactions`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                      },
+                      body: JSON.stringify({ reaction })
+                    });
+                  }
+                } catch (error) {
+                  console.error('Toggle reaction error:', error);
+                  toast.error('Failed to update reaction');
+                }
+              }}
+            />
+            
+            {/* Reaction Picker Button */}
+            <MessageReactionPicker
+              messageId={message._id}
+              currentUserId={user?._id}
+              onReactionAdd={async (messageId, reaction) => {
+                try {
+                  await fetch(`${API_URL}/chat-enhanced/messages/${messageId}/reactions`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ reaction })
+                  });
+                  toast.success('Reaction added');
+                } catch (error) {
+                  console.error('Add reaction error:', error);
+                  toast.error('Failed to add reaction');
+                }
+              }}
+            />
+            
+            {/* Thread Reply Button */}
             <button
-              onClick={() => setShowEmojiPicker(showEmojiPicker === message._id ? null : message._id)}
-              className="p-1 hover:bg-gray-200 rounded"
-              title="React"
+              onClick={() => {
+                setActiveThread(message._id);
+                setShowThreadView(true);
+              }}
+              className="text-xs text-gray-500 hover:text-blue-600 flex items-center gap-1"
             >
-              <Smile className="w-4 h-4 text-gray-500" />
+              <MessageCircle className="w-3 h-3" />
+              {message.replyCount || 0} replies
             </button>
-            
-            {/* Quick Reactions Picker */}
-            {showEmojiPicker === message._id && (
-              <div className={`absolute ${isOwn ? 'right-0' : 'left-0'} top-full mt-1 bg-white rounded-lg shadow-lg border p-2 z-50 flex gap-1`}>
-                {['👍', '❤️', '😂', '😮', '😢', '🙏', '🎉', '🔥'].map(emoji => (
-                  <button
-                    key={emoji}
-                    onClick={() => {
-                      addReaction(message._id, emoji);
-                      setShowEmojiPicker(null);
-                    }}
-                    className="text-2xl hover:scale-125 transition-transform p-1"
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="relative">
-            <button 
-              onClick={() => setShowMessageMenu(showMessageMenu === message._id ? null : message._id)}
-              className="p-1 hover:bg-gray-200 rounded" 
-              title="More"
-            >
-              <MoreVertical className="w-4 h-4 text-gray-500" />
-            </button>
-            
-            {/* Dropdown Menu */}
-            {showMessageMenu === message._id && (
-              <div className={`absolute ${isOwn ? 'right-0' : 'left-0'} top-full mt-1 bg-white rounded-lg shadow-lg border py-1 z-50 min-w-[150px]`}>
-                {isOwn && (
-                  <>
-                    <button
-                      onClick={() => {
-                        setEditingMessage(message);
-                        setNewMessage(message.content);
-                        setShowMessageMenu(null);
-                      }}
-                      className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                      Edit Message
-                    </button>
-                    <button
-                      onClick={() => {
-                        deleteMessage(message._id);
-                        setShowMessageMenu(null);
-                      }}
-                      className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 text-red-600 flex items-center gap-2"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      Delete Message
-                    </button>
-                  </>
-                )}
-                <button
-                  onClick={() => {
-                    togglePinMessage(message._id);
-                    setShowMessageMenu(null);
-                  }}
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2"
-                >
-                  <Pin className="w-4 h-4" />
-                  {pinnedMessages.includes(message._id) ? 'Unpin' : 'Pin'} Message
-                </button>
-                <button
-                  onClick={() => {
-                    setForwardingMessage(message);
-                    setShowForwardModal(true);
-                    setShowMessageMenu(null);
-                  }}
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2"
-                >
-                  <Forward className="w-4 h-4" />
-                  Forward
-                </button>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(message.content);
-                    toast.success('Message copied!');
-                    setShowMessageMenu(null);
-                  }}
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2"
-                >
-                  <FileText className="w-4 h-4" />
-                  Copy Text
-                </button>
-                <button
-                  onClick={() => {
-                    setReplyingTo(message);
-                    setShowMessageMenu(null);
-                  }}
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2"
-                >
-                  <Reply className="w-4 h-4" />
-                  Reply
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -1129,7 +1202,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
   );
 
   return (
-    <div className="fixed inset-0 bg-gray-100 flex flex-col overflow-hidden" {...getRootProps()}>
+    <div className="fixed inset-0 bg-gray-100 dark:bg-gray-950 flex flex-col overflow-hidden" {...getRootProps()}>
       <input {...getInputProps()} />
       
       {/* Top Header Bar with Logo */}
@@ -1168,16 +1241,15 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
         {/* Sidebar */}
         <div className={`
           ${selectedChat ? 'hidden md:flex' : 'flex'}
-          w-full md:w-80 lg:w-96 bg-white border-r flex-col
+          w-full md:w-80 lg:w-96 bg-white dark:bg-gray-900 border-r dark:border-gray-800 flex-col
           overflow-hidden
         `}>
         {/* Tabs */}
         <div className="p-2 md:p-4 border-b bg-gradient-to-r from-blue-600 to-purple-600">
-          <div className="grid grid-cols-5 gap-1 md:gap-2">
+          <div className="grid grid-cols-4 gap-1 md:gap-2">
             {[
               { id: 'ai-guide', label: 'AI Guide', icon: Globe },
               { id: 'friends', label: 'Friends', icon: UserPlus },
-              { id: 'dms', label: 'DMs', icon: MessageCircle },
               { id: 'communities', label: 'Communities', icon: Users },
               { id: 'groups', label: 'Groups', icon: Hash }
             ].map(tab => (
@@ -1190,35 +1262,35 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                     setSelectedChatType('ai');
                   }
                 }}
-                className={`px-2 md:px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition-all ${
+                className={`px-1 md:px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition-all ${
                   activeTab === tab.id
                     ? 'bg-white text-blue-600 shadow-lg'
                     : 'bg-blue-500/20 text-white hover:bg-white/20'
                 }`}
               >
                 <tab.icon className="w-4 h-4 mx-auto md:hidden" />
-                <span className="hidden md:block">{tab.label}</span>
+                <span className="hidden md:block truncate">{tab.label}</span>
               </button>
             ))}
           </div>
         </div>
 
         {/* Search */}
-        <div className="p-3 border-b bg-white">
+        <div className="p-3 border-b dark:border-gray-800 bg-white dark:bg-gray-900">
           <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
             <input
               type="text"
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
         </div>
 
         {/* Content based on active tab */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto bg-white dark:bg-gray-900">
           {activeTab === 'friends' && (
             <div className="p-3 space-y-2">
               {/* Add Friend Button */}
@@ -1233,11 +1305,11 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
               {/* Friend requests */}
               {friendRequests.received.length > 0 && (
                 <div className="mb-4">
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2 px-2">
+                  <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2 px-2">
                     Pending Requests ({friendRequests.received.length})
                   </h3>
                   {friendRequests.received.map(request => (
-                    <div key={request._id} className="bg-white p-3 rounded-lg border mb-2">
+                    <div key={request._id} className="bg-white dark:bg-gray-800 p-3 rounded-lg border dark:border-gray-700 mb-2">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                           <span className="text-white text-sm font-semibold">
@@ -1245,14 +1317,14 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                           </span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                             {request.sender.firstName} {request.sender.lastName}
                           </p>
-                          <p className="text-xs text-gray-500">@{request.sender.username}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">@{request.sender.username}</p>
                         </div>
                       </div>
                       {request.message && (
-                        <p className="text-xs text-gray-600 mb-2 italic">"{request.message}"</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 italic">"{request.message}"</p>
                       )}
                       <div className="flex gap-2">
                         <button
@@ -1264,7 +1336,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                         </button>
                         <button
                           onClick={() => rejectFriendRequest(request._id)}
-                          className="flex-1 px-3 py-1.5 bg-gray-200 text-gray-700 rounded text-xs font-medium hover:bg-gray-300"
+                          className="flex-1 px-3 py-1.5 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs font-medium hover:bg-gray-300 dark:hover:bg-gray-600"
                         >
                           <X className="w-3 h-3 inline mr-1" />
                           Decline
@@ -1276,7 +1348,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
               )}
 
               {/* Friends list */}
-              <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2 px-2">
+              <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2 px-2">
                 Friends ({friends.length})
               </h3>
               {friends.map(friend => (
@@ -1287,7 +1359,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                     setSelectedChat(friend._id);
                     setSelectedChatType('user');
                   }}
-                  className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-white transition-colors"
+                  className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 >
                   <div className="relative">
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
@@ -1296,14 +1368,14 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                       </span>
                     </div>
                     {onlineUsers.has(friend._id) && (
-                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-50"></div>
+                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-900"></div>
                     )}
                   </div>
                   <div className="flex-1 text-left min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                       {friend.firstName} {friend.lastName}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       {onlineUsers.has(friend._id) ? 'Online' : 'Offline'}
                     </p>
                   </div>
@@ -1339,27 +1411,27 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
           {activeTab === 'ai-guide-old-intro' && (
             <div className="p-4 space-y-4">
               {/* AI Guide Header */}
-              <div className="bg-gradient-to-r from-purple-100 to-blue-100 p-4 rounded-lg border border-purple-200">
+              <div className="bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 p-4 rounded-lg border border-purple-200 dark:border-purple-700">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
                     <Globe className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900">AI Learning Guide</h3>
-                    <div className="flex items-center gap-1 text-xs text-green-600">
+                    <h3 className="font-bold text-gray-900 dark:text-white">AI Learning Guide</h3>
+                    <div className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
                       <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                       <span>Always Available</span>
                     </div>
                   </div>
                 </div>
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-gray-700 dark:text-gray-300">
                   Your personal AI assistant for learning support, course guidance, and instant answers to your questions.
                 </p>
               </div>
 
               {/* Quick Actions */}
               <div>
-                <h4 className="text-xs font-semibold text-gray-500 uppercase mb-2">Quick Actions</h4>
+                <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Quick Actions</h4>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => {
@@ -1367,11 +1439,11 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                       setSelectedChatType('ai');
                       setNewMessage("Help me understand a topic");
                     }}
-                    className="p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm transition-all text-left"
+                    className="p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-sm transition-all text-left"
                   >
                     <div className="text-2xl mb-1">📚</div>
-                    <div className="text-xs font-medium text-gray-900">Explain Topic</div>
-                    <div className="text-xs text-gray-500">Get explanations</div>
+                    <div className="text-xs font-medium text-gray-900 dark:text-white">Explain Topic</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Get explanations</div>
                   </button>
                   <button
                     onClick={() => {
@@ -1379,11 +1451,11 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                       setSelectedChatType('ai');
                       setNewMessage("I need help with my course");
                     }}
-                    className="p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm transition-all text-left"
+                    className="p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-sm transition-all text-left"
                   >
                     <div className="text-2xl mb-1">🎓</div>
-                    <div className="text-xs font-medium text-gray-900">Course Help</div>
-                    <div className="text-xs text-gray-500">Course guidance</div>
+                    <div className="text-xs font-medium text-gray-900 dark:text-white">Course Help</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Course guidance</div>
                   </button>
                   <button
                     onClick={() => {
@@ -1391,11 +1463,11 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                       setSelectedChatType('ai');
                       setNewMessage("Give me study tips");
                     }}
-                    className="p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm transition-all text-left"
+                    className="p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-sm transition-all text-left"
                   >
                     <div className="text-2xl mb-1">💡</div>
-                    <div className="text-xs font-medium text-gray-900">Study Tips</div>
-                    <div className="text-xs text-gray-500">Learning strategies</div>
+                    <div className="text-xs font-medium text-gray-900 dark:text-white">Study Tips</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Learning strategies</div>
                   </button>
                   <button
                     onClick={() => {
@@ -1403,18 +1475,18 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                       setSelectedChatType('ai');
                       setNewMessage("Suggest a learning path");
                     }}
-                    className="p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm transition-all text-left"
+                    className="p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-sm transition-all text-left"
                   >
                     <div className="text-2xl mb-1">🗺️</div>
-                    <div className="text-xs font-medium text-gray-900">Learning Path</div>
-                    <div className="text-xs text-gray-500">Personalized plan</div>
+                    <div className="text-xs font-medium text-gray-900 dark:text-white">Learning Path</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Personalized plan</div>
                   </button>
                 </div>
               </div>
 
               {/* Example Questions */}
               <div>
-                <h4 className="text-xs font-semibold text-gray-500 uppercase mb-2">Example Questions</h4>
+                <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Example Questions</h4>
                 <div className="space-y-2">
                   {[
                     "What's the best way to learn programming?",
@@ -1429,7 +1501,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                         setSelectedChatType('ai');
                         setNewMessage(question);
                       }}
-                      className="w-full text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-purple-300 hover:shadow-sm transition-all"
+                      className="w-full text-left p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-purple-300 dark:hover:border-purple-600 hover:shadow-sm transition-all"
                     >
                       <div className="flex items-start gap-2">
                         <MessageCircle className="w-4 h-4 text-purple-500 mt-0.5 flex-shrink-0" />
@@ -1494,14 +1566,14 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                     setSelectedChat(group._id);
                     setSelectedChatType('group');
                   }}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg hover:bg-white transition-colors ${
-                    selectedChat === group._id && selectedChatType === 'group' ? 'bg-white' : ''
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${
+                    selectedChat === group._id && selectedChatType === 'group' ? 'bg-gray-100 dark:bg-gray-800' : ''
                   }`}
                 >
-                  <Hash className="w-5 h-5 text-gray-500" />
+                  <Hash className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                   <div className="flex-1 text-left">
-                    <p className="text-sm font-medium text-gray-900">{group.name}</p>
-                    <p className="text-xs text-gray-500">{group.members.length} members</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{group.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{group.members.length} members</p>
                   </div>
                 </button>
               ))}
@@ -1510,7 +1582,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
         </div>
 
         {/* User info */}
-        <div className="p-3 border-t bg-white">
+        <div className="p-3 border-t dark:border-gray-800 bg-white dark:bg-gray-900">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-semibold">
@@ -1518,13 +1590,13 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
+              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                 {user.firstName} {user.lastName}
               </p>
-              <p className="text-xs text-green-600">● Online</p>
+              <p className="text-xs text-green-600 dark:text-green-400">● Online</p>
             </div>
-            <button className="p-2 hover:bg-gray-100 rounded-lg">
-              <Settings className="w-4 h-4 text-gray-500" />
+            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+              <Settings className="w-4 h-4 text-gray-500 dark:text-gray-400" />
             </button>
           </div>
         </div>
@@ -1556,21 +1628,21 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
       {/* Main chat area */}
       <div className={`
         ${selectedChat ? 'flex' : 'hidden md:flex'}
-        flex-1 flex-col bg-gray-50
+        flex-1 flex-col bg-gray-50 dark:bg-gray-950
         h-full overflow-hidden
       `}>
         {selectedChat ? (
           <>
             {/* Chat header */}
-            <div className={`px-3 md:px-6 py-3 md:py-4 border-b flex items-center justify-between shadow-sm ${
-              selectedChatType === 'ai' ? 'bg-gradient-to-r from-purple-50 to-blue-50' : 'bg-white'
+            <div className={`px-3 md:px-6 py-3 md:py-4 border-b dark:border-gray-800 flex items-center justify-between shadow-sm ${
+              selectedChatType === 'ai' ? 'bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20' : 'bg-white dark:bg-gray-900'
             }`}>
               {/* Back button for mobile */}
               <button
                 onClick={() => setSelectedChat(null)}
-                className="md:hidden p-2 hover:bg-gray-100 rounded-lg mr-2"
+                className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg mr-2"
               >
-                <ChevronDown className="w-5 h-5 text-gray-600 transform rotate-90" />
+                <ChevronDown className="w-5 h-5 text-gray-600 dark:text-gray-400 transform rotate-90" />
               </button>
               <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
                 {selectedChatType === 'ai' ? (
@@ -1579,8 +1651,8 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                       <Globe className="w-6 h-6 text-white" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h2 className="font-semibold text-gray-900 truncate text-sm md:text-base">AI Learning Guide</h2>
-                      <div className="text-xs text-purple-600 truncate flex items-center gap-1">
+                      <h2 className="font-semibold text-gray-900 dark:text-white truncate text-sm md:text-base">AI Learning Guide</h2>
+                      <div className="text-xs text-purple-600 dark:text-purple-400 truncate flex items-center gap-1">
                         {aiIsTyping ? (
                           <>
                             <span className="inline-flex gap-0.5">
@@ -1601,10 +1673,10 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                   </>
                 ) : (
                   <>
-                    <Hash className="w-5 h-5 text-gray-500 hidden md:block" />
+                    <Hash className="w-5 h-5 text-gray-500 dark:text-gray-400 hidden md:block" />
                     <div className="min-w-0 flex-1">
-                      <h2 className="font-semibold text-gray-900 truncate text-sm md:text-base">Chat</h2>
-                      <p className="text-xs text-gray-500 truncate">
+                      <h2 className="font-semibold text-gray-900 dark:text-white truncate text-sm md:text-base">Chat</h2>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                         {typingUsers.size > 0 ? (
                           <span className="flex items-center gap-1">
                             <span className="inline-flex gap-0.5">
@@ -1628,7 +1700,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                         clearAIMessages();
                       }
                     }}
-                    className="p-2 hover:bg-gray-100 rounded-lg text-gray-500"
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-500 dark:text-gray-400"
                     title="Clear chat history"
                   >
                     <Trash2 className="w-5 h-5" />
@@ -1638,35 +1710,90 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                   <>
                     <button 
                       onClick={() => setShowPinnedMessages(!showPinnedMessages)}
-                      className={`p-2 hover:bg-gray-100 rounded-lg ${pinnedMessages.length > 0 ? 'text-blue-600' : 'text-gray-500'}`}
+                      className={`p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg relative ${pinnedMessages.length > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`}
                       title={`${pinnedMessages.length} pinned messages`}
                     >
                       <Pin className="w-5 h-5" />
                       {pinnedMessages.length > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                        <span className="absolute -top-1 -right-1 bg-blue-600 dark:bg-blue-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
                           {pinnedMessages.length}
                         </span>
                       )}
                     </button>
-                    <button className="p-2 hover:bg-gray-100 rounded-lg hidden md:block">
-                      <Phone className="w-5 h-5 text-gray-500" />
-                    </button>
-                    <button className="p-2 hover:bg-gray-100 rounded-lg hidden md:block">
-                      <VideoIcon className="w-5 h-5 text-gray-500" />
-                    </button>
                     <button 
-                      onClick={() => setShowSearch(!showSearch)}
-                      className="p-2 hover:bg-gray-100 rounded-lg hidden sm:block"
+                      onClick={() => setShowMessageSearch(!showMessageSearch)}
+                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                      title="Search messages"
                     >
-                      <Search className="w-5 h-5 text-gray-500" />
+                      <Search className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                     </button>
+                    <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg hidden md:block">
+                      <Phone className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                    </button>
+                    <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg hidden md:block">
+                      <VideoIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                    </button>
+                    {/* Conversation Menu */}
+                    <ConversationMenu
+                      conversation={{ _id: selectedChat, name: 'Chat', type: selectedChatType }}
+                      onUpdate={(id, updates) => {
+                        console.log('Update conversation:', id, updates);
+                        toast.success('Conversation updated');
+                      }}
+                      onDelete={(id) => {
+                        if (window.confirm('Delete this conversation?')) {
+                          console.log('Delete conversation:', id);
+                          setSelectedChat(null);
+                          toast.success('Conversation deleted');
+                        }
+                      }}
+                      onSearch={() => setShowMessageSearch(true)}
+                    />
                   </>
                 )}
-                <button className="p-2 hover:bg-gray-100 rounded-lg">
-                  <MoreVertical className="w-5 h-5 text-gray-500" />
-                </button>
               </div>
             </div>
+            
+            {/* Enhanced Message Search */}
+            {showMessageSearch && selectedChatType !== 'ai' && (
+              <MessageSearch
+                conversationId={selectedChat}
+                isOpen={showMessageSearch}
+                onClose={() => setShowMessageSearch(false)}
+                onMessageSelect={(messageId) => {
+                  const element = document.getElementById(`message-${messageId}`);
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    element.classList.add('bg-blue-100', 'dark:bg-blue-900/30');
+                    setTimeout(() => {
+                      element.classList.remove('bg-blue-100', 'dark:bg-blue-900/30');
+                    }, 2000);
+                  }
+                  setShowMessageSearch(false);
+                }}
+              />
+            )}
+            
+            {/* Enhanced Pinned Messages Panel */}
+            {selectedChat && selectedChatType !== 'ai' && (
+              <PinnedMessagesPanel
+                conversationId={selectedChat}
+                onMessageClick={(messageId) => {
+                  const element = document.getElementById(`message-${messageId}`);
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    element.classList.add('bg-yellow-100', 'dark:bg-yellow-900/30');
+                    setTimeout(() => {
+                      element.classList.remove('bg-yellow-100', 'dark:bg-yellow-900/30');
+                    }, 2000);
+                  }
+                }}
+                onUnpin={(messageId) => {
+                  setPinnedMessages(prev => prev.filter(id => id !== messageId));
+                  toast.success('Message unpinned');
+                }}
+              />
+            )}
 
             {/* Search bar */}
             {showSearch && (
@@ -1717,7 +1844,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                     const msg = messages.find(m => m._id === msgId);
                     if (!msg) return null;
                     return (
-                      <div key={msgId} className="bg-white p-2 rounded text-sm">
+                      <div key={msgId} className="bg-white dark:bg-gray-700 p-2 rounded text-sm">
                         <p className="text-gray-800 truncate">{msg.content}</p>
                         <span className="text-xs text-gray-500">{msg.sender?.name}</span>
                       </div>
@@ -1728,7 +1855,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
             )}
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-2 md:p-4 bg-gray-50 relative">
+            <div className="flex-1 overflow-y-auto p-2 md:p-4 bg-gray-50 dark:bg-gray-900 relative">
               {isDragActive && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -1781,8 +1908,8 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                       <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mb-4 shadow-lg">
                         <Globe className="w-10 h-10 text-white" />
                       </div>
-                      <h3 className="text-2xl font-bold text-gray-900 mb-2">Welcome to AI Learning Guide!</h3>
-                      <div className="text-gray-600 text-center max-w-md mb-6">
+                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Welcome to AI Learning Guide!</h3>
+                      <div className="text-gray-600 dark:text-gray-300 text-center max-w-md mb-6">
                         I'm your personal AI assistant. Ask me anything about your courses, get study tips, or explore new topics!
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
@@ -1795,10 +1922,10 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                           <button
                             key={idx}
                             onClick={() => setNewMessage(item.question)}
-                            className="p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-purple-300 hover:shadow-md transition-all text-left group"
+                            className="p-4 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-purple-300 dark:hover:border-purple-600 hover:shadow-md transition-all text-left group"
                           >
                             <div className="text-2xl mb-2">{item.icon}</div>
-                            <div className="text-sm font-medium text-gray-700 group-hover:text-purple-600">
+                            <div className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400">
                               {item.text}
                             </div>
                           </button>
@@ -1838,8 +1965,8 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                             isUser
                               ? 'bg-blue-600 text-white'
                             : message.isError
-                            ? 'bg-red-50 text-red-800 border border-red-200'
-                            : 'bg-gradient-to-r from-purple-50 to-blue-50 text-gray-800 border border-purple-100'
+                            ? 'bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-700'
+                            : 'bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 text-gray-800 dark:text-gray-100 border border-purple-100 dark:border-purple-800'
                         }`}>
                           {isUser ? (
                             <div className="text-sm md:text-base whitespace-pre-wrap break-words">
@@ -1852,7 +1979,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                             />
                           )}
                         </div>
-                        <div className="text-xs text-gray-500 mt-1 px-2">
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 px-2">
                           {new Date(message.timestamp || message.createdAt).toLocaleTimeString('en-US', { 
                             hour: 'numeric', 
                             minute: '2-digit' 
@@ -1870,7 +1997,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                         <Globe className="w-5 h-5 md:w-6 md:h-6 text-white" />
                       </div>
                       <div className="flex flex-col max-w-[75%] md:max-w-[70%] items-start">
-                        <div className="px-4 py-2 md:py-3 rounded-2xl bg-gradient-to-r from-purple-50 to-blue-50 text-gray-800 border border-purple-100">
+                        <div className="px-4 py-2 md:py-3 rounded-2xl bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 text-gray-800 dark:text-gray-100 border border-purple-100 dark:border-purple-800">
                           <MarkdownMessage 
                             content={currentStreamMessage} 
                             className="text-sm md:text-base"
@@ -1957,7 +2084,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
             )}
 
             {/* Message input */}
-            <div className="p-2 md:p-4 border-t bg-white">
+            <div className="p-2 md:p-4 border-t dark:border-gray-700 bg-white dark:bg-gray-800">
               {uploadingFiles.length > 0 && (
                 <div className="mb-2 flex flex-wrap gap-2">
                   {uploadingFiles.map(file => (
@@ -1972,7 +2099,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
               <div className="flex items-end gap-1 md:gap-2">
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                   title="Attach file"
                 >
                   <Paperclip className="w-4 md:w-5 h-4 md:h-5" />
@@ -1983,7 +2110,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                   className={`p-2 rounded-lg transition-colors ${
                     isRecordingVoice 
                       ? 'bg-red-500 text-white animate-pulse' 
-                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                   title={isRecordingVoice ? 'Stop recording' : 'Record voice message'}
                 >
@@ -1995,7 +2122,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                   className={`p-2 rounded-lg transition-colors ${
                     isRecordingVideo 
                       ? 'bg-red-500 text-white animate-pulse' 
-                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                   title={isRecordingVideo ? 'Stop recording' : 'Record video message'}
                 >
@@ -2033,13 +2160,13 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
                     }}
                     onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
                     placeholder="Type a message..."
-                    className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10 text-sm md:text-base"
+                    className="w-full px-3 md:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10 text-sm md:text-base bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   />
                   <button
                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                   >
-                    <Smile className="w-4 md:w-5 h-4 md:h-5 text-gray-500" />
+                    <Smile className="w-4 md:w-5 h-4 md:h-5 text-gray-500 dark:text-gray-400" />
                   </button>
 
                   {showEmojiPicker && (
@@ -2067,7 +2194,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center bg-gray-50 p-4">
+          <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
             <div className="text-center max-w-md">
               <MessageCircle className="w-12 md:w-16 h-12 md:h-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-base md:text-lg font-semibold text-gray-700 mb-2">Select a chat to start messaging</h3>
@@ -2078,6 +2205,21 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
       </div>
       </div>
 
+      {/* Thread View Sidebar */}
+      <AnimatePresence>
+        {showThreadView && activeThread && selectedChatType !== 'ai' && (
+          <ThreadView
+            parentMessageId={activeThread}
+            currentUserId={user?._id}
+            onClose={() => {
+              setShowThreadView(false);
+              setActiveThread(null);
+            }}
+            socket={socketRef.current}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Forward Message Modal */}
       {showForwardModal && forwardingMessage && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -2085,7 +2227,7 @@ const ChatPortalEnhanced = ({ user, token, onNavigateHome }) => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white rounded-lg max-w-md w-full max-h-[80vh] overflow-hidden"
+            className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full max-h-[80vh] overflow-hidden"
           >
             <div className="p-4 border-b flex items-center justify-between">
               <h3 className="text-lg font-semibold">Forward Message</h3>
@@ -2150,13 +2292,13 @@ const CommunityItem = ({ community, onSelectChannel }) => {
     <div className="mb-2">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center gap-2 p-3 rounded-lg hover:bg-white transition-colors"
+        className="w-full flex items-center gap-2 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
       >
-        {expanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-        <Users className="w-5 h-5 text-gray-500" />
+        {expanded ? <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" /> : <ChevronRight className="w-4 h-4 text-gray-500 dark:text-gray-400" />}
+        <Users className="w-5 h-5 text-gray-500 dark:text-gray-400" />
         <div className="flex-1 text-left">
-          <p className="text-sm font-medium text-gray-900">{community.name}</p>
-          <p className="text-xs text-gray-500">{community.stats?.totalMembers || 0} members</p>
+          <p className="text-sm font-medium text-gray-900 dark:text-white">{community.name}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{community.stats?.totalMembers || 0} members</p>
         </div>
       </button>
 
@@ -2166,10 +2308,10 @@ const CommunityItem = ({ community, onSelectChannel }) => {
             <button
               key={channel._id}
               onClick={() => onSelectChannel(channel._id)}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white transition-colors"
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
-              <Hash className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-gray-700">{channel.name}</span>
+              <Hash className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+              <span className="text-sm text-gray-700 dark:text-gray-300">{channel.name}</span>
             </button>
           ))}
         </div>

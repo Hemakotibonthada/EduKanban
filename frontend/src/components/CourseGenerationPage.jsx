@@ -246,26 +246,26 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
+  <div className="max-w-4xl mx-auto">
       {/* Progress Bar */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-bold text-gray-900">Create AI-Powered Course</h1>
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create AI-Powered Course</h1>
+          <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
             <span>Step {step} of 4</span>
           </div>
         </div>
         
-        <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-2">
           <motion.div
-            className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-900 dark:to-purple-900 h-2 rounded-full"
             initial={{ width: '25%' }}
             animate={{ width: `${(step / 4) * 100}%` }}
             transition={{ duration: 0.3 }}
           />
         </div>
         
-        <div className="flex justify-between mt-2 text-xs text-gray-500">
+        <div className="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
           <span>Course Details</span>
           <span>Learning Preferences</span>
           <span>Generate Course</span>
@@ -282,18 +282,18 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="bg-white rounded-xl p-8 shadow-sm border"
+            className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-sm border dark:border-gray-700"
           >
             <div className="flex items-center space-x-3 mb-6">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <BookOpen className="w-6 h-6 text-blue-600" />
+              <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-300" />
               </div>
-              <h2 className="text-xl font-semibold text-gray-900">Course Details</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Course Details</h2>
             </div>
 
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Course Title *
                 </label>
                 <input
@@ -302,19 +302,19 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
                   value={formData.title}
                   onChange={handleInputChange}
                   placeholder="e.g., Complete Web Development Bootcamp"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-700 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Subject *
                 </label>
                 <select
                   name="subject"
                   value={formData.subject}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-700 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="">Select a subject</option>
                   {subjects.map(subject => (
@@ -325,14 +325,14 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Duration
                   </label>
                   <select
                     name="duration"
                     value={formData.duration}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-700 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     <option value="2 weeks">2 weeks</option>
                     <option value="4 weeks">4 weeks</option>
@@ -343,14 +343,14 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Difficulty Level
                   </label>
                   <select
                     name="difficulty"
                     value={formData.difficulty}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-700 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     <option value="Beginner">Beginner</option>
                     <option value="Intermediate">Intermediate</option>
@@ -361,7 +361,7 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
 
               {formData.subject && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                     Specific Topics (Optional)
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -373,9 +373,9 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
                           value={topic}
                           checked={formData.specificTopics.includes(topic)}
                           onChange={handleInputChange}
-                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          className="w-4 h-4 text-blue-600 dark:text-blue-300 border-gray-300 dark:border-gray-700 rounded focus:ring-blue-500 dark:focus:ring-blue-700"
                         />
-                        <span className="text-sm text-gray-700">{topic}</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{topic}</span>
                       </label>
                     ))}
                   </div>
@@ -386,7 +386,7 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
             <div className="flex justify-end mt-8">
               <button
                 onClick={handleNext}
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center space-x-2"
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-900 dark:to-purple-900 text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center space-x-2"
               >
                 <span>Next</span>
                 <ArrowRight className="w-4 h-4" />
@@ -403,26 +403,26 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="bg-white rounded-xl p-8 shadow-sm border"
+            className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-sm border dark:border-gray-700"
           >
             <div className="flex items-center space-x-3 mb-6">
-              <div className="p-3 bg-purple-100 rounded-lg">
-                <User className="w-6 h-6 text-purple-600" />
+              <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                <User className="w-6 h-6 text-purple-600 dark:text-purple-300" />
               </div>
-              <h2 className="text-xl font-semibold text-gray-900">Learning Preferences</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Learning Preferences</h2>
             </div>
 
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Your Knowledge Level
                   </label>
                   <select
                     name="knowledgeLevel"
                     value={formData.knowledgeLevel}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-700 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     <option value="Beginner">Beginner</option>
                     <option value="Intermediate">Intermediate</option>
@@ -432,7 +432,7 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Time Commitment
                   </label>
                   <input
@@ -441,13 +441,13 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
                     value={formData.timeCommitment}
                     onChange={handleInputChange}
                     placeholder="e.g., 5 hours per week"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-700 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Preferred Learning Style
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -459,16 +459,16 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
                         value={style}
                         checked={formData.preferredLearningStyle === style}
                         onChange={handleInputChange}
-                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                        className="w-4 h-4 text-blue-600 dark:text-blue-300 border-gray-300 dark:border-gray-700 focus:ring-blue-500 dark:focus:ring-blue-700"
                       />
-                      <span className="text-sm text-gray-700">{style}</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-300">{style}</span>
                     </label>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                   Learning Goals
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -487,9 +487,9 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
                         value={goal}
                         checked={formData.learningGoals.includes(goal)}
                         onChange={handleInputChange}
-                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        className="w-4 h-4 text-blue-600 dark:text-blue-300 border-gray-300 dark:border-gray-700 rounded focus:ring-blue-500 dark:focus:ring-blue-700"
                       />
-                      <span className="text-sm text-gray-700">{goal}</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-300">{goal}</span>
                     </label>
                   ))}
                 </div>
@@ -499,13 +499,13 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
             <div className="flex justify-between mt-8">
               <button
                 onClick={handlePrevious}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-6 py-3 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
                 Previous
               </button>
               <button
                 onClick={handleNext}
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center space-x-2"
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-900 dark:to-purple-900 text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center space-x-2"
               >
                 <span>Next</span>
                 <ArrowRight className="w-4 h-4" />
@@ -522,43 +522,43 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="bg-white rounded-xl p-8 shadow-sm border"
+            className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-sm border dark:border-gray-700"
           >
             <div className="text-center">
               <div className="flex items-center justify-center space-x-3 mb-6">
-                <div className="p-3 bg-green-100 rounded-lg">
-                  <Brain className="w-6 h-6 text-green-600" />
+                <div className="p-3 bg-green-100 dark:bg-green-900 rounded-lg">
+                  <Brain className="w-6 h-6 text-green-600 dark:text-green-300" />
                 </div>
-                <h2 className="text-xl font-semibold text-gray-900">AI Course Generation</h2>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">AI Course Generation</h2>
               </div>
 
               {!generating ? (
                 <div className="space-y-6">
-                  <div className="bg-gray-50 rounded-lg p-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Course Summary</h3>
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Course Summary</h3>
                     <div className="text-left space-y-2">
-                      <p><strong>Title:</strong> {formData.title}</p>
-                      <p><strong>Subject:</strong> {formData.subject}</p>
-                      <p><strong>Duration:</strong> {formData.duration}</p>
-                      <p><strong>Difficulty:</strong> {formData.difficulty}</p>
-                      <p><strong>Your Level:</strong> {formData.knowledgeLevel}</p>
-                      <p><strong>Learning Style:</strong> {formData.preferredLearningStyle}</p>
+                      <p className="text-gray-900 dark:text-gray-300"><strong>Title:</strong> {formData.title}</p>
+                      <p className="text-gray-900 dark:text-gray-300"><strong>Subject:</strong> {formData.subject}</p>
+                      <p className="text-gray-900 dark:text-gray-300"><strong>Duration:</strong> {formData.duration}</p>
+                      <p className="text-gray-900 dark:text-gray-300"><strong>Difficulty:</strong> {formData.difficulty}</p>
+                      <p className="text-gray-900 dark:text-gray-300"><strong>Your Level:</strong> {formData.knowledgeLevel}</p>
+                      <p className="text-gray-900 dark:text-gray-300"><strong>Learning Style:</strong> {formData.preferredLearningStyle}</p>
                       {formData.specificTopics.length > 0 && (
-                        <p><strong>Topics:</strong> {formData.specificTopics.join(', ')}</p>
+                        <p className="text-gray-900 dark:text-gray-300"><strong>Topics:</strong> {formData.specificTopics.join(', ')}</p>
                       )}
                     </div>
                   </div>
 
                   <div className="flex items-center justify-center space-x-2 text-blue-600">
-                    <Zap className="w-5 h-5" />
-                    <span className="text-sm font-medium">
+                    <Zap className="w-5 h-5 dark:text-blue-300" />
+                    <span className="text-sm font-medium dark:text-blue-200">
                       Our AI will create a personalized learning path just for you!
                     </span>
                   </div>
 
                   <button
                     onClick={generateCourse}
-                    className="px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center space-x-3 mx-auto"
+                    className="px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 dark:from-green-900 dark:to-blue-900 text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center space-x-3 mx-auto"
                   >
                     <Lightbulb className="w-5 h-5" />
                     <span>Generate My Course</span>
@@ -597,7 +597,7 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
                 <div className="flex justify-between mt-8">
                   <button
                     onClick={handlePrevious}
-                    className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="px-6 py-3 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
                     Previous
                   </button>
@@ -615,35 +615,35 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="bg-white rounded-xl p-8 shadow-sm border"
+            className="bg-white dark:bg-gray-800 rounded-xl p-8 shadow-sm border dark:border-gray-700"
           >
             <div className="flex items-center space-x-3 mb-6">
-              <div className="p-3 bg-yellow-100 rounded-lg">
-                <Star className="w-6 h-6 text-yellow-600" />
+              <div className="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
+                <Star className="w-6 h-6 text-yellow-600 dark:text-yellow-300" />
               </div>
-              <h2 className="text-xl font-semibold text-gray-900">Review Your Course</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Review Your Course</h2>
             </div>
 
             {!generatedCourse ? (
               <div className="text-center py-12">
                 <div className="space-y-6">
-                  <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+                  <div className="animate-spin w-8 h-8 border-4 border-blue-600 dark:border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
                   <div>
-                    <p className="text-gray-600 text-lg">Generating your personalized course...</p>
-                    <p className="text-sm text-gray-500 mt-2">This may take a few moments</p>
+                    <p className="text-gray-600 dark:text-gray-300 text-lg">Generating your personalized course...</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">This may take a few moments</p>
                   </div>
-                  <div className="bg-blue-50 rounded-lg p-6 max-w-md mx-auto">
-                    <h3 className="font-semibold text-gray-900 mb-3">Course Preview</h3>
+                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 max-w-md mx-auto border dark:border-blue-800">
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Course Preview</h3>
                     <div className="text-left space-y-2 text-sm">
-                      <p><strong>Topic:</strong> {formData.subject || formData.title}</p>
-                      <p><strong>Level:</strong> {formData.knowledgeLevel}</p>
-                      <p><strong>Time Commitment:</strong> {formData.timeCommitment}</p>
-                      <p><strong>Duration:</strong> {formData.duration}</p>
+                      <p className="text-gray-900 dark:text-gray-300"><strong>Topic:</strong> {formData.subject || formData.title}</p>
+                      <p className="text-gray-900 dark:text-gray-300"><strong>Level:</strong> {formData.knowledgeLevel}</p>
+                      <p className="text-gray-900 dark:text-gray-300"><strong>Time Commitment:</strong> {formData.timeCommitment}</p>
+                      <p className="text-gray-900 dark:text-gray-300"><strong>Duration:</strong> {formData.duration}</p>
                     </div>
                   </div>
                   <button
                     onClick={() => setStep(3)}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="px-6 py-2 bg-blue-600 dark:bg-blue-900 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
                   >
                     Regenerate Course
                   </button>
@@ -651,26 +651,26 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
               </div>
             ) : (
               <div className="space-y-6">
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{generatedCourse.title}</h3>
-                  <p className="text-gray-600 mb-4">{generatedCourse.description}</p>
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-6 border dark:border-blue-800">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{generatedCourse.title}</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-4">{generatedCourse.description}</p>
                   
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div className="flex items-center space-x-2">
-                      <Clock className="w-4 h-4 text-blue-600" />
-                      <span>{generatedCourse.duration || formData.duration}</span>
+                      <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <span className="text-gray-900 dark:text-gray-300">{generatedCourse.duration || formData.duration}</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Target className="w-4 h-4 text-green-600" />
-                      <span>{generatedCourse.difficulty || formData.difficulty}</span>
+                      <Target className="w-4 h-4 text-green-600 dark:text-green-400" />
+                      <span className="text-gray-900 dark:text-gray-300">{generatedCourse.difficulty || formData.difficulty}</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <BookOpen className="w-4 h-4 text-purple-600" />
-                      <span>{generatedCourse.modules?.length || 0} Modules</span>
+                      <BookOpen className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                      <span className="text-gray-900 dark:text-gray-300">{generatedCourse.modules?.length || 0} Modules</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Award className="w-4 h-4 text-orange-600" />
-                      <span>Certificate</span>
+                      <Award className="w-4 h-4 text-orange-600 dark:text-orange-300" />
+                      <span className="dark:text-gray-300">Certificate</span>
                     </div>
                   </div>
                 </div>
@@ -682,21 +682,21 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
                       {generatedCourse.modules.map((module, index) => (
                         <div key={index} className="border rounded-lg p-4">
                           <div className="flex items-center justify-between mb-2">
-                            <h5 className="font-medium text-gray-900">
+                            <h5 className="font-medium text-gray-900 dark:text-white">
                               Module {index + 1}: {module.title}
                             </h5>
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-gray-500 dark:text-gray-400">
                               {module.estimatedTime || '2-3 hours'}
                             </span>
                           </div>
-                          <p className="text-gray-600 text-sm mb-3">{module.description}</p>
+                          <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">{module.description}</p>
                           
                           {module.topics && (
                             <div className="flex flex-wrap gap-2">
                               {module.topics.map((topic, topicIndex) => (
                                 <span
                                   key={topicIndex}
-                                  className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs"
+                                  className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 rounded text-xs"
                                 >
                                   {topic}
                                 </span>
@@ -711,12 +711,12 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
 
                 {generatedCourse.learningOutcomes && (
                   <div>
-                    <h4 className="text-lg font-medium text-gray-900 mb-4">Learning Outcomes</h4>
+                    <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Learning Outcomes</h4>
                     <ul className="space-y-2">
                       {generatedCourse.learningOutcomes.map((outcome, index) => (
                         <li key={index} className="flex items-start space-x-2">
-                          <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                          <span className="text-gray-700">{outcome}</span>
+                          <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-300 mt-0.5 flex-shrink-0" />
+                          <span className="text-gray-700 dark:text-gray-300">{outcome}</span>
                         </li>
                       ))}
                     </ul>
@@ -727,7 +727,7 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
                   <button
                     onClick={regenerateCourse}
                     disabled={generating}
-                    className="px-6 py-3 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors flex items-center space-x-2 disabled:opacity-50"
+                    className="px-6 py-3 border border-blue-600 dark:border-blue-900 text-blue-600 dark:text-blue-300 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900 transition-colors flex items-center space-x-2 disabled:opacity-50"
                   >
                     {generating ? (
                       <>
@@ -746,7 +746,7 @@ const CourseGenerationPage = ({ user, token, onCourseCreated }) => {
                   <button
                     onClick={handleStartLearning}
                     disabled={loading || !generatedCourse}
-                    className="px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center space-x-2 disabled:opacity-50"
+                    className="px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 dark:from-green-900 dark:to-blue-900 text-white rounded-lg hover:shadow-lg transition-all duration-200 flex items-center space-x-2 disabled:opacity-50"
                   >
                     <Play className="w-5 h-5" />
                     <span>Start Learning</span>

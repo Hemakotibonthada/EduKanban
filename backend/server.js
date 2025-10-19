@@ -43,6 +43,9 @@ async function startServer() {
     const socialRoutes = require('./routes/social');
     const quizRoutes = require('./routes/quizzes');
     const examRoutes = require('./routes/exams');
+    const flashcardRoutes = require('./routes/flashcards');
+    const peerReviewRoutes = require('./routes/peerReview');
+    const aiInsightsRoutes = require('./routes/aiInsights');
 
     // Import middleware
     const authMiddleware = require('./middleware/auth');
@@ -141,8 +144,12 @@ async function startServer() {
     // Add rate limit headers to all responses
     app.use(addRateLimitHeaders);
 
-    // General API rate limiting
-    app.use('/api/', apiLimiter);
+    // General API rate limiting (skip in development for local testing)
+    if (process.env.NODE_ENV !== 'development') {
+      app.use('/api/', apiLimiter);
+    } else {
+      console.log('⚠️  Rate limiting disabled in development mode');
+    }
 
     // Strict auth endpoint rate limiting
     app.use('/api/auth/login', authLimiter);
@@ -273,6 +280,9 @@ async function startServer() {
     app.use('/api/social', authMiddleware, socialRoutes);
     app.use('/api/quizzes', authMiddleware, quizRoutes);
     app.use('/api/exams', authMiddleware, examRoutes);
+    app.use('/api/flashcards', authMiddleware, flashcardRoutes);
+    app.use('/api/peer-review', authMiddleware, peerReviewRoutes);
+    app.use('/api/analytics', authMiddleware, aiInsightsRoutes);
     app.use('/api/workground', authMiddleware, require('./routes/workground'));
 
     // Step 10: Configure Socket.IO

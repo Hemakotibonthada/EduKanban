@@ -185,9 +185,9 @@ const RehabilitationCenter = ({ user, token }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
       {/* Header */}
-      <div className="bg-white border-b shadow-sm">
+      <div className="bg-white dark:bg-gray-800 border-b dark:border-gray-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -198,7 +198,7 @@ const RehabilitationCenter = ({ user, token }) => {
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   Rehabilitation Center
                 </h1>
-                <p className="text-gray-600">Your journey to recovery and wellness</p>
+                <p className="text-gray-600 dark:text-gray-400">Your journey to recovery and wellness</p>
               </div>
             </div>
             
@@ -222,8 +222,8 @@ const RehabilitationCenter = ({ user, token }) => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Sidebar - Program Selection */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">My Programs</h2>
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 mb-6 border dark:border-gray-700">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">My Programs</h2>
                 <div className="space-y-2">
                   {programs.map((program) => (
                     <button
@@ -232,7 +232,7 @@ const RehabilitationCenter = ({ user, token }) => {
                       className={`w-full text-left p-4 rounded-lg transition-all ${
                         selectedProgram?._id === program._id
                           ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
-                          : 'bg-gray-50 hover:bg-gray-100'
+                          : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-900 dark:text-white'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -242,7 +242,7 @@ const RehabilitationCenter = ({ user, token }) => {
                         <span className={`px-2 py-1 rounded text-xs font-medium ${
                           selectedProgram?._id === program._id
                             ? 'bg-white/20'
-                            : 'bg-blue-100 text-blue-700'
+                            : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
                         }`}>
                           {program.status}
                         </span>
@@ -258,8 +258,8 @@ const RehabilitationCenter = ({ user, token }) => {
               </div>
 
               {/* Quick Actions */}
-              <div className="bg-white rounded-xl shadow-sm p-4">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">Quick Actions</h3>
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border dark:border-gray-700">
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Quick Actions</h3>
                 <div className="space-y-2">
                   <button
                     onClick={() => setShowCheckInModal(true)}
@@ -274,23 +274,23 @@ const RehabilitationCenter = ({ user, token }) => {
                   
                   <button
                     onClick={() => setShowAISupportModal(true)}
-                    className="w-full flex items-center gap-3 p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors text-left"
+                    className="w-full flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors text-left"
                   >
-                    <MessageCircle className="w-5 h-5 text-blue-600" />
+                    <MessageCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     <div>
-                      <p className="font-medium text-blue-900">AI Support</p>
-                      <p className="text-xs text-blue-700">Get guidance</p>
+                      <p className="font-medium text-blue-900 dark:text-blue-300">AI Support</p>
+                      <p className="text-xs text-blue-700 dark:text-blue-400">Get guidance</p>
                     </div>
                   </button>
                   
                   <button
                     onClick={() => toast.info('Crisis support: Call 988')}
-                    className="w-full flex items-center gap-3 p-3 bg-red-50 hover:bg-red-100 rounded-lg transition-colors text-left"
+                    className="w-full flex items-center gap-3 p-3 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors text-left"
                   >
-                    <Phone className="w-5 h-5 text-red-600" />
+                    <Phone className="w-5 h-5 text-red-600 dark:text-red-400" />
                     <div>
-                      <p className="font-medium text-red-900">Crisis Hotline</p>
-                      <p className="text-xs text-red-700">988 - Available 24/7</p>
+                      <p className="font-medium text-red-900 dark:text-red-300">Crisis Hotline</p>
+                      <p className="text-xs text-red-700 dark:text-red-400">988 - Available 24/7</p>
                     </div>
                   </button>
                 </div>
@@ -356,38 +356,38 @@ const WelcomeScreen = ({ onCreateProgram }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    className="bg-white rounded-2xl shadow-xl p-12 text-center max-w-3xl mx-auto"
+    className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-12 text-center max-w-3xl mx-auto border dark:border-gray-700"
   >
     <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
       <Heart className="w-10 h-10 text-white" />
     </div>
     
-    <h2 className="text-3xl font-bold text-gray-900 mb-4">
+    <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
       Welcome to Your Recovery Journey
     </h2>
     
-    <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+    <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
       This is a safe, supportive space designed to help you overcome addiction and build a healthier future. 
       Our AI-powered tools, evidence-based strategies, and compassionate support will guide you every step of the way.
     </p>
     
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div className="p-6 bg-blue-50 rounded-xl">
-        <Brain className="w-8 h-8 text-blue-600 mx-auto mb-3" />
-        <h3 className="font-semibold text-gray-900 mb-2">AI-Powered Support</h3>
-        <p className="text-sm text-gray-600">24/7 guidance from our compassionate AI counselor</p>
+      <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl border dark:border-blue-800/30">
+        <Brain className="w-8 h-8 text-blue-600 dark:text-blue-400 mx-auto mb-3" />
+        <h3 className="font-semibold text-gray-900 dark:text-white mb-2">AI-Powered Support</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400">24/7 guidance from our compassionate AI counselor</p>
       </div>
       
-      <div className="p-6 bg-purple-50 rounded-xl">
-        <Target className="w-8 h-8 text-purple-600 mx-auto mb-3" />
-        <h3 className="font-semibold text-gray-900 mb-2">Personalized Plan</h3>
-        <p className="text-sm text-gray-600">Custom recovery roadmap tailored to your needs</p>
+      <div className="p-6 bg-purple-50 dark:bg-purple-900/20 rounded-xl border dark:border-purple-800/30">
+        <Target className="w-8 h-8 text-purple-600 dark:text-purple-400 mx-auto mb-3" />
+        <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Personalized Plan</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400">Custom recovery roadmap tailored to your needs</p>
       </div>
       
-      <div className="p-6 bg-pink-50 rounded-xl">
-        <Shield className="w-8 h-8 text-pink-600 mx-auto mb-3" />
-        <h3 className="font-semibold text-gray-900 mb-2">Complete Privacy</h3>
-        <p className="text-sm text-gray-600">Your journey is confidential and secure</p>
+      <div className="p-6 bg-pink-50 dark:bg-pink-900/20 rounded-xl border dark:border-pink-800/30">
+        <Shield className="w-8 h-8 text-pink-600 dark:text-pink-400 mx-auto mb-3" />
+        <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Complete Privacy</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400">Your journey is confidential and secure</p>
       </div>
     </div>
     
@@ -399,7 +399,7 @@ const WelcomeScreen = ({ onCreateProgram }) => (
       <span>Start Your Recovery Journey</span>
     </button>
     
-    <p className="text-sm text-gray-500 mt-6">
+    <p className="text-sm text-gray-500 dark:text-gray-400 mt-6">
       Crisis? Call <strong>988</strong> for immediate support (24/7)
     </p>
   </motion.div>
@@ -407,8 +407,8 @@ const WelcomeScreen = ({ onCreateProgram }) => (
 
 // Progress Overview Component
 const ProgressOverview = ({ program, stats }) => (
-  <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-    <h2 className="text-xl font-bold text-gray-900 mb-4">Progress Overview</h2>
+  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6 border dark:border-gray-700">
+    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Progress Overview</h2>
     
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl text-white">
@@ -462,30 +462,30 @@ const RecoveryPlan = ({ program, token, onUpdate }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Recovery Plan</h2>
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6 border dark:border-gray-700">
+      <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Recovery Plan</h2>
       
       <div className="space-y-3">
         {program.recoveryPlan.phases.map((phase, index) => (
           <div
             key={index}
             className={`border-2 rounded-lg overflow-hidden transition-all ${
-              phase.completed ? 'border-green-500 bg-green-50' : 'border-gray-200'
+              phase.completed ? 'border-green-500 dark:border-green-600 bg-green-50 dark:bg-green-900/20' : 'border-gray-200 dark:border-gray-700'
             }`}
           >
             <button
               onClick={() => setExpandedPhase(expandedPhase === index ? -1 : index)}
-              className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+              className="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                  phase.completed ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'
+                  phase.completed ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
                 }`}>
                   {phase.completed ? <CheckCircle className="w-5 h-5" /> : phase.phase}
                 </div>
                 <div className="text-left">
-                  <h3 className="font-semibold text-gray-900">{phase.title}</h3>
-                  <p className="text-sm text-gray-600">{phase.duration}</p>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">{phase.title}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{phase.duration}</p>
                 </div>
               </div>
               <motion.div
@@ -508,14 +508,14 @@ const RecoveryPlan = ({ program, token, onUpdate }) => {
                 >
                   <div className="p-4 space-y-4">
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                        <Target className="w-4 h-4 text-blue-600" />
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                        <Target className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                         Goals
                       </h4>
                       <ul className="space-y-1">
                         {phase.goals.map((goal, i) => (
-                          <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
-                            <span className="text-blue-600 mt-1">•</span>
+                          <li key={i} className="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
+                            <span className="text-blue-600 dark:text-blue-400 mt-1">•</span>
                             <span>{goal}</span>
                           </li>
                         ))}
@@ -523,14 +523,14 @@ const RecoveryPlan = ({ program, token, onUpdate }) => {
                     </div>
                     
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                        <Lightbulb className="w-4 h-4 text-yellow-600" />
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                        <Lightbulb className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
                         Strategies
                       </h4>
                       <ul className="space-y-1">
                         {phase.strategies.map((strategy, i) => (
-                          <li key={i} className="text-sm text-gray-600 flex items-start gap-2">
-                            <span className="text-yellow-600 mt-1">•</span>
+                          <li key={i} className="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
+                            <span className="text-yellow-600 dark:text-yellow-400 mt-1">•</span>
                             <span>{strategy}</span>
                           </li>
                         ))}
@@ -573,32 +573,32 @@ const RecentActivity = ({ program }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Check-ins</h2>
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6 border dark:border-gray-700">
+      <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Recent Check-ins</h2>
       
       {recentEntries.length === 0 ? (
-        <p className="text-gray-500 text-center py-8">No check-ins yet. Start your first one!</p>
+        <p className="text-gray-500 dark:text-gray-400 text-center py-8">No check-ins yet. Start your first one!</p>
       ) : (
         <div className="space-y-3">
           {recentEntries.map((entry, index) => (
-            <div key={index} className="p-4 bg-gray-50 rounded-lg">
+            <div key={index} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   {getMoodIcon(entry.mood)}
-                  <span className="font-medium capitalize">{entry.mood.replace('_', ' ')}</span>
+                  <span className="font-medium capitalize text-gray-900 dark:text-white">{entry.mood.replace('_', ' ')}</span>
                 </div>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-gray-500 dark:text-gray-400">
                   {new Date(entry.date).toLocaleDateString()}
                 </span>
               </div>
               
               {entry.cravingLevel !== undefined && (
                 <div className="mb-2">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                     <Activity className="w-4 h-4" />
                     <span>Craving Level: {entry.cravingLevel}/10</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+                  <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mt-1">
                     <div
                       className="bg-gradient-to-r from-green-500 to-red-500 h-2 rounded-full"
                       style={{ width: `${(entry.cravingLevel / 10) * 100}%` }}
@@ -608,7 +608,7 @@ const RecentActivity = ({ program }) => {
               )}
               
               {entry.notes && (
-                <p className="text-sm text-gray-600 italic">&quot;{entry.notes}&quot;</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 italic">&quot;{entry.notes}&quot;</p>
               )}
             </div>
           ))}
@@ -620,14 +620,14 @@ const RecentActivity = ({ program }) => {
 
 // Milestones Component
 const Milestones = ({ program }) => (
-  <div className="bg-white rounded-xl shadow-sm p-6">
-    <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border dark:border-gray-700">
+    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
       <Award className="w-6 h-6 text-yellow-500" />
       Milestones Achieved
     </h2>
     
     {program.milestones.length === 0 ? (
-      <p className="text-gray-500 text-center py-8">Keep going! Your first milestone is coming soon.</p>
+      <p className="text-gray-500 dark:text-gray-400 text-center py-8">Keep going! Your first milestone is coming soon.</p>
     ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {program.milestones.map((milestone, index) => (
@@ -636,14 +636,14 @@ const Milestones = ({ program }) => (
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: index * 0.1 }}
-            className="p-4 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg border-2 border-yellow-200"
+            className="p-4 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-lg border-2 border-yellow-200 dark:border-yellow-700"
           >
             <div className="flex items-start gap-3">
               <Star className="w-6 h-6 text-yellow-500 flex-shrink-0" />
               <div>
-                <h3 className="font-semibold text-gray-900">{milestone.milestone}</h3>
-                <p className="text-sm text-gray-600 mt-1">{milestone.celebrationMessage}</p>
-                <p className="text-xs text-gray-500 mt-2">
+                <h3 className="font-semibold text-gray-900 dark:text-white">{milestone.milestone}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{milestone.celebrationMessage}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
                   {new Date(milestone.achievedAt).toLocaleDateString()}
                 </p>
               </div>
@@ -696,27 +696,27 @@ const CreateProgramModal = ({ onClose, onCreate }) => {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border dark:border-gray-700"
       >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Start Recovery Program</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Start Recovery Program</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           </button>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Addiction Type
             </label>
             <select
               value={formData.addictionType}
               onChange={(e) => setFormData({ ...formData, addictionType: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               required
             >
               {addictionTypes.map(type => (
@@ -726,20 +726,20 @@ const CreateProgramModal = ({ onClose, onCreate }) => {
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Specific Addiction (e.g., Instagram, Call of Duty)
             </label>
             <input
               type="text"
               value={formData.specificAddiction}
               onChange={(e) => setFormData({ ...formData, specificAddiction: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Optional"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Severity
             </label>
             <div className="grid grid-cols-3 gap-3">
@@ -751,7 +751,7 @@ const CreateProgramModal = ({ onClose, onCreate }) => {
                   className={`py-3 rounded-lg font-medium transition-all ${
                     formData.severity === level
                       ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                   }`}
                 >
                   {level.charAt(0).toUpperCase() + level.slice(1)}
@@ -761,13 +761,13 @@ const CreateProgramModal = ({ onClose, onCreate }) => {
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Primary Goal
             </label>
             <textarea
               value={formData.primaryGoal}
               onChange={(e) => setFormData({ ...formData, primaryGoal: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               rows="3"
               placeholder="What do you want to achieve through this recovery program?"
               required
@@ -775,14 +775,14 @@ const CreateProgramModal = ({ onClose, onCreate }) => {
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Target Completion Date (Optional)
             </label>
             <input
               type="date"
               value={formData.targetCompletionDate}
               onChange={(e) => setFormData({ ...formData, targetCompletionDate: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           
@@ -790,7 +790,7 @@ const CreateProgramModal = ({ onClose, onCreate }) => {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              className="flex-1 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
             >
               Cancel
             </button>
@@ -848,18 +848,18 @@ const CheckInModal = ({ onClose, onSubmit }) => {
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto border dark:border-gray-700"
       >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Daily Check-in</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
-            <X className="w-5 h-5" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Daily Check-in</h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+            <X className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           </button>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
               How are you feeling today?
             </label>
             <div className="grid grid-cols-5 gap-2">
@@ -872,12 +872,12 @@ const CheckInModal = ({ onClose, onSubmit }) => {
                     onClick={() => setFormData({ ...formData, mood: mood.value })}
                     className={`p-3 rounded-lg border-2 transition-all ${
                       formData.mood === mood.value
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                        : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                     }`}
                   >
                     <Icon className={`w-6 h-6 mx-auto ${mood.color}`} />
-                    <p className="text-xs mt-1">{mood.label}</p>
+                    <p className="text-xs mt-1 text-gray-700 dark:text-gray-300">{mood.label}</p>
                   </button>
                 );
               })}
@@ -885,7 +885,7 @@ const CheckInModal = ({ onClose, onSubmit }) => {
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Craving Level (0-10)
             </label>
             <input
@@ -896,47 +896,47 @@ const CheckInModal = ({ onClose, onSubmit }) => {
               onChange={(e) => setFormData({ ...formData, cravingLevel: parseInt(e.target.value) })}
               className="w-full"
             />
-            <div className="flex justify-between text-sm text-gray-600 mt-1">
+            <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mt-1">
               <span>None</span>
-              <span className="font-bold text-lg">{formData.cravingLevel}</span>
+              <span className="font-bold text-lg text-gray-900 dark:text-white">{formData.cravingLevel}</span>
               <span>Intense</span>
             </div>
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Triggers Today (comma-separated)
             </label>
             <input
               type="text"
               value={formData.triggers}
               onChange={(e) => setFormData({ ...formData, triggers: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500"
               placeholder="e.g., stress, boredom, social pressure"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Coping Strategies Used (comma-separated)
             </label>
             <input
               type="text"
               value={formData.copingStrategies}
               onChange={(e) => setFormData({ ...formData, copingStrategies: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500"
               placeholder="e.g., exercise, meditation, called friend"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Notes (Optional)
             </label>
             <textarea
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500"
               rows="3"
               placeholder="Any additional thoughts or reflections..."
             />
@@ -950,7 +950,7 @@ const CheckInModal = ({ onClose, onSubmit }) => {
               onChange={(e) => setFormData({ ...formData, successfulResistance: e.target.checked })}
               className="w-4 h-4 text-blue-600 rounded"
             />
-            <label htmlFor="successfulResistance" className="text-sm font-medium text-gray-700">
+            <label htmlFor="successfulResistance" className="text-sm font-medium text-gray-700 dark:text-gray-300">
               I successfully resisted my addiction today
             </label>
           </div>
@@ -959,7 +959,7 @@ const CheckInModal = ({ onClose, onSubmit }) => {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              className="flex-1 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
             >
               Cancel
             </button>
@@ -1013,21 +1013,21 @@ const AISupportModal = ({ onClose, messages, input, setInput, onSend, loading, p
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-2xl w-full max-w-2xl h-[600px] flex flex-col"
+        className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-2xl h-[600px] flex flex-col border dark:border-gray-700"
       >
         {/* Header */}
-        <div className="p-6 border-b flex items-center justify-between">
+        <div className="p-6 border-b dark:border-gray-700 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
               <Brain className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">AI Support Counselor</h2>
-              <p className="text-sm text-gray-600">Here to help 24/7</p>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">AI Support Counselor</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Here to help 24/7</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
-            <X className="w-5 h-5" />
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+            <X className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           </button>
         </div>
         

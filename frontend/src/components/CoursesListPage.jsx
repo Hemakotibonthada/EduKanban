@@ -146,7 +146,7 @@ const CoursesListPage = ({ user, token, onCourseSelect, onCreateCourse }) => {
         layout
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`bg-white rounded-xl shadow-sm border hover:shadow-md transition-shadow ${
+        className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 hover:shadow-md transition-shadow ${
           isListView ? 'p-4' : 'overflow-hidden'
         }`}
       >
@@ -159,14 +159,14 @@ const CoursesListPage = ({ user, token, onCourseSelect, onCreateCourse }) => {
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0 mr-4">
-                  <h3 className="text-lg font-semibold text-gray-900 truncate">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
                     {course.title}
                   </h3>
-                  <p className="text-sm text-gray-600 mb-2 line-clamp-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-1">
                     {course.description}
                   </p>
                   
-                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                  <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
                     <div className="flex items-center space-x-1">
                       <Clock className="w-4 h-4" />
                       <span>{course.estimatedDuration || 'Self-paced'}</span>
@@ -187,12 +187,12 @@ const CoursesListPage = ({ user, token, onCourseSelect, onCreateCourse }) => {
                 <div className="flex items-center space-x-2">
                   {course.progress > 0 && (
                     <div className="text-right mr-4">
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">
                         {Math.round(course.progress || 0)}%
                       </div>
-                      <div className="w-20 bg-gray-200 rounded-full h-1.5">
+                      <div className="w-20 bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                         <div
-                          className="bg-blue-600 h-1.5 rounded-full"
+                          className="bg-blue-600 dark:bg-purple-400 h-1.5 rounded-full"
                           style={{ width: `${course.progress || 0}%` }}
                         />
                       </div>
@@ -210,19 +210,19 @@ const CoursesListPage = ({ user, token, onCourseSelect, onCreateCourse }) => {
                   <div className="relative">
                     <button
                       onClick={() => setShowMenu(!showMenu)}
-                      className="p-2 text-gray-400 hover:text-gray-600 rounded-lg"
+                      className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg"
                     >
                       <MoreVertical className="w-4 h-4" />
                     </button>
                     
                     {showMenu && (
-                      <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border z-10">
+                      <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border dark:border-gray-700 z-10">
                         <button
                           onClick={() => {
                             onCourseSelect(course._id);
                             setShowMenu(false);
                           }}
-                          className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                          className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-2"
                         >
                           <Eye className="w-4 h-4" />
                           <span>View Course</span>
@@ -232,7 +232,7 @@ const CoursesListPage = ({ user, token, onCourseSelect, onCreateCourse }) => {
                             // Handle edit
                             setShowMenu(false);
                           }}
-                          className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                          className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-2"
                         >
                           <Edit className="w-4 h-4" />
                           <span>Edit Course</span>
@@ -242,7 +242,7 @@ const CoursesListPage = ({ user, token, onCourseSelect, onCreateCourse }) => {
                             deleteCourse(course._id);
                             setShowMenu(false);
                           }}
-                          className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
+                          className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center space-x-2"
                         >
                           <Trash2 className="w-4 h-4" />
                           <span>Delete Course</span>
@@ -262,25 +262,25 @@ const CoursesListPage = ({ user, token, onCourseSelect, onCreateCourse }) => {
             
             <div className="p-6">
               <div className="flex items-start justify-between mb-3">
-                <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
                   {course.title}
                 </h3>
                 <div className="relative ml-2">
                   <button
                     onClick={() => setShowMenu(!showMenu)}
-                    className="p-1 text-gray-400 hover:text-gray-600 rounded"
+                    className="p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 rounded"
                   >
                     <MoreVertical className="w-4 h-4" />
                   </button>
                   
                   {showMenu && (
-                    <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border z-10">
+                    <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border dark:border-gray-700 z-10">
                       <button
                         onClick={() => {
                           onCourseSelect(course._id);
                           setShowMenu(false);
                         }}
-                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-2"
                       >
                         <Eye className="w-4 h-4" />
                         <span>View Course</span>
@@ -290,7 +290,7 @@ const CoursesListPage = ({ user, token, onCourseSelect, onCreateCourse }) => {
                           // Handle edit
                           setShowMenu(false);
                         }}
-                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-2"
                       >
                         <Edit className="w-4 h-4" />
                         <span>Edit Course</span>
@@ -300,7 +300,7 @@ const CoursesListPage = ({ user, token, onCourseSelect, onCreateCourse }) => {
                           deleteCourse(course._id);
                           setShowMenu(false);
                         }}
-                        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
+                        className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center space-x-2"
                       >
                         <Trash2 className="w-4 h-4" />
                         <span>Delete Course</span>
@@ -310,11 +310,11 @@ const CoursesListPage = ({ user, token, onCourseSelect, onCreateCourse }) => {
                 </div>
               </div>
               
-              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+              <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
                 {course.description}
               </p>
               
-              <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+              <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
                 <div className="flex items-center space-x-1">
                   <Clock className="w-4 h-4" />
                   <span>{course.estimatedDuration || 'Self-paced'}</span>
@@ -346,14 +346,14 @@ const CoursesListPage = ({ user, token, onCourseSelect, onCreateCourse }) => {
               {course.progress > 0 && (
                 <div className="mb-4">
                   <div className="flex items-center justify-between text-sm mb-1">
-                    <span className="text-gray-600">Progress</span>
-                    <span className="font-medium text-gray-900">
+                    <span className="text-gray-600 dark:text-gray-400">Progress</span>
+                    <span className="font-medium text-gray-900 dark:text-white">
                       {Math.round(course.progress || 0)}%
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                     <div
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      className="bg-blue-600 dark:bg-purple-400 h-2 rounded-full transition-all duration-300"
                       style={{ width: `${course.progress || 0}%` }}
                     />
                   </div>
@@ -376,10 +376,10 @@ const CoursesListPage = ({ user, token, onCourseSelect, onCreateCourse }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading courses...</p>
+          <div className="w-12 h-12 border-4 border-blue-600 dark:border-purple-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading courses...</p>
         </div>
       </div>
     );
@@ -392,8 +392,8 @@ const CoursesListPage = ({ user, token, onCourseSelect, onCreateCourse }) => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">My Courses</h1>
-          <p className="text-gray-600">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Courses</h1>
+          <p className="text-gray-600 dark:text-gray-400">
             {courses.length} course{courses.length !== 1 ? 's' : ''} • {filteredCourses.length} showing
           </p>
         </div>
@@ -408,24 +408,24 @@ const CoursesListPage = ({ user, token, onCourseSelect, onCreateCourse }) => {
       </div>
 
       {/* Filters and Controls */}
-      <div className="bg-white rounded-xl p-4 shadow-sm border">
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border dark:border-gray-700">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
           <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
             <div className="relative flex-1 sm:w-64">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
               <input
                 type="text"
                 placeholder="Search courses..."
                 value={filters.search}
                 onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             
             <select
               value={filters.status}
               onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>
@@ -436,7 +436,7 @@ const CoursesListPage = ({ user, token, onCourseSelect, onCreateCourse }) => {
             <select
               value={filters.difficulty}
               onChange={(e) => setFilters(prev => ({ ...prev, difficulty: e.target.value }))}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">All Levels</option>
               <option value="beginner">Beginner</option>
@@ -447,7 +447,7 @@ const CoursesListPage = ({ user, token, onCourseSelect, onCreateCourse }) => {
             <select
               value={filters.sort}
               onChange={(e) => setFilters(prev => ({ ...prev, sort: e.target.value }))}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="recent">Recently Added</option>
               <option value="alphabetical">A-Z</option>
@@ -460,8 +460,8 @@ const CoursesListPage = ({ user, token, onCourseSelect, onCreateCourse }) => {
               onClick={() => setViewMode('grid')}
               className={`p-2 rounded-lg transition-colors ${
                 viewMode === 'grid' 
-                  ? 'bg-blue-100 text-blue-600' 
-                  : 'text-gray-400 hover:text-gray-600'
+                  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' 
+                  : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
               }`}
             >
               <Grid className="w-4 h-4" />
@@ -470,8 +470,8 @@ const CoursesListPage = ({ user, token, onCourseSelect, onCreateCourse }) => {
               onClick={() => setViewMode('list')}
               className={`p-2 rounded-lg transition-colors ${
                 viewMode === 'list' 
-                  ? 'bg-blue-100 text-blue-600' 
-                  : 'text-gray-400 hover:text-gray-600'
+                  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' 
+                  : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
               }`}
             >
               <List className="w-4 h-4" />
@@ -482,10 +482,10 @@ const CoursesListPage = ({ user, token, onCourseSelect, onCreateCourse }) => {
 
       {/* Empty State */}
       {filteredCourses.length === 0 && courses.length === 0 && (
-        <div className="bg-white rounded-xl p-12 shadow-sm border text-center">
-          <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No courses yet</h3>
-          <p className="text-gray-600 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-12 shadow-sm border dark:border-gray-700 text-center">
+          <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-600" />
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No courses yet</h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
             Create your first AI-powered course to get started with your learning journey.
           </p>
           <button

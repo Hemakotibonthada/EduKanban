@@ -106,7 +106,7 @@ const MessageActions = ({
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${getBackendURL()}/api/chat/messages/${message._id}`, {
+      const response = await fetch(`${getBackendURL()}/api/chat-enhanced/messages/${message._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -146,7 +146,7 @@ const MessageActions = ({
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${getBackendURL()}/api/chat/messages/${message._id}`, {
+      const response = await fetch(`${getBackendURL()}/api/chat-enhanced/messages/${message._id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

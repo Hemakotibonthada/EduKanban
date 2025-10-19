@@ -24,8 +24,13 @@ import {
   FileText,
   Download,
   Sparkles,
-  Code
+  Code,
+  FolderOpen,
+  Map,
+  Shield,
+  Brain
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { API_BASE_URL } from '../config/api';
 import EnhancedKanbanBoard from './EnhancedKanbanBoard';
 import ProfilePage from './ProfilePage';
@@ -37,7 +42,7 @@ import CourseContentPage from './CourseContentPageSimple';
 import Analytics from './Analytics';
 import ChatPortal from './ChatPortal';
 import ChatPortalEnhanced from './ChatPortalEnhanced';
-import NotificationCenter from './NotificationCenter';
+import SmartNotificationCenter from './SmartNotificationCenter';
 import StudyTimer from './StudyTimer';
 import CalendarView from './CalendarView';
 import GamificationDashboard from './GamificationDashboard';
@@ -48,9 +53,30 @@ import CertificatesPage from './CertificatesPage';
 import SocialHub from './SocialHub';
 import WelcomeTour from './WelcomeTour';
 import LandingDashboard from './LandingDashboard';
+import QuickActionsWidget from './QuickActionsWidget';
+import CourseMarketplace from './CourseMarketplace';
+import ResourceLibrary from './ResourceLibrary';
+import EnhancedSocialHub from './EnhancedSocialHub';
+import EnhancedWellnessCenter from './EnhancedWellnessCenter';
+import EnhancedRehabilitationCenter from './EnhancedRehabilitationCenter';
+import CombinedWellnessCenter from './CombinedWellnessCenter';
+import LearningPathVisualizer from './LearningPathVisualizer';
+import EnhancedProfilePortfolio from './EnhancedProfilePortfolio';
+import EnhancedCertificatesPage from './EnhancedCertificatesPage';
+import AdminDashboard from './AdminDashboard';
+import StudyRooms from './StudyRooms';
+import AdminPasswordChangeModal from './AdminPasswordChangeModal';
+import FlashcardSystem from './FlashcardSystem';
+import LearningAnalyticsAI from './LearningAnalyticsAI';
+import PeerReviewSystem from './PeerReviewSystem';
+import ThemeToggle from './ThemeToggle';
 
 const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
   const [activeView, setActiveView] = useState(() => {
+    // Auto-open admin panel for admin users
+    if (user?.role === 'admin' || user?.email === 'admin@circuvent.com') {
+      return 'admin';
+    }
     return localStorage.getItem('dashboardActiveView') || 'dashboard';
   });
   const [selectedCourseId, setSelectedCourseId] = useState(null);
@@ -61,6 +87,7 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showAdminPasswordChange, setShowAdminPasswordChange] = useState(false);
 
   // Persist active view to localStorage
   useEffect(() => {
@@ -80,6 +107,9 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
     { 
       category: 'Learning Tools',
       items: [
+        { id: 'flashcards', label: 'Flashcards', icon: Brain, color: 'from-purple-500 to-pink-500' },
+        { id: 'marketplace', label: 'Course Marketplace', icon: Sparkles, color: 'from-purple-500 to-pink-500' },
+        { id: 'resources', label: 'Resource Library', icon: FolderOpen, color: 'from-blue-500 to-cyan-500' },
         { id: 'create-course', label: 'Create Course', icon: Plus, color: 'from-yellow-500 to-orange-500' },
         { id: 'workground', label: 'Code Playground', icon: Code, color: 'from-purple-500 to-indigo-500' },
         { id: 'calendar', label: 'Calendar', icon: CalendarIcon, color: 'from-teal-500 to-green-500' },
@@ -89,6 +119,8 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
     {
       category: 'Progress & Growth',
       items: [
+        { id: 'ai-insights', label: 'AI Insights', icon: Brain, color: 'from-purple-500 to-pink-500' },
+        { id: 'learning-paths', label: 'Learning Paths', icon: Map, color: 'from-indigo-500 to-purple-500' },
         { id: 'analytics', label: 'Analytics', icon: TrendingUp, color: 'from-orange-500 to-red-500' },
         { id: 'gamification', label: 'Achievements', icon: Award, color: 'from-yellow-500 to-orange-500' },
         { id: 'certificates', label: 'Certificates', icon: FileText, color: 'from-amber-500 to-yellow-500' },
@@ -97,6 +129,8 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
     {
       category: 'Community & Wellness',
       items: [
+        { id: 'peer-review', label: 'Peer Review', icon: Users, color: 'from-blue-500 to-cyan-500' },
+        { id: 'study-rooms', label: 'Study Rooms', icon: Users, color: 'from-purple-500 to-blue-500' },
         { id: 'social', label: 'Social Hub', icon: Users, color: 'from-cyan-500 to-blue-500' },
         { id: 'rehabilitation', label: 'Wellness Center', icon: Heart, color: 'from-pink-500 to-rose-500' },
       ]
@@ -106,6 +140,10 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
       items: [
         { id: 'profile', label: 'Profile', icon: User, color: 'from-pink-500 to-rose-500' },
         { id: 'export', label: 'Export/Import', icon: Download, color: 'from-slate-500 to-gray-500' },
+        // Only show admin panel for admin users
+        ...(user?.role === 'admin' || user?.email === 'admin@circuvent.com' 
+          ? [{ id: 'admin', label: 'Admin Panel', icon: Shield, color: 'from-red-500 to-orange-500' }] 
+          : []),
       ]
     }
   ];
@@ -114,6 +152,29 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
   useEffect(() => {
     fetchUserData();
   }, []);
+
+  // Auto-navigate admin users to admin panel
+  useEffect(() => {
+    const isAdmin = user?.role === 'admin' || user?.email === 'admin@circuvent.com';
+    if (isAdmin && activeView === 'dashboard') {
+      setActiveView('admin');
+      toast.success('Welcome Admin! Opening Admin Panel...', {
+        icon: '🛡️',
+        duration: 3000
+      });
+      
+      // Check if password has been changed
+      const passwordChanged = localStorage.getItem('adminPasswordChanged');
+      const passwordSkipped = localStorage.getItem('adminPasswordChangeSkipped');
+      
+      if (!passwordChanged && !passwordSkipped) {
+        // Show password change modal after a short delay
+        setTimeout(() => {
+          setShowAdminPasswordChange(true);
+        }, 2000);
+      }
+    }
+  }, [user]);
 
   const fetchUserData = async () => {
     try {
@@ -182,7 +243,7 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
       {/* Welcome Tour for New Users */}
       <WelcomeTour user={user} />
 
@@ -196,7 +257,7 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
       ) : (
         <>
           {/* Header */}
-          <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+          <header className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 sticky top-0 z-50 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -229,7 +290,7 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
                     className={`group relative flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 font-medium text-sm ${
                       isActive
                         ? `bg-gradient-to-r ${item.color} text-white shadow-lg`
-                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
                     }`}
                   >
                     <Icon className={`w-5 h-5 ${isActive ? '' : 'group-hover:scale-110 transition-transform'}`} />
@@ -251,8 +312,8 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
                   onClick={() => setShowMoreMenu(!showMoreMenu)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 font-medium text-sm ${
                     showMoreMenu
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
                   }`}
                 >
                   <Sparkles className="w-5 h-5" />
@@ -267,14 +328,14 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50"
+                      className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50"
                       onMouseLeave={() => setShowMoreMenu(false)}
                     >
                       <div className="max-h-[70vh] overflow-y-auto">
                         {secondaryNavItems.map((category, idx) => (
-                          <div key={idx} className={idx > 0 ? 'border-t border-gray-100' : ''}>
-                            <div className="px-4 py-2 bg-gray-50">
-                              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                          <div key={idx} className={idx > 0 ? 'border-t border-gray-100 dark:border-gray-700' : ''}>
+                            <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700">
+                              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                 {category.category}
                               </p>
                             </div>
@@ -291,8 +352,8 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
                                     }}
                                     className={`w-full flex items-center gap-3 px-4 py-2.5 transition-all ${
                                       isActive
-                                        ? 'bg-gradient-to-r from-blue-50 to-purple-50 text-blue-600 font-medium'
-                                        : 'text-gray-700 hover:bg-gray-50'
+                                        ? 'bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 text-blue-600 dark:text-blue-400 font-medium'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                                     }`}
                                   >
                                     <div className={`p-1.5 rounded-lg ${
@@ -316,24 +377,34 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
 
             {/* Right Side Actions */}
             <div className="flex items-center space-x-2">
+              {/* Theme Toggle */}
+              <ThemeToggle />
+
               {/* Study Timer Button */}
               <button
                 onClick={() => setShowStudyTimer(true)}
-                className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all relative group"
+                className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-all relative group"
                 title="Study Timer"
               >
                 <Timer className="w-5 h-5" />
                 <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
               </button>
 
-              {/* Notification Center */}
-              <NotificationCenter user={user} token={token} />
+              {/* Notification Center Button */}
+              <button
+                onClick={() => setShowNotifications(true)}
+                className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-all relative"
+                title="Notifications"
+              >
+                <Bell className="w-5 h-5" />
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+              </button>
 
               {/* User Profile */}
-              <div className="hidden sm:flex items-center space-x-2 pl-2 ml-2 border-l border-gray-200">
+              <div className="hidden sm:flex items-center space-x-2 pl-2 ml-2 border-l border-gray-200 dark:border-gray-700">
                 <button
                   onClick={() => setActiveView('profile')}
-                  className="flex items-center space-x-2 hover:bg-gray-50 rounded-lg p-1.5 transition-all"
+                  className="flex items-center space-x-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-1.5 transition-all"
                 >
                   <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center ring-2 ring-offset-1 ring-blue-500/30">
                     <span className="text-white text-xs font-bold">
@@ -341,10 +412,10 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
                     </span>
                   </div>
                   <div className="text-left">
-                    <p className="text-sm font-semibold text-gray-900 leading-tight">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">
                       {user.firstName}
                     </p>
-                    <p className="text-xs text-gray-500">View Profile</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">View Profile</p>
                   </div>
                 </button>
               </div>
@@ -352,7 +423,7 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
               {/* Logout */}
               <button
                 onClick={handleLogout}
-                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                className="p-2 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                 title="Logout"
               >
                 <LogOut className="w-5 h-5" />
@@ -377,7 +448,7 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
               animate={{ x: 0 }}
               exit={{ x: -300 }}
               transition={{ type: 'spring', damping: 25 }}
-              className="absolute left-0 top-0 bottom-0 w-80 bg-white shadow-2xl overflow-y-auto"
+              className="absolute left-0 top-0 bottom-0 w-80 bg-white dark:bg-gray-800 shadow-2xl overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="p-4 border-b bg-gradient-to-r from-blue-600 to-purple-600">
@@ -412,7 +483,7 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
 
               {/* Primary Navigation */}
               <div className="p-4">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-2">
                   Quick Access
                 </p>
                 {primaryNavItems.map((item) => {
@@ -428,7 +499,7 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
                       className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all mb-1 ${
                         isActive
                           ? `bg-gradient-to-r ${item.color} text-white shadow-lg`
-                          : 'text-gray-700 hover:bg-gray-100'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                       }`}
                     >
                       <Icon className="w-5 h-5" />
@@ -440,9 +511,9 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
 
               {/* Secondary Navigation */}
               {secondaryNavItems.map((category, idx) => (
-                <div key={idx} className="border-t border-gray-100">
-                  <div className="px-4 py-2 bg-gray-50">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <div key={idx} className="border-t border-gray-100 dark:border-gray-700">
+                  <div className="px-4 py-2 bg-gray-50 dark:bg-gray-700">
+                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       {category.category}
                     </p>
                   </div>
@@ -459,14 +530,14 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
                           }}
                           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all mb-1 ${
                             isActive
-                              ? 'bg-blue-50 text-blue-600 font-medium'
-                              : 'text-gray-700 hover:bg-gray-50'
+                              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium'
+                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                           }`}
                         >
                           <div className={`p-1.5 rounded-lg ${
-                            isActive ? `bg-gradient-to-r ${item.color}` : 'bg-gray-100'
+                            isActive ? `bg-gradient-to-r ${item.color}` : 'bg-gray-100 dark:bg-gray-600'
                           }`}>
-                            <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-600'}`} />
+                            <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-600 dark:text-gray-300'}`} />
                           </div>
                           <span className="text-sm">{item.label}</span>
                         </button>
@@ -521,6 +592,20 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
           <EnhancedKanbanBoard user={user} token={token} />
         )}
 
+        {activeView === 'marketplace' && (
+          <CourseMarketplace 
+            user={user} 
+            token={token}
+            onCourseSelect={(courseId) => {
+              setSelectedCourseId(courseId);
+              setActiveView('course-content');
+            }}
+            onEnroll={(courseId) => {
+              fetchUserData();
+            }}
+          />
+        )}
+
         {activeView === 'calendar' && (
           <CalendarView user={user} token={token} />
         )}
@@ -539,12 +624,24 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
           />
         )}
 
+        {activeView === 'resources' && (
+          <ResourceLibrary user={user} token={token} />
+        )}
+
+        {activeView === 'learning-paths' && (
+          <LearningPathVisualizer 
+            user={user} 
+            token={token}
+            onNavigate={setActiveView}
+          />
+        )}
+
         {activeView === 'gamification' && (
           <GamificationDashboard user={user} token={token} />
         )}
 
         {activeView === 'rehabilitation' && (
-          <RehabilitationCenter user={user} token={token} />
+          <CombinedWellnessCenter user={user} token={token} />
         )}
 
         {activeView === 'export' && (
@@ -552,11 +649,27 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
         )}
 
         {activeView === 'certificates' && (
-          <CertificatesPage token={token} />
+          <EnhancedCertificatesPage token={token} user={user} />
         )}
 
         {activeView === 'social' && (
-          <SocialHub user={user} token={token} />
+          <EnhancedSocialHub user={user} token={token} />
+        )}
+
+        {activeView === 'flashcards' && (
+          <FlashcardSystem user={user} token={token} />
+        )}
+
+        {activeView === 'ai-insights' && (
+          <LearningAnalyticsAI user={user} token={token} />
+        )}
+
+        {activeView === 'peer-review' && (
+          <PeerReviewSystem user={user} token={token} />
+        )}
+
+        {activeView === 'study-rooms' && (
+          <StudyRooms user={user} token={token} />
         )}
 
         {activeView === 'analytics' && (
@@ -579,7 +692,33 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
         )}
 
         {activeView === 'profile' && (
-          <ProfilePage user={user} token={token} />
+          <EnhancedProfilePortfolio user={user} token={token} />
+        )}
+
+        {activeView === 'admin' && (
+          (user?.role === 'admin' || user?.email === 'admin@circuvent.com') ? (
+            <AdminDashboard user={user} token={token} />
+          ) : (
+            <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-6">
+              <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+                <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Shield className="w-10 h-10 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  Access Denied
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  You don't have permission to access the Admin Panel. This area is restricted to administrators only.
+                </p>
+                <button
+                  onClick={() => setActiveView('dashboard')}
+                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-shadow"
+                >
+                  Return to Dashboard
+                </button>
+              </div>
+            </div>
+          )
         )}
       </main>
       
@@ -589,6 +728,35 @@ const Dashboard = ({ user, token, onLogout, onCelebrate }) => {
           user={user}
           token={token}
           onClose={() => setShowStudyTimer(false)}
+        />
+      )}
+
+      {/* Quick Actions Widget */}
+      <QuickActionsWidget
+        onNavigate={setActiveView}
+        onStartTimer={() => setShowStudyTimer(true)}
+        user={user}
+        token={token}
+      />
+
+      {/* Smart Notification Center */}
+      <SmartNotificationCenter
+        user={user}
+        token={token}
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
+      />
+
+      {/* Admin Password Change Modal */}
+      {showAdminPasswordChange && (
+        <AdminPasswordChangeModal
+          user={user}
+          token={token}
+          onPasswordChanged={() => {
+            setShowAdminPasswordChange(false);
+            toast.success('Your admin account is now secure! 🔒');
+          }}
+          onSkip={() => setShowAdminPasswordChange(false)}
         />
       )}
       </>

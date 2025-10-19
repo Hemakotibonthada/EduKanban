@@ -150,7 +150,18 @@ router.get('/profile', async (req, res) => {
 router.put('/profile', [
   body('firstName').optional().trim().notEmpty(),
   body('lastName').optional().trim().notEmpty(),
-  body('username').optional().isLength({ min: 3, max: 30 })
+  body('username').optional().isLength({ min: 3, max: 30 }),
+  body('email').optional().isEmail(),
+  body('bio').optional().isLength({ max: 500 }),
+  body('phone').optional().trim(),
+  body('location').optional().trim(),
+  body('jobTitle').optional().trim(),
+  body('company').optional().trim(),
+  body('birthDate').optional().isISO8601(),
+  body('website').optional().isURL().optional({ checkFalsy: true }),
+  body('github').optional().isURL().optional({ checkFalsy: true }),
+  body('linkedin').optional().isURL().optional({ checkFalsy: true }),
+  body('twitter').optional().isURL().optional({ checkFalsy: true })
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -163,7 +174,16 @@ router.put('/profile', [
     }
 
     const updates = {};
-    const allowedFields = ['firstName', 'lastName', 'username'];
+    const allowedFields = [
+      'firstName', 
+      'lastName', 
+      'username', 
+      'email', 
+      'bio', 
+      'phone', 
+      'location',
+      'avatar'
+    ];
     
     allowedFields.forEach(field => {
       if (req.body[field] !== undefined) {
@@ -171,10 +191,32 @@ router.put('/profile', [
       }
     });
 
+    // Handle profile nested fields
     if (req.body.profile) {
       Object.keys(req.body.profile).forEach(key => {
         updates[`profile.${key}`] = req.body.profile[key];
       });
+    }
+
+    // Handle additional profile fields
+    const profileFields = ['jobTitle', 'company', 'birthDate', 'skills', 'interests'];
+    profileFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        updates[`profile.${field}`] = req.body[field];
+      }
+    });
+
+    // Handle social links
+    const socialLinks = ['website', 'github', 'linkedin', 'twitter', 'instagram'];
+    const socialUpdates = {};
+    socialLinks.forEach(link => {
+      if (req.body[link] !== undefined) {
+        socialUpdates[link] = req.body[link];
+      }
+    });
+    
+    if (Object.keys(socialUpdates).length > 0) {
+      updates['profile.socialLinks'] = socialUpdates;
     }
 
     const user = await User.findByIdAndUpdate(
@@ -182,6 +224,13 @@ router.put('/profile', [
       { $set: updates },
       { new: true, runValidators: true }
     ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
 
     // Log profile update
     await ActivityLog.create({
@@ -204,9 +253,20 @@ router.put('/profile', [
 
   } catch (error) {
     console.error('Update profile error:', error);
+    
+    // Handle duplicate key errors
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
+      return res.status(400).json({
+        success: false,
+        message: `${field} already exists`
+      });
+    }
+    
     res.status(500).json({
       success: false,
-      message: 'Failed to update profile'
+      message: 'Failed to update profile',
+      error: error.message
     });
   }
 });

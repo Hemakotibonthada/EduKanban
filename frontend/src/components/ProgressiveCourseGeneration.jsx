@@ -35,6 +35,8 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
     duration: '4 weeks',
     difficulty: 'Intermediate'
   });
+  const [customSubject, setCustomSubject] = useState('');
+  const [showCustomInput, setShowCustomInput] = useState(false);
 
   const eventSourceRef = useRef(null);
   const [subjects] = useState([
@@ -57,14 +59,46 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    if (name === 'subject') {
+      console.log('Subject changed to:', value);
+      if (value === 'Other') {
+        console.log('Showing custom input');
+        setShowCustomInput(true);
+        setFormData(prev => ({
+          ...prev,
+          subject: customSubject || '' // Use existing custom subject or empty
+        }));
+      } else {
+        console.log('Hiding custom input');
+        setShowCustomInput(false);
+        setCustomSubject('');
+        setFormData(prev => ({
+          ...prev,
+          subject: value
+        }));
+      }
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+
+  const handleCustomSubjectChange = (e) => {
+    const value = e.target.value;
+    console.log('Custom subject changed to:', value);
+    setCustomSubject(value);
+    // Update formData.subject with the custom input
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      subject: value
     }));
   };
 
   const handleNext = () => {
-    if (step === 1 && (!formData.title || !formData.subject)) {
+    if (step === 1 && (!formData.title || !formData.subject || (showCustomInput && !customSubject.trim()))) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -318,9 +352,18 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
                   name="title"
                   value={formData.title}
                   onChange={handleInputChange}
-                  placeholder="e.g., Complete Python Programming"
+                  placeholder={
+                    showCustomInput && customSubject
+                      ? `e.g., Complete ${customSubject} Mastery`
+                      : "e.g., Complete Python Programming"
+                  }
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
+                {showCustomInput && customSubject && (
+                  <p className="text-xs text-blue-600 mt-1">
+                    💡 Suggested: "Complete {customSubject} Mastery" or "Advanced {customSubject} Course"
+                  </p>
+                )}
               </div>
 
               <div>
@@ -329,15 +372,53 @@ const ProgressiveCourseGeneration = ({ user, token, onCourseCreated }) => {
                 </label>
                 <select
                   name="subject"
-                  value={formData.subject}
+                  value={showCustomInput ? 'Other' : formData.subject}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                    showCustomInput 
+                      ? 'border-blue-400 bg-blue-50' 
+                      : 'border-gray-300'
+                  }`}
                 >
                   <option value="">Select a subject</option>
                   {subjects.map(subject => (
                     <option key={subject} value={subject}>{subject}</option>
                   ))}
                 </select>
+                
+                {/* Custom Subject Input - appears when "Other" is selected */}
+                {showCustomInput && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200"
+                  >
+                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                      <Lightbulb className="w-4 h-4 mr-2 text-blue-600" />
+                      What do you want to learn? *
+                    </label>
+                    <input
+                      type="text"
+                      value={customSubject}
+                      onChange={handleCustomSubjectChange}
+                      placeholder="e.g., Advanced Quantum Computing, Digital Art Creation, Sustainable Agriculture, Blockchain Development..."
+                      className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                      autoFocus
+                    />
+                    <div className="mt-2 p-3 bg-blue-100 rounded-lg">
+                      <p className="text-xs text-blue-700 font-medium mb-1">
+                        🚀 AI Course Generation Tips:
+                      </p>
+                      <ul className="text-xs text-blue-600 space-y-1">
+                        <li>• Be specific about your learning goals</li>
+                        <li>• Include any particular tools or technologies you want to focus on</li>
+                        <li>• Mention your preferred application areas or use cases</li>
+                      </ul>
+                    </div>
+                  </motion.div>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

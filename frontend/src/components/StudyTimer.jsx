@@ -214,7 +214,7 @@ const StudyTimer = ({ user, token, onClose }) => {
         return {
           name: 'Focus Time',
           color: 'from-red-500 to-orange-500',
-          bgColor: 'bg-red-50',
+          bgColor: 'bg-red-50 dark:bg-gray-900',
           icon: Target,
           emoji: '🍅'
         };
@@ -222,7 +222,7 @@ const StudyTimer = ({ user, token, onClose }) => {
         return {
           name: 'Short Break',
           color: 'from-green-500 to-teal-500',
-          bgColor: 'bg-green-50',
+          bgColor: 'bg-green-50 dark:bg-gray-900',
           icon: Coffee,
           emoji: '☕'
         };
@@ -230,7 +230,7 @@ const StudyTimer = ({ user, token, onClose }) => {
         return {
           name: 'Long Break',
           color: 'from-blue-500 to-purple-500',
-          bgColor: 'bg-blue-50',
+          bgColor: 'bg-blue-50 dark:bg-gray-900',
           icon: Coffee,
           emoji: '🧘'
         };
@@ -238,7 +238,7 @@ const StudyTimer = ({ user, token, onClose }) => {
         return {
           name: 'Custom',
           color: 'from-gray-500 to-gray-600',
-          bgColor: 'bg-gray-50',
+          bgColor: 'bg-gray-50 dark:bg-gray-900',
           icon: Timer,
           emoji: '⏱️'
         };
@@ -289,8 +289,8 @@ const StudyTimer = ({ user, token, onClose }) => {
                 onClick={() => switchMode(modeBtn.key)}
                 className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
                   mode === modeBtn.key
-                    ? 'bg-white shadow-md scale-105'
-                    : 'bg-white/50 hover:bg-white/70'
+                    ? 'bg-white dark:bg-gray-800 shadow-md scale-105 text-gray-900 dark:text-white'
+                    : 'bg-white/50 dark:bg-gray-800/50 hover:bg-white/70 dark:hover:bg-gray-800/70 text-gray-700 dark:text-gray-300'
                 }`}
               >
                 <span className="mr-2">{modeBtn.emoji}</span>
@@ -310,7 +310,7 @@ const StudyTimer = ({ user, token, onClose }) => {
                   stroke="currentColor"
                   strokeWidth="8"
                   fill="transparent"
-                  className="text-gray-200"
+                  className="text-gray-200 dark:text-gray-700"
                 />
                 <circle
                   cx="128"
@@ -326,10 +326,10 @@ const StudyTimer = ({ user, token, onClose }) => {
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-6xl font-bold text-gray-900">
+                <span className="text-6xl font-bold text-gray-900 dark:text-white">
                   {formatTime(timeLeft)}
                 </span>
-                <span className="text-sm text-gray-500 mt-2">
+                <span className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                   {isActive && !isPaused ? 'In Progress' : isPaused ? 'Paused' : 'Ready'}
                 </span>
               </div>
@@ -350,19 +350,19 @@ const StudyTimer = ({ user, token, onClose }) => {
             </button>
             <button
               onClick={handleReset}
-              className="p-4 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
+              className="p-4 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
             >
               <RotateCcw className="w-8 h-8" />
             </button>
             <button
               onClick={() => setShowSettings(!showSettings)}
-              className="p-4 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
+              className="p-4 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
             >
               <Settings className="w-8 h-8" />
             </button>
             <button
               onClick={() => setShowStats(!showStats)}
-              className="p-4 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
+              className="p-4 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
             >
               <BarChart3 className="w-8 h-8" />
             </button>
@@ -370,23 +370,23 @@ const StudyTimer = ({ user, token, onClose }) => {
 
           {/* Today's Stats Quick View */}
           <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="bg-white rounded-lg p-4 text-center">
-              <div className="text-3xl font-bold text-red-600">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center border dark:border-gray-700">
+              <div className="text-3xl font-bold text-red-600 dark:text-red-400">
                 {todayStats.pomodorosCompleted}
               </div>
-              <div className="text-xs text-gray-600 mt-1">Pomodoros</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Pomodoros</div>
             </div>
-            <div className="bg-white rounded-lg p-4 text-center">
-              <div className="text-3xl font-bold text-blue-600">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center border dark:border-gray-700">
+              <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
                 {Math.floor(todayStats.totalStudyTime / 60)}m
               </div>
-              <div className="text-xs text-gray-600 mt-1">Study Time</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Study Time</div>
             </div>
-            <div className="bg-white rounded-lg p-4 text-center">
-              <div className="text-3xl font-bold text-green-600">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 text-center border dark:border-gray-700">
+              <div className="text-3xl font-bold text-green-600 dark:text-green-400">
                 {todayStats.longestStreak}
               </div>
-              <div className="text-xs text-gray-600 mt-1">Streak</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Streak</div>
             </div>
           </div>
 
@@ -397,51 +397,51 @@ const StudyTimer = ({ user, token, onClose }) => {
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="bg-white rounded-lg p-6 mb-4 overflow-hidden"
+                className="bg-white dark:bg-gray-800 rounded-lg p-6 mb-4 overflow-hidden border dark:border-gray-700"
               >
-                <h3 className="font-semibold text-lg mb-4">Timer Settings</h3>
+                <h3 className="font-semibold text-lg mb-4 text-gray-900 dark:text-white">Timer Settings</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Pomodoro Duration (minutes)
                     </label>
                     <input
                       type="number"
                       value={settings.pomodoro}
                       onChange={(e) => setSettings({...settings, pomodoro: parseInt(e.target.value)})}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg"
                       min="1"
                       max="60"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Short Break (minutes)
                     </label>
                     <input
                       type="number"
                       value={settings.shortBreak}
                       onChange={(e) => setSettings({...settings, shortBreak: parseInt(e.target.value)})}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg"
                       min="1"
                       max="30"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Long Break (minutes)
                     </label>
                     <input
                       type="number"
                       value={settings.longBreak}
                       onChange={(e) => setSettings({...settings, longBreak: parseInt(e.target.value)})}
-                      className="w-full px-3 py-2 border rounded-lg"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg"
                       min="1"
                       max="60"
                     />
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Auto-start Breaks
                     </span>
                     <button
@@ -456,7 +456,7 @@ const StudyTimer = ({ user, token, onClose }) => {
                     </button>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Sound Notifications
                     </span>
                     <button
@@ -482,40 +482,40 @@ const StudyTimer = ({ user, token, onClose }) => {
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="bg-white rounded-lg p-6 overflow-hidden"
+                className="bg-white dark:bg-gray-800 rounded-lg p-6 overflow-hidden border dark:border-gray-700"
               >
-                <h3 className="font-semibold text-lg mb-4">Today's Statistics</h3>
+                <h3 className="font-semibold text-lg mb-4 text-gray-900 dark:text-white">Today's Statistics</h3>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-red-100 rounded-lg">
-                        <CheckCircle className="w-5 h-5 text-red-600" />
+                      <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-lg">
+                        <CheckCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
                       </div>
-                      <span className="font-medium">Completed Pomodoros</span>
+                      <span className="font-medium text-gray-900 dark:text-white">Completed Pomodoros</span>
                     </div>
-                    <span className="text-2xl font-bold text-red-600">
+                    <span className="text-2xl font-bold text-red-600 dark:text-red-400">
                       {todayStats.pomodorosCompleted}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-blue-100 rounded-lg">
-                        <Clock className="w-5 h-5 text-blue-600" />
+                      <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-lg">
+                        <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                       </div>
-                      <span className="font-medium">Total Study Time</span>
+                      <span className="font-medium text-gray-900 dark:text-white">Total Study Time</span>
                     </div>
-                    <span className="text-2xl font-bold text-blue-600">
+                    <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                       {Math.floor(todayStats.totalStudyTime / 60)}m
                     </span>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-green-100 rounded-lg">
-                        <TrendingUp className="w-5 h-5 text-green-600" />
+                      <div className="p-2 bg-green-100 dark:bg-green-900/40 rounded-lg">
+                        <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
                       </div>
-                      <span className="font-medium">Current Streak</span>
+                      <span className="font-medium text-gray-900 dark:text-white">Current Streak</span>
                     </div>
-                    <span className="text-2xl font-bold text-green-600">
+                    <span className="text-2xl font-bold text-green-600 dark:text-green-400">
                       {todayStats.longestStreak} days
                     </span>
                   </div>

@@ -126,19 +126,19 @@ const WelcomeTour = ({ user, onComplete }) => {
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden"
+        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border dark:border-gray-700"
       >
         {/* Header */}
         <div className={`bg-gradient-to-r ${currentStepData.color} p-8 text-white relative`}>
           <button
             onClick={skipTour}
-            className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-lg transition-colors"
+            className="absolute top-4 right-4 p-2 hover:bg-white/20 dark:hover:bg-black/20 rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
 
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+            <div className="w-16 h-16 bg-white/20 dark:bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center">
               <Icon className="w-8 h-8" />
             </div>
             <div className="flex-1">
@@ -154,7 +154,7 @@ const WelcomeTour = ({ user, onComplete }) => {
 
         {/* Content */}
         <div className="p-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Key Features:</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Key Features:</h3>
           <div className="space-y-3 mb-8">
             {currentStepData.features.map((feature, index) => (
               <motion.div
@@ -167,7 +167,7 @@ const WelcomeTour = ({ user, onComplete }) => {
                 <div className={`w-6 h-6 bg-gradient-to-r ${currentStepData.color} rounded-full flex items-center justify-center flex-shrink-0 mt-0.5`}>
                   <Check className="w-4 h-4 text-white" />
                 </div>
-                <p className="text-gray-700">{feature}</p>
+                <p className="text-gray-700 dark:text-gray-300">{feature}</p>
               </motion.div>
             ))}
           </div>
@@ -180,10 +180,10 @@ const WelcomeTour = ({ user, onComplete }) => {
                 onClick={() => setCurrentStep(index)}
                 className={`h-2 rounded-full transition-all ${
                   index === currentStep
-                    ? 'w-8 bg-blue-600'
+                    ? 'w-8 bg-blue-600 dark:bg-blue-500'
                     : index < currentStep
                     ? 'w-2 bg-green-500'
-                    : 'w-2 bg-gray-300'
+                    : 'w-2 bg-gray-300 dark:bg-gray-600'
                 }`}
               />
             ))}
@@ -193,7 +193,7 @@ const WelcomeTour = ({ user, onComplete }) => {
           <div className="flex items-center justify-between gap-4">
             <button
               onClick={skipTour}
-              className="px-6 py-3 text-gray-600 hover:text-gray-900 transition-colors font-medium"
+              className="px-6 py-3 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors font-medium"
             >
               Skip Tour
             </button>
@@ -202,7 +202,7 @@ const WelcomeTour = ({ user, onComplete }) => {
               {currentStep > 0 && (
                 <button
                   onClick={handlePrevious}
-                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2"
+                  className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium flex items-center gap-2"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   Previous

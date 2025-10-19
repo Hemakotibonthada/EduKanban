@@ -404,6 +404,88 @@ router.put('/:id/complete', async (req, res) => {
   }
 });
 
+// PUT /api/courses/:courseId/modules/:moduleId/status - Update module status
+router.put('/:courseId/modules/:moduleId/status', async (req, res) => {
+  try {
+    const { courseId, moduleId } = req.params;
+    const { status, moduleData } = req.body;
+    
+    console.log('Update module status request:', { courseId, moduleId, status, moduleData });
+
+    // Find the course and update the specific module
+    const course = await Course.findOne({
+      _id: courseId,
+      userId: req.userId
+    });
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found'
+      });
+    }
+
+    // Find and update the module
+    const moduleIndex = course.modules.findIndex(m => m._id.toString() === moduleId);
+    if (moduleIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'Module not found'
+      });
+    }
+
+    // Update module status and data
+    course.modules[moduleIndex].status = status;
+    
+    // Update other allowed fields from moduleData (excluding _id and other immutable fields)
+    if (moduleData) {
+      const allowedFields = ['reviewTopics', 'failedTopics', 'examAttempts', 'examPassed', 'certificate', 'progress', 'lastExamResults'];
+      allowedFields.forEach(field => {
+        if (moduleData[field] !== undefined) {
+          course.modules[moduleIndex][field] = moduleData[field];
+        }
+      });
+    }
+
+    await course.save();
+
+    // Log activity
+    await ActivityLog.create({
+      userId: req.userId,
+      sessionId: req.sessionId,
+      action: 'module_status_updated',
+      entity: { 
+        type: 'module', 
+        id: moduleId, 
+        title: course.modules[moduleIndex].title,
+        courseId: courseId,
+        status: status
+      },
+      metadata: {
+        previousStatus: course.modules[moduleIndex].status,
+        newStatus: status,
+        userAgent: req.get('User-Agent'),
+        ipAddress: req.ip
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Module status updated successfully',
+      data: {
+        module: course.modules[moduleIndex]
+      }
+    });
+
+  } catch (error) {
+    console.error('Update module status error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update module status'
+    });
+  }
+});
+
 // GET /api/courses/:id/progress - Get course progress
 router.get('/:id/progress', async (req, res) => {
   try {

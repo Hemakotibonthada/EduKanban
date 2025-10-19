@@ -84,7 +84,7 @@ const courseTemplateSchema = new mongoose.Schema({
     resources: [{
       type: {
         type: String,
-        enum: ['video', 'article', 'book', 'tool', 'exercise']
+        enum: ['video', 'article', 'book', 'tool', 'exercise', 'webinar', 'podcast', 'tutorial', 'documentation']
       },
       title: String,
       url: String,

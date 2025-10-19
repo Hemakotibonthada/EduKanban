@@ -44,7 +44,7 @@ const NotificationCenter = ({ user, token }) => {
       console.log('✅ Notification socket connected');
     });
 
-    socket.on('new_notification', (notification) => {
+      socket.on('new_notification', (notification) => {
       setNotifications(prev => [notification, ...prev]);
       setUnreadCount(prev => prev + 1);
       
@@ -54,28 +54,26 @@ const NotificationCenter = ({ user, token }) => {
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
-          className="bg-white rounded-lg shadow-lg p-4 max-w-md"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 max-w-md border dark:border-gray-700"
         >
           <div className="flex items-start gap-3">
             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getIconColor(notification.type)}`}>
               {getIcon(notification.type)}
             </div>
             <div className="flex-1">
-              <h4 className="font-semibold text-gray-900">{notification.title}</h4>
-              <p className="text-sm text-gray-600">{notification.message}</p>
+              <h4 className="font-semibold text-gray-900 dark:text-white">{notification.title}</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{notification.message}</p>
             </div>
             <button
               onClick={() => toast.dismiss(t.id)}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
         </motion.div>
       ), { duration: 4000 });
-    });
-
-    socketRef.current = socket;
+    });    socketRef.current = socket;
 
     return () => {
       socket.disconnect();
@@ -195,18 +193,18 @@ const NotificationCenter = ({ user, token }) => {
 
   const getIconColor = (type) => {
     const colors = {
-      friend_request: 'bg-blue-100 text-blue-600',
-      friend_accepted: 'bg-green-100 text-green-600',
-      message: 'bg-purple-100 text-purple-600',
-      mention: 'bg-yellow-100 text-yellow-600',
-      reaction: 'bg-pink-100 text-pink-600',
-      community_invite: 'bg-indigo-100 text-indigo-600',
-      group_invite: 'bg-cyan-100 text-cyan-600',
-      course_update: 'bg-orange-100 text-orange-600',
-      task_assigned: 'bg-teal-100 text-teal-600',
-      task_due: 'bg-red-100 text-red-600',
-      achievement: 'bg-yellow-100 text-yellow-600',
-      system: 'bg-gray-100 text-gray-600'
+      friend_request: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
+      friend_accepted: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
+      message: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
+      mention: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
+      reaction: 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400',
+      community_invite: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400',
+      group_invite: 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400',
+      course_update: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
+      task_assigned: 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400',
+      task_due: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
+      achievement: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
+      system: 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
     };
     return colors[type] || colors.system;
   };
@@ -231,10 +229,10 @@ const NotificationCenter = ({ user, token }) => {
       {/* Bell Icon Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
+        className="relative p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
         aria-label="Notifications"
       >
-        <Bell className="w-6 h-6 text-gray-600" />
+        <Bell className="w-6 h-6 text-gray-600 dark:text-gray-400" />
         {unreadCount > 0 && (
           <motion.span
             initial={{ scale: 0 }}
@@ -264,23 +262,23 @@ const NotificationCenter = ({ user, token }) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="bg-white rounded-lg shadow-2xl border border-gray-200 z-50 flex flex-col w-[calc(100vw-2rem)] max-w-sm md:w-96 max-h-[70vh] md:max-h-[500px] fixed md:absolute top-16 md:top-auto left-4 md:left-auto right-4 md:right-0 md:mt-2"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 z-50 flex flex-col w-[calc(100vw-2rem)] max-w-sm md:w-96 max-h-[70vh] md:max-h-[500px] fixed md:absolute top-16 md:top-auto left-4 md:left-auto right-4 md:right-0 md:mt-2"
           >
             {/* Header */}
-            <div className="p-3 md:p-4 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-blue-600 to-purple-600 rounded-t-lg">
+            <div className="p-3 md:p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-gradient-to-r from-blue-600 to-purple-600 rounded-t-lg">
               <h3 className="font-bold text-base md:text-lg text-white">Notifications</h3>
               <div className="flex items-center gap-2">
                 {unreadCount > 0 && (
                   <button
                     onClick={markAllAsRead}
-                    className="text-xs md:text-sm text-white hover:text-blue-100 font-medium transition-colors px-2 py-1 rounded hover:bg-white/20"
+                    className="text-xs md:text-sm text-white hover:text-blue-100 font-medium transition-colors px-2 py-1 rounded hover:bg-white/20 dark:hover:bg-black/20"
                   >
                     Mark all read
                   </button>
                 )}
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="md:hidden p-1.5 text-white hover:bg-white/20 rounded-lg transition-colors"
+                  className="md:hidden p-1.5 text-white hover:bg-white/20 dark:hover:bg-black/20 rounded-lg transition-colors"
                   aria-label="Close notifications"
                 >
                   <X className="w-5 h-5" />
@@ -293,7 +291,7 @@ const NotificationCenter = ({ user, token }) => {
               {loading ? (
                 <div className="p-8 text-center">
                   <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                  <p className="text-sm text-gray-500">Loading...</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
                 </div>
               ) : notifications.length > 0 ? (
                 notifications.map((notification) => (
@@ -301,8 +299,8 @@ const NotificationCenter = ({ user, token }) => {
                     key={notification._id}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className={`p-3 md:p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors ${
-                      !notification.read ? 'bg-blue-50' : ''
+                    className={`p-3 md:p-4 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                      !notification.read ? 'bg-blue-50 dark:bg-blue-900/20' : ''
                     }`}
                   >
                     <div className="flex items-start gap-2 md:gap-3">
@@ -310,13 +308,13 @@ const NotificationCenter = ({ user, token }) => {
                         {getIcon(notification.type)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-xs md:text-sm font-semibold text-gray-900 mb-0.5">
+                        <h4 className="text-xs md:text-sm font-semibold text-gray-900 dark:text-white mb-0.5">
                           {notification.title}
                         </h4>
-                        <p className="text-xs md:text-sm text-gray-600 mb-1 line-clamp-2">
+                        <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 mb-1 line-clamp-2">
                           {notification.message}
                         </p>
-                        <span className="text-xs text-gray-400">
+                        <span className="text-xs text-gray-400 dark:text-gray-500">
                           {formatTime(notification.createdAt)}
                         </span>
                       </div>
@@ -324,7 +322,7 @@ const NotificationCenter = ({ user, token }) => {
                         {!notification.read && (
                           <button
                             onClick={() => markAsRead(notification._id)}
-                            className="p-1 md:p-1.5 text-blue-600 hover:bg-blue-100 rounded transition-colors"
+                            className="p-1 md:p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded transition-colors"
                             title="Mark as read"
                           >
                             <Check className="w-3.5 h-3.5 md:w-4 md:h-4" />
@@ -332,7 +330,7 @@ const NotificationCenter = ({ user, token }) => {
                         )}
                         <button
                           onClick={() => deleteNotification(notification._id)}
-                          className="p-1 md:p-1.5 text-gray-400 hover:bg-gray-200 hover:text-red-600 rounded transition-colors"
+                          className="p-1 md:p-1.5 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-red-600 dark:hover:text-red-400 rounded transition-colors"
                           title="Delete"
                         >
                           <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
@@ -342,8 +340,8 @@ const NotificationCenter = ({ user, token }) => {
                   </motion.div>
                 ))
               ) : (
-                <div className="p-6 md:p-8 text-center text-gray-500">
-                  <Bell className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-2 text-gray-400" />
+                <div className="p-6 md:p-8 text-center text-gray-500 dark:text-gray-400">
+                  <Bell className="w-10 h-10 md:w-12 md:h-12 mx-auto mb-2 text-gray-400 dark:text-gray-500" />
                   <p className="text-sm font-medium">No notifications</p>
                   <p className="text-xs">You're all caught up!</p>
                 </div>
@@ -352,13 +350,13 @@ const NotificationCenter = ({ user, token }) => {
 
             {/* Footer */}
             {notifications.length > 0 && (
-              <div className="p-3 border-t border-gray-200 text-center">
+              <div className="p-3 border-t border-gray-200 dark:border-gray-700 text-center">
                 <button 
                   onClick={() => {
                     setIsOpen(false);
                     // Navigate to notifications page if exists
                   }}
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
                 >
                   View all notifications
                 </button>

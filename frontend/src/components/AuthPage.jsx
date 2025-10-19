@@ -99,11 +99,11 @@ const AuthPage = ({ mode, onAuthSuccess, onModeChange, onBack }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center px-4 py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md"
+        className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 w-full max-w-md"
       >
         {/* Header */}
         <div className="text-center mb-8">
@@ -116,10 +116,10 @@ const AuthPage = ({ mode, onAuthSuccess, onModeChange, onBack }) => {
             </span>
           </div>
           
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             {mode === 'register' ? 'Create Your Account' : 'Welcome Back'}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             {mode === 'register' 
               ? 'Start your personalized learning journey today' 
               : 'Sign in to continue your learning journey'
@@ -133,7 +133,7 @@ const AuthPage = ({ mode, onAuthSuccess, onModeChange, onBack }) => {
             <>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     First Name
                   </label>
                   <div className="relative">
@@ -143,7 +143,7 @@ const AuthPage = ({ mode, onAuthSuccess, onModeChange, onBack }) => {
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                       placeholder="John"
                       required
                     />
@@ -151,7 +151,7 @@ const AuthPage = ({ mode, onAuthSuccess, onModeChange, onBack }) => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Last Name
                   </label>
                   <div className="relative">
@@ -161,7 +161,7 @@ const AuthPage = ({ mode, onAuthSuccess, onModeChange, onBack }) => {
                       name="lastName"
                       value={formData.lastName}
                       onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                       placeholder="Doe"
                       required
                     />
@@ -170,7 +170,7 @@ const AuthPage = ({ mode, onAuthSuccess, onModeChange, onBack }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Username
                 </label>
                 <div className="relative">
@@ -289,7 +289,7 @@ const AuthPage = ({ mode, onAuthSuccess, onModeChange, onBack }) => {
 
         {/* Footer */}
         <div className="mt-8 text-center">
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             {mode === 'register' ? 'Already have an account?' : "Don't have an account?"}
             <button
               onClick={() => onModeChange(mode === 'register' ? 'login' : 'register')}

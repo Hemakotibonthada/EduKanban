@@ -19,7 +19,7 @@ const activityLogSchema = new mongoose.Schema({
       'login', 'logout', 'register', 'password_reset', 'password_change',
       // Learning actions
       'course_created', 'course_started', 'course_completed', 'course_paused',
-      'module_started', 'module_completed', 'module_paused',
+      'module_started', 'module_completed', 'module_paused', 'module_status_updated',
       'task_started', 'task_completed', 'task_paused', 'task_failed', 'task_skipped',
       'test_started', 'test_completed', 'test_failed',
       // Navigation actions
